@@ -186,9 +186,9 @@
             this.dtpFechaReserva.BackColor = System.Drawing.Color.WhiteSmoke;
             this.dtpFechaReserva.BorderRadius = 10;
             this.dtpFechaReserva.Checked = true;
-            this.dtpFechaReserva.FillColor = System.Drawing.Color.Transparent;
+            this.dtpFechaReserva.FillColor = System.Drawing.Color.White;
             this.dtpFechaReserva.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.dtpFechaReserva.Format = System.Windows.Forms.DateTimePickerFormat.Long;
+            this.dtpFechaReserva.Format = System.Windows.Forms.DateTimePickerFormat.Short;
             this.dtpFechaReserva.Location = new System.Drawing.Point(21, 192);
             this.dtpFechaReserva.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.dtpFechaReserva.MaxDate = new System.DateTime(9998, 12, 31, 0, 0, 0, 0);
@@ -298,17 +298,17 @@
             this.guna2ComboBox3.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.guna2ComboBox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(68)))), ((int)(((byte)(88)))), ((int)(((byte)(112)))));
             this.guna2ComboBox3.ItemHeight = 30;
-            this.guna2ComboBox3.Location = new System.Drawing.Point(382, 192);
+            this.guna2ComboBox3.Location = new System.Drawing.Point(409, 192);
             this.guna2ComboBox3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.guna2ComboBox3.Name = "guna2ComboBox3";
-            this.guna2ComboBox3.Size = new System.Drawing.Size(128, 36);
+            this.guna2ComboBox3.Size = new System.Drawing.Size(100, 36);
             this.guna2ComboBox3.TabIndex = 40;
             // 
             // guna2HtmlLabel9
             // 
             this.guna2HtmlLabel9.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel9.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel9.Location = new System.Drawing.Point(387, 154);
+            this.guna2HtmlLabel9.Location = new System.Drawing.Point(380, 165);
             this.guna2HtmlLabel9.Name = "guna2HtmlLabel9";
             this.guna2HtmlLabel9.Size = new System.Drawing.Size(83, 22);
             this.guna2HtmlLabel9.TabIndex = 39;
@@ -325,7 +325,7 @@
             this.cmbHoraReserva.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.cmbHoraReserva.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(68)))), ((int)(((byte)(88)))), ((int)(((byte)(112)))));
             this.cmbHoraReserva.ItemHeight = 30;
-            this.cmbHoraReserva.Location = new System.Drawing.Point(278, 192);
+            this.cmbHoraReserva.Location = new System.Drawing.Point(266, 192);
             this.cmbHoraReserva.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.cmbHoraReserva.Name = "cmbHoraReserva";
             this.cmbHoraReserva.Size = new System.Drawing.Size(101, 36);
@@ -335,7 +335,7 @@
             // 
             this.guna2HtmlLabel8.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel8.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel8.Location = new System.Drawing.Point(258, 160);
+            this.guna2HtmlLabel8.Location = new System.Drawing.Point(266, 165);
             this.guna2HtmlLabel8.Name = "guna2HtmlLabel8";
             this.guna2HtmlLabel8.Size = new System.Drawing.Size(47, 22);
             this.guna2HtmlLabel8.TabIndex = 37;
@@ -355,7 +355,7 @@
             // 
             this.guna2HtmlLabel5.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel5.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel5.Location = new System.Drawing.Point(322, 83);
+            this.guna2HtmlLabel5.Location = new System.Drawing.Point(322, 86);
             this.guna2HtmlLabel5.Name = "guna2HtmlLabel5";
             this.guna2HtmlLabel5.Size = new System.Drawing.Size(78, 22);
             this.guna2HtmlLabel5.TabIndex = 33;
@@ -375,7 +375,7 @@
             this.txtTelefono.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.txtTelefono.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtTelefono.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtTelefono.Location = new System.Drawing.Point(335, 112);
+            this.txtTelefono.Location = new System.Drawing.Point(335, 115);
             this.txtTelefono.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtTelefono.Name = "txtTelefono";
             this.txtTelefono.PlaceholderText = "985214763";
@@ -387,7 +387,7 @@
             // 
             this.guna2HtmlLabel4.BackColor = System.Drawing.Color.Transparent;
             this.guna2HtmlLabel4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel4.Location = new System.Drawing.Point(11, 83);
+            this.guna2HtmlLabel4.Location = new System.Drawing.Point(11, 86);
             this.guna2HtmlLabel4.Name = "guna2HtmlLabel4";
             this.guna2HtmlLabel4.Size = new System.Drawing.Size(64, 22);
             this.guna2HtmlLabel4.TabIndex = 31;
@@ -404,7 +404,7 @@
             this.cmbMesa.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.cmbMesa.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(68)))), ((int)(((byte)(88)))), ((int)(((byte)(112)))));
             this.cmbMesa.ItemHeight = 30;
-            this.cmbMesa.Location = new System.Drawing.Point(48, 48);
+            this.cmbMesa.Location = new System.Drawing.Point(48, 43);
             this.cmbMesa.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.cmbMesa.Name = "cmbMesa";
             this.cmbMesa.Size = new System.Drawing.Size(199, 36);
@@ -424,7 +424,7 @@
             this.txtCliente.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.txtCliente.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtCliente.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.txtCliente.Location = new System.Drawing.Point(48, 112);
+            this.txtCliente.Location = new System.Drawing.Point(48, 115);
             this.txtCliente.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtCliente.Name = "txtCliente";
             this.txtCliente.PlaceholderText = "Juan Garcia";

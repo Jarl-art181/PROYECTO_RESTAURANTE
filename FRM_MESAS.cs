@@ -194,6 +194,7 @@ namespace PROYECTO_RESTAURANTE
             }
         }
 
+
         private void CargarContadoresMesas()
         {
             string consulta = @"
@@ -201,41 +202,69 @@ namespace PROYECTO_RESTAURANTE
             COUNT(*) AS TotalMesas,
 
             COUNT(CASE
-                WHEN estado = 'Libre' THEN 1
+                WHEN LOWER(LTRIM(RTRIM(M.estado))) =
+                    'libre'
+                THEN 1
             END) AS MesasLibres,
 
             COUNT(CASE
-                WHEN estado = 'Ocupada' THEN 1
+                WHEN LOWER(LTRIM(RTRIM(M.estado))) =
+                    'ocupada'
+                THEN 1
             END) AS MesasOcupadas,
 
-            COUNT(CASE
-                WHEN estado = 'Reservada' THEN 1
-            END) AS MesasReservadas
-        FROM MESA;";
+            (
+                SELECT COUNT(DISTINCT R.id_mesa)
+                FROM dbo.RESERVA_MESA R
+
+                INNER JOIN dbo.MESA M2
+                    ON R.id_mesa = M2.id_mesa
+
+                WHERE M2.id_sucursal = @Sucursal
+                  AND R.estado = 'confirmada'
+                  AND DATEADD(
+                      MINUTE, 120, R.fecha_hora
+                  ) > SYSDATETIME()
+
+            ) AS MesasReservadas
+
+        FROM dbo.MESA M
+
+        WHERE M.id_sucursal = @Sucursal;";
 
             try
             {
-                using (SqlConnection con =
+                using (SqlConnection conexion =
                     new SqlConnection(cadenaConexion))
+                using (SqlCommand comando =
+                    new SqlCommand(consulta, conexion))
                 {
-                    con.Open();
+                    comando.Parameters.Add(
+                        "@Sucursal",
+                        SqlDbType.Int).Value = 1;
 
-                    using (SqlCommand cmd = new SqlCommand(consulta, con))
-                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    conexion.Open();
+
+                    using (SqlDataReader lector =
+                        comando.ExecuteReader())
                     {
-                        if (dr.Read())
+                        if (lector.Read())
                         {
                             lblMesasTotales.Text =
-                                Convert.ToInt32(dr["TotalMesas"]).ToString("D2");
+                                Convert.ToInt32(
+                                    lector["TotalMesas"]).ToString("D2");
 
                             lblMesasLibres.Text =
-                                Convert.ToInt32(dr["MesasLibres"]).ToString("D2");
+                                Convert.ToInt32(
+                                    lector["MesasLibres"]).ToString("D2");
 
                             lblMesasOcupadas.Text =
-                                Convert.ToInt32(dr["MesasOcupadas"]).ToString("D2");
+                                Convert.ToInt32(
+                                    lector["MesasOcupadas"]).ToString("D2");
 
                             lblMesasReservadas.Text =
-                                Convert.ToInt32(dr["MesasReservadas"]).ToString("D2");
+                                Convert.ToInt32(
+                                    lector["MesasReservadas"]).ToString("D2");
                         }
                     }
                 }
@@ -243,7 +272,7 @@ namespace PROYECTO_RESTAURANTE
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "Error al cargar los contadores de mesas:\n" +
+                    "Error al cargar los contadores:\n" +
                     ex.Message,
                     "Gestión de Mesas",
                     MessageBoxButtons.OK,
@@ -775,17 +804,20 @@ namespace PROYECTO_RESTAURANTE
 
 
 
-        private void txtBuscarMesa_TextChanged(object sender, EventArgs e)
-        {
-            FiltrarMesas();
-        }
 
-        private void btnNuevaReserva_Click(object sender, EventArgs e)
+        private void btnNuevaReserva_Click(
+            object sender, EventArgs e)
         {
-            using (RESERVAR_MESA ventana = new RESERVAR_MESA())
+            using (RESERVAR_MESA ventana =
+                new RESERVAR_MESA())
             {
-                if (ventana.ShowDialog(this) == DialogResult.OK)
+                if (ventana.ShowDialog(this) ==
+                    DialogResult.OK)
                 {
+                    // Actualizar reservas registradas.
+                    CargarHistorialMesas();
+
+                    // Actualizar estado actual de las mesas.
                     CargarContadoresMesas();
                     CargarEstadosMesas();
                     FiltrarMesas();
@@ -797,7 +829,7 @@ namespace PROYECTO_RESTAURANTE
 
 
 
-       
+
 
         private void SeleccionarMesa(object sender, EventArgs e)
         {
@@ -1273,206 +1305,236 @@ namespace PROYECTO_RESTAURANTE
             textEstadoDetalleMesa.FillColor = Color.LightGray;
         }
 
+
         private void CargarHistorialMesas()
         {
             try
             {
-                // ==========================================
-                // 1. CONFIGURAR LA TABLA
-                // ==========================================
+                // =====================================
+                // 1. CONSULTAR RESERVAS EN SQL SERVER
+                // =====================================
+
+                string sql = @"
+            SELECT
+                R.id_reserva AS Numero,
+
+                'Mesa ' +
+                CONVERT(VARCHAR(10), M.[número])
+                    AS Mesa,
+
+                R.nombre_cliente AS Cliente,
+
+                CONVERT(VARCHAR(10),
+                    R.fecha_hora, 103) AS Fecha,
+
+                CONVERT(VARCHAR(5),
+                    R.fecha_hora, 108) AS Hora,
+
+                CASE
+                    WHEN R.estado = 'confirmada'
+                        THEN 'Confirmada'
+                    ELSE R.estado
+                END AS Estado,
+
+                ISNULL(
+                    NULLIF(R.observacion, ''),
+                    'Sin observación'
+                ) AS Observacion
+
+            FROM dbo.RESERVA_MESA R
+
+            INNER JOIN dbo.MESA M
+                ON R.id_mesa = M.id_mesa
+
+            WHERE M.id_sucursal = @Sucursal
+              AND R.estado = 'confirmada'
+
+              AND DATEADD(
+                    MINUTE, 120, R.fecha_hora
+                  ) > SYSDATETIME()
+
+            ORDER BY
+                R.fecha_hora ASC,
+                R.id_reserva ASC;";
+
+                DataTable tabla = new DataTable();
+
+                using (SqlConnection conexion =
+                    new SqlConnection(cadenaConexion))
+                using (SqlCommand comando =
+                    new SqlCommand(sql, conexion))
+                {
+                    comando.Parameters.Add(
+                        "@Sucursal", SqlDbType.Int
+                    ).Value = 1;
+
+                    using (SqlDataAdapter adaptador =
+                        new SqlDataAdapter(comando))
+                    {
+                        adaptador.Fill(tabla);
+                    }
+                }
+
+                // =====================================
+                // 2. PREPARAR TABLA
+                // =====================================
 
                 dgvHistorialMesas.DataSource = null;
                 dgvHistorialMesas.AutoGenerateColumns = false;
-
                 dgvHistorialMesas.Columns.Clear();
 
-                // ==========================================
-                // 2. CREAR LAS CINCO COLUMNAS
-                // ==========================================
+                dgvHistorialMesas.Columns.Add(
+                    "colNumero", "N°");
 
-                dgvHistorialMesas.Columns.Add("colNumero", "N°");
-                dgvHistorialMesas.Columns.Add("colMesa", "MESA");
-                dgvHistorialMesas.Columns.Add("colEstado", "ESTADO");
-                dgvHistorialMesas.Columns.Add("colHora", "HORA");
+                dgvHistorialMesas.Columns.Add(
+                    "colMesa", "MESA");
+
+                dgvHistorialMesas.Columns.Add(
+                    "colCliente", "CLIENTE");
+
+                dgvHistorialMesas.Columns.Add(
+                    "colFecha", "FECHA");
+
+                dgvHistorialMesas.Columns.Add(
+                    "colHora", "HORA");
+
+                dgvHistorialMesas.Columns.Add(
+                    "colEstado", "ESTADO");
+
                 dgvHistorialMesas.Columns.Add(
                     "colObservacion", "OBSERVACIÓN");
 
-                // ==========================================
-                // 3. RELACIONAR COLUMNAS CON SQL SERVER
-                // ==========================================
+                // =====================================
+                // 3. RELACIONAR COLUMNAS
+                // =====================================
 
-                dgvHistorialMesas.Columns[0].DataPropertyName = "Numero";
-                dgvHistorialMesas.Columns[1].DataPropertyName = "Mesa";
-                dgvHistorialMesas.Columns[2].DataPropertyName = "Estado";
-                dgvHistorialMesas.Columns[3].DataPropertyName = "Hora";
-                dgvHistorialMesas.Columns[4].DataPropertyName = "Observacion";
+                dgvHistorialMesas.Columns[0]
+                    .DataPropertyName = "Numero";
 
-                // ==========================================
-                // 4. CONFIGURAR ANCHO DE COLUMNAS
-                // ==========================================
+                dgvHistorialMesas.Columns[1]
+                    .DataPropertyName = "Mesa";
+
+                dgvHistorialMesas.Columns[2]
+                    .DataPropertyName = "Cliente";
+
+                dgvHistorialMesas.Columns[3]
+                    .DataPropertyName = "Fecha";
+
+                dgvHistorialMesas.Columns[4]
+                    .DataPropertyName = "Hora";
+
+                dgvHistorialMesas.Columns[5]
+                    .DataPropertyName = "Estado";
+
+                dgvHistorialMesas.Columns[6]
+                    .DataPropertyName = "Observacion";
+
+                // =====================================
+                // 4. TAMAÑO DE COLUMNAS
+                // =====================================
 
                 dgvHistorialMesas.AutoSizeColumnsMode =
                     DataGridViewAutoSizeColumnsMode.Fill;
 
-                dgvHistorialMesas.Columns[0].FillWeight = 8;
-                dgvHistorialMesas.Columns[1].FillWeight = 18;
-                dgvHistorialMesas.Columns[2].FillWeight = 18;
-                dgvHistorialMesas.Columns[3].FillWeight = 12;
-                dgvHistorialMesas.Columns[4].FillWeight = 44;
+                dgvHistorialMesas.Columns[0].FillWeight = 7;
+                dgvHistorialMesas.Columns[1].FillWeight = 12;
+                dgvHistorialMesas.Columns[2].FillWeight = 22;
+                dgvHistorialMesas.Columns[3].FillWeight = 15;
+                dgvHistorialMesas.Columns[4].FillWeight = 10;
+                dgvHistorialMesas.Columns[5].FillWeight = 15;
+                dgvHistorialMesas.Columns[6].FillWeight = 19;
 
-                // Evitar observaciones cortadas.
-                dgvHistorialMesas.Columns[4].DefaultCellStyle.WrapMode =
-                    DataGridViewTriState.True;
+                dgvHistorialMesas.Columns[6]
+                    .DefaultCellStyle.WrapMode =
+                        DataGridViewTriState.True;
 
-                // ==========================================
-                // 5. ESTILO GENERAL
-                // ==========================================
-
-                dgvHistorialMesas.BackgroundColor = Color.White;
-                dgvHistorialMesas.BorderStyle = BorderStyle.None;
+                // =====================================
+                // 5. CONFIGURAR TABLA
+                // =====================================
 
                 dgvHistorialMesas.ReadOnly = true;
+
                 dgvHistorialMesas.AllowUserToAddRows = false;
+
                 dgvHistorialMesas.AllowUserToDeleteRows = false;
+
                 dgvHistorialMesas.RowHeadersVisible = false;
 
                 dgvHistorialMesas.SelectionMode =
                     DataGridViewSelectionMode.FullRowSelect;
 
-                // Letras negras y fondo blanco.
+                dgvHistorialMesas.AutoSizeRowsMode =
+                    DataGridViewAutoSizeRowsMode.AllCells;
+
+                dgvHistorialMesas.RowTemplate.Height = 35;
+
+                dgvHistorialMesas.BackgroundColor =
+                    Color.White;
+
+                dgvHistorialMesas.BorderStyle =
+                    BorderStyle.None;
+
+                // =====================================
+                // 6. COLORES DE LAS FILAS
+                // =====================================
+
                 dgvHistorialMesas.DefaultCellStyle.BackColor =
                     Color.White;
 
                 dgvHistorialMesas.DefaultCellStyle.ForeColor =
                     Color.Black;
 
-                dgvHistorialMesas.DefaultCellStyle.SelectionBackColor =
-                    Color.FromArgb(255, 245, 170);
+                dgvHistorialMesas.AlternatingRowsDefaultCellStyle
+                    .BackColor = Color.WhiteSmoke;
 
-                dgvHistorialMesas.DefaultCellStyle.SelectionForeColor =
-                    Color.Black;
+                dgvHistorialMesas.AlternatingRowsDefaultCellStyle
+                    .ForeColor = Color.Black;
 
-                dgvHistorialMesas.DefaultCellStyle.Font =
-                    new Font("Segoe UI", 10);
+                dgvHistorialMesas.DefaultCellStyle
+                    .SelectionBackColor =
+                        Color.FromArgb(255, 245, 170);
 
-                // Filas alternadas.
-                dgvHistorialMesas.AlternatingRowsDefaultCellStyle.BackColor =
-                    Color.FromArgb(245, 245, 245);
+                dgvHistorialMesas.DefaultCellStyle
+                    .SelectionForeColor = Color.Black;
 
-                dgvHistorialMesas.AlternatingRowsDefaultCellStyle.ForeColor =
-                    Color.Black;
+                // =====================================
+                // 7. ENCABEZADO AMARILLO
+                // =====================================
 
-                // Altura de las filas.
-                dgvHistorialMesas.RowTemplate.Height = 35;
+                dgvHistorialMesas.EnableHeadersVisualStyles =
+                    false;
 
-                dgvHistorialMesas.AutoSizeRowsMode =
-                    DataGridViewAutoSizeRowsMode.AllCells;
+                dgvHistorialMesas.ColumnHeadersDefaultCellStyle
+                    .BackColor = Color.Gold;
 
-                // ==========================================
-                // 6. ENCABEZADO AMARILLO
-                // ==========================================
+                dgvHistorialMesas.ColumnHeadersDefaultCellStyle
+                    .ForeColor = Color.Black;
 
-                dgvHistorialMesas.EnableHeadersVisualStyles = false;
-
-                dgvHistorialMesas.ColumnHeadersDefaultCellStyle.BackColor =
-                    Color.FromArgb(255, 212, 0);
-
-                dgvHistorialMesas.ColumnHeadersDefaultCellStyle.ForeColor =
-                    Color.Black;
-
-                dgvHistorialMesas.ColumnHeadersDefaultCellStyle.Font =
-                    new Font("Segoe UI", 10, FontStyle.Bold);
-
-                dgvHistorialMesas.ColumnHeadersHeightSizeMode =
-                    DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+                dgvHistorialMesas.ColumnHeadersDefaultCellStyle
+                    .Font = new Font(
+                        "Segoe UI", 9, FontStyle.Bold);
 
                 dgvHistorialMesas.ColumnHeadersHeight = 38;
 
-                // ==========================================
-                // 7. CONSULTAR EL HISTORIAL DE SQL SERVER
-                // ==========================================
+                // =====================================
+                // 8. MOSTRAR RESERVAS
+                // =====================================
 
-                string consulta = @"
-            WITH UltimosMovimientos AS
-            (
-                SELECT TOP (20)
-                    h.id_historial,
-                    m.[número] AS NumeroMesa,
-                    h.estado,
-                    h.fecha_hora,
-                    h.observacion
-
-                FROM dbo.HISTORIAL_MESA h
-
-                INNER JOIN dbo.MESA m
-                    ON h.id_mesa = m.id_mesa
-
-                -- Solo mesas que fueron ocupadas o reservadas.
-                WHERE h.estado IN ('ocupada', 'reservada')
-
-                ORDER BY h.fecha_hora DESC,
-                         h.id_historial DESC
-            )
-
-            SELECT
-                ROW_NUMBER() OVER
-                (
-                    ORDER BY fecha_hora DESC,
-                             id_historial DESC
-                ) AS Numero,
-
-                'Mesa ' +
-                    CONVERT(VARCHAR(10), NumeroMesa) AS Mesa,
-
-                estado AS Estado,
-
-                CONVERT(VARCHAR(5), fecha_hora, 108) AS Hora,
-
-                observacion AS Observacion
-
-            FROM UltimosMovimientos
-
-            ORDER BY fecha_hora DESC,
-                     id_historial DESC;";
-
-                // ==========================================
-                // 8. CONECTAR CON SQL SERVER
-                // ==========================================
-
-                using (SqlConnection conexion =
-                    new SqlConnection(cadenaConexion))
-                {
-                    conexion.Open();
-
-                    using (SqlDataAdapter adaptador =
-                        new SqlDataAdapter(consulta, conexion))
-                    {
-                        DataTable tabla = new DataTable();
-
-                        // Obtener los registros.
-                        adaptador.Fill(tabla);
-
-                        // Mostrar la información.
-                        dgvHistorialMesas.DataSource = tabla;
-                    }
-                }
-
-                // ==========================================
-                // 9. QUITAR SELECCIÓN INICIAL
-                // ==========================================
+                dgvHistorialMesas.DataSource = tabla;
 
                 dgvHistorialMesas.ClearSelection();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "Error al cargar el historial de mesas:\n" +
+                    "Error al cargar reservas:\n" +
                     ex.Message,
                     "Gestión de Mesas",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
         }
+
 
         private void btnAbrirPedido_Click(object sender, EventArgs e)
         {
@@ -1484,15 +1546,20 @@ namespace PROYECTO_RESTAURANTE
 
         private void btnReservar_Click(object sender, EventArgs e)
         {
-            
-            // 1. Validar que se seleccione una mesa.
+
             if (mesaSeleccionada == 0)
             {
                 MessageBox.Show(
-                    "Primero seleccione una mesa.");
+                    "Primero seleccione una mesa.",
+                    "Gestión de Mesas",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
                 return;
             }
 
+            // Abrir el formulario de reservas.
+            btnNuevaReserva_Click(sender, e);
             // 2. Confirmar la reserva.
             DialogResult respuesta = MessageBox.Show(
                 "¿Desea reservar la Mesa " +
