@@ -1,0 +1,31 @@
+bin/
+obj/
+packages/
+.vs/
+bin/
+obj/
+*.user
+*.suo
+
+# Archivos temporales de Visual Studio
+.vs/
+bin/
+obj/
+*.user
+*.suo
+
+# Respaldos comprimidos
+*.zip
+*.rar
+*.7z
+
+# Respaldos y archivos locales SQL Server
+*.bak
+*.mdf
+*.ldf
+
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
