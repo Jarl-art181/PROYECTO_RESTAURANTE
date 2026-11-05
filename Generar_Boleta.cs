@@ -10,8 +10,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using ZXing;
-using ZXing.Common;
-
 
 namespace PROYECTO_RESTAURANTE
 {
@@ -60,7 +58,11 @@ namespace PROYECTO_RESTAURANTE
         public Generar_Boleta()
         {
             InitializeComponent();
-
+            // Evitar ejecutar configuraciones en el diseñador.
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+            {
+                return;
+            }
             // =====================================
             // CONFIGURAR FORMAS DE PAGO
             // =====================================
@@ -94,7 +96,7 @@ namespace PROYECTO_RESTAURANTE
             // CONFIGURACIÓN ORIGINAL
             // =====================================
 
-            CargarImpresoras();
+         
 
             this.Shown += Generar_Boleta_Shown;
 
@@ -119,6 +121,9 @@ namespace PROYECTO_RESTAURANTE
 
         private void Generar_Boleta_Shown(object sender, EventArgs e)
         {
+            // Cargar impresoras al mostrar la ventana,
+            // no mientras Visual Studio diseña el formulario.
+            CargarImpresoras();
             // 1. Verificar que se haya recibido un pedido.
             if (this.Tag == null)
             {
@@ -2516,5 +2521,7 @@ namespace PROYECTO_RESTAURANTE
         {
             this.Close();
         }
+
+       
     }
 }
