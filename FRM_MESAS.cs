@@ -18,6 +18,9 @@ namespace PROYECTO_RESTAURANTE
         // Guarda el número de mesa que seleccionamos.
         private int mesaSeleccionada = 0;
         private string filtroActual = "todas";
+
+        // La tabla de reservas crea sus columnas una sola vez.
+        private bool historialConfigurado = false;
         private readonly string cadenaConexion =
     @"Server=LAPTOP-GH63852S\SQLEXPRESS;
       Database=AL_ESTILO_PIURA;
@@ -1319,141 +1322,149 @@ namespace PROYECTO_RESTAURANTE
                 // =====================================
 
                 dgvHistorialMesas.DataSource = null;
-                dgvHistorialMesas.AutoGenerateColumns = false;
-                dgvHistorialMesas.Columns.Clear();
+                // Columnas, anchos y estilos se crean UNA sola vez.
+                // Antes se borraban y recreaban en cada refresco
+                // (al mostrarse Mesas y con cada aviso de reservas).
+                if (!historialConfigurado)
+                {
+                    dgvHistorialMesas.AutoGenerateColumns = false;
+                    dgvHistorialMesas.Columns.Clear();
 
-                dgvHistorialMesas.Columns.Add(
-                    "colNumero", "N°");
+                    dgvHistorialMesas.Columns.Add(
+                        "colNumero", "N°");
 
-                dgvHistorialMesas.Columns.Add(
-                    "colMesa", "MESA");
+                    dgvHistorialMesas.Columns.Add(
+                        "colMesa", "MESA");
 
-                dgvHistorialMesas.Columns.Add(
-                    "colCliente", "CLIENTE");
+                    dgvHistorialMesas.Columns.Add(
+                        "colCliente", "CLIENTE");
 
-                dgvHistorialMesas.Columns.Add(
-                    "colFecha", "FECHA");
+                    dgvHistorialMesas.Columns.Add(
+                        "colFecha", "FECHA");
 
-                dgvHistorialMesas.Columns.Add(
-                    "colHora", "HORA");
+                    dgvHistorialMesas.Columns.Add(
+                        "colHora", "HORA");
 
-                dgvHistorialMesas.Columns.Add(
-                    "colEstado", "ESTADO");
+                    dgvHistorialMesas.Columns.Add(
+                        "colEstado", "ESTADO");
 
-                dgvHistorialMesas.Columns.Add(
-                    "colObservacion", "OBSERVACIÓN");
+                    dgvHistorialMesas.Columns.Add(
+                        "colObservacion", "OBSERVACIÓN");
 
-                // =====================================
-                // 3. RELACIONAR COLUMNAS
-                // =====================================
+                    // =====================================
+                    // 3. RELACIONAR COLUMNAS
+                    // =====================================
 
-                dgvHistorialMesas.Columns[0]
-                    .DataPropertyName = "Numero";
+                    dgvHistorialMesas.Columns[0]
+                        .DataPropertyName = "Numero";
 
-                dgvHistorialMesas.Columns[1]
-                    .DataPropertyName = "Mesa";
+                    dgvHistorialMesas.Columns[1]
+                        .DataPropertyName = "Mesa";
 
-                dgvHistorialMesas.Columns[2]
-                    .DataPropertyName = "Cliente";
+                    dgvHistorialMesas.Columns[2]
+                        .DataPropertyName = "Cliente";
 
-                dgvHistorialMesas.Columns[3]
-                    .DataPropertyName = "Fecha";
+                    dgvHistorialMesas.Columns[3]
+                        .DataPropertyName = "Fecha";
 
-                dgvHistorialMesas.Columns[4]
-                    .DataPropertyName = "Hora";
+                    dgvHistorialMesas.Columns[4]
+                        .DataPropertyName = "Hora";
 
-                dgvHistorialMesas.Columns[5]
-                    .DataPropertyName = "Estado";
+                    dgvHistorialMesas.Columns[5]
+                        .DataPropertyName = "Estado";
 
-                dgvHistorialMesas.Columns[6]
-                    .DataPropertyName = "Observacion";
+                    dgvHistorialMesas.Columns[6]
+                        .DataPropertyName = "Observacion";
 
-                // =====================================
-                // 4. TAMAÑO DE COLUMNAS
-                // =====================================
+                    // =====================================
+                    // 4. TAMAÑO DE COLUMNAS
+                    // =====================================
 
-                dgvHistorialMesas.AutoSizeColumnsMode =
-                    DataGridViewAutoSizeColumnsMode.Fill;
+                    dgvHistorialMesas.AutoSizeColumnsMode =
+                        DataGridViewAutoSizeColumnsMode.Fill;
 
-                dgvHistorialMesas.Columns[0].FillWeight = 7;
-                dgvHistorialMesas.Columns[1].FillWeight = 12;
-                dgvHistorialMesas.Columns[2].FillWeight = 22;
-                dgvHistorialMesas.Columns[3].FillWeight = 15;
-                dgvHistorialMesas.Columns[4].FillWeight = 10;
-                dgvHistorialMesas.Columns[5].FillWeight = 15;
-                dgvHistorialMesas.Columns[6].FillWeight = 19;
+                    dgvHistorialMesas.Columns[0].FillWeight = 7;
+                    dgvHistorialMesas.Columns[1].FillWeight = 12;
+                    dgvHistorialMesas.Columns[2].FillWeight = 22;
+                    dgvHistorialMesas.Columns[3].FillWeight = 15;
+                    dgvHistorialMesas.Columns[4].FillWeight = 10;
+                    dgvHistorialMesas.Columns[5].FillWeight = 15;
+                    dgvHistorialMesas.Columns[6].FillWeight = 19;
 
-                dgvHistorialMesas.Columns[6]
-                    .DefaultCellStyle.WrapMode =
-                        DataGridViewTriState.True;
+                    dgvHistorialMesas.Columns[6]
+                        .DefaultCellStyle.WrapMode =
+                            DataGridViewTriState.True;
 
-                // =====================================
-                // 5. CONFIGURAR TABLA
-                // =====================================
+                    // =====================================
+                    // 5. CONFIGURAR TABLA
+                    // =====================================
 
-                dgvHistorialMesas.ReadOnly = true;
+                    dgvHistorialMesas.ReadOnly = true;
 
-                dgvHistorialMesas.AllowUserToAddRows = false;
+                    dgvHistorialMesas.AllowUserToAddRows = false;
 
-                dgvHistorialMesas.AllowUserToDeleteRows = false;
+                    dgvHistorialMesas.AllowUserToDeleteRows = false;
 
-                dgvHistorialMesas.RowHeadersVisible = false;
+                    dgvHistorialMesas.RowHeadersVisible = false;
 
-                dgvHistorialMesas.SelectionMode =
-                    DataGridViewSelectionMode.FullRowSelect;
+                    dgvHistorialMesas.SelectionMode =
+                        DataGridViewSelectionMode.FullRowSelect;
 
-                dgvHistorialMesas.AutoSizeRowsMode =
-                    DataGridViewAutoSizeRowsMode.AllCells;
+                    dgvHistorialMesas.AutoSizeRowsMode =
+                        DataGridViewAutoSizeRowsMode.AllCells;
 
-                dgvHistorialMesas.RowTemplate.Height = 35;
+                    dgvHistorialMesas.RowTemplate.Height = 35;
 
-                dgvHistorialMesas.BackgroundColor =
-                    Color.White;
+                    dgvHistorialMesas.BackgroundColor =
+                        Color.White;
 
-                dgvHistorialMesas.BorderStyle =
-                    BorderStyle.None;
+                    dgvHistorialMesas.BorderStyle =
+                        BorderStyle.None;
 
-                // =====================================
-                // 6. COLORES DE LAS FILAS
-                // =====================================
+                    // =====================================
+                    // 6. COLORES DE LAS FILAS
+                    // =====================================
 
-                dgvHistorialMesas.DefaultCellStyle.BackColor =
-                    Color.White;
+                    dgvHistorialMesas.DefaultCellStyle.BackColor =
+                        Color.White;
 
-                dgvHistorialMesas.DefaultCellStyle.ForeColor =
-                    Color.Black;
+                    dgvHistorialMesas.DefaultCellStyle.ForeColor =
+                        Color.Black;
 
-                dgvHistorialMesas.AlternatingRowsDefaultCellStyle
-                    .BackColor = Color.WhiteSmoke;
+                    dgvHistorialMesas.AlternatingRowsDefaultCellStyle
+                        .BackColor = Color.WhiteSmoke;
 
-                dgvHistorialMesas.AlternatingRowsDefaultCellStyle
-                    .ForeColor = Color.Black;
+                    dgvHistorialMesas.AlternatingRowsDefaultCellStyle
+                        .ForeColor = Color.Black;
 
-                dgvHistorialMesas.DefaultCellStyle
-                    .SelectionBackColor =
-                        Color.FromArgb(255, 245, 170);
+                    dgvHistorialMesas.DefaultCellStyle
+                        .SelectionBackColor =
+                            Color.FromArgb(255, 245, 170);
 
-                dgvHistorialMesas.DefaultCellStyle
-                    .SelectionForeColor = Color.Black;
+                    dgvHistorialMesas.DefaultCellStyle
+                        .SelectionForeColor = Color.Black;
 
-                // =====================================
-                // 7. ENCABEZADO AMARILLO
-                // =====================================
+                    // =====================================
+                    // 7. ENCABEZADO AMARILLO
+                    // =====================================
 
-                dgvHistorialMesas.EnableHeadersVisualStyles =
-                    false;
+                    dgvHistorialMesas.EnableHeadersVisualStyles =
+                        false;
 
-                dgvHistorialMesas.ColumnHeadersDefaultCellStyle
-                    .BackColor = Color.Gold;
+                    dgvHistorialMesas.ColumnHeadersDefaultCellStyle
+                        .BackColor = Color.Gold;
 
-                dgvHistorialMesas.ColumnHeadersDefaultCellStyle
-                    .ForeColor = Color.Black;
+                    dgvHistorialMesas.ColumnHeadersDefaultCellStyle
+                        .ForeColor = Color.Black;
 
-                dgvHistorialMesas.ColumnHeadersDefaultCellStyle
-                    .Font = new Font(
-                        "Segoe UI", 9, FontStyle.Bold);
+                    dgvHistorialMesas.ColumnHeadersDefaultCellStyle
+                        .Font = new Font(
+                            "Segoe UI", 9, FontStyle.Bold);
 
-                dgvHistorialMesas.ColumnHeadersHeight = 38;
+                    dgvHistorialMesas.ColumnHeadersHeight = 38;
+
+                    historialConfigurado = true;
+                }
 
                 // =====================================
                 // 8. MOSTRAR RESERVAS

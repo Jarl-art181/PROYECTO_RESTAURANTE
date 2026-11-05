@@ -50,6 +50,16 @@ namespace PROYECTO_RESTAURANTE
             CargarPlatosMasVendidos();
             AplicarEstiloInicio();
 
+            // Últimos pedidos: número centrado e importe a la derecha
+            // (el resto de la tabla ya se veía correctamente).
+            if (dgvUltimoPedido.Columns.Count >= 4)
+            {
+                dgvUltimoPedido.Columns[0].DefaultCellStyle.Alignment = EstiloTablas.Centro;
+                dgvUltimoPedido.Columns[0].HeaderCell.Style.Alignment = EstiloTablas.Centro;
+                dgvUltimoPedido.Columns[3].DefaultCellStyle.Alignment = EstiloTablas.Derecha;
+                dgvUltimoPedido.Columns[3].HeaderCell.Style.Alignment = EstiloTablas.Derecha;
+            }
+
             // El reloj solo trabaja mientras Inicio está visible.
             this.VisibleChanged += (s, e) =>
             {

@@ -94,6 +94,12 @@ namespace PROYECTO_RESTAURANTE
             numCopiasBoleta.Value = 1;
 
             // =====================================
+            // TABLAS: proporciones y textos legibles
+            // =====================================
+
+            AjustarTablasBoleta();
+
+            // =====================================
             // CONFIGURACIÓN ORIGINAL
             // =====================================
 
@@ -117,6 +123,26 @@ namespace PROYECTO_RESTAURANTE
 
 
 
+
+        // Una sola vez: detalle del pedido (izquierda) y altura del
+        // encabezado de la vista previa (antes 15 px, texto recortado).
+        private void AjustarTablasBoleta()
+        {
+            if (dgvDetallePedido.Columns.Count >= 4)
+            {
+                DataGridView t = dgvDetallePedido;
+                EstiloTablas.Configurar(t, 30, 26);
+                EstiloTablas.Columna(t.Columns[0], 12, 46, EstiloTablas.Centro);
+                EstiloTablas.Columna(t.Columns[1], 46, 120, EstiloTablas.Izquierda, true);
+                EstiloTablas.Columna(t.Columns[2], 20, 66, EstiloTablas.Derecha);
+                EstiloTablas.Columna(t.Columns[3], 22, 72, EstiloTablas.Derecha);
+            }
+
+            dgvBoletaDetalle.ColumnHeadersHeightSizeMode =
+                DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+            dgvBoletaDetalle.ColumnHeadersHeight = 24;
+            dgvBoletaDetalle.ThemeStyle.HeaderStyle.Height = 24;
+        }
 
         // ==============================================
         // PAGO MIXTO: efectivo fijo + segundo metodo
@@ -1151,8 +1177,8 @@ namespace PROYECTO_RESTAURANTE
             dgvBoletaDetalle.AutoSizeColumnsMode =
                 DataGridViewAutoSizeColumnsMode.None;
 
-            // Cantidad.
-            dgvBoletaDetalle.Columns[0].Width = 45;
+            // Cantidad (50 px: el encabezado "Cant." ya no se corta).
+            dgvBoletaDetalle.Columns[0].Width = 50;
 
             // Descripción.
             dgvBoletaDetalle.Columns[1].MinimumWidth = 100;

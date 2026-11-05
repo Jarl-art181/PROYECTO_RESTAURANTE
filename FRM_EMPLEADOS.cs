@@ -85,6 +85,25 @@ namespace PROYECTO_RESTAURANTE
             ColumnAccion.Text = "Opciones";
             ColumnAccion.UseColumnTextForButtonValue = true;
 
+            // Visual: proporciones, textos legibles y nombres en dos líneas.
+            EstiloTablas.Configurar(tabla, 36, 34);
+            // Celdas a 10 pt (antes 11,25 pt): con 8 columnas en 719 px
+            // el texto se cortaba. Misma familia de letra del diseño.
+            tabla.DefaultCellStyle.Font = new Font("Microsoft Sans Serif", 10F);
+            tabla.AlternatingRowsDefaultCellStyle.Font = tabla.DefaultCellStyle.Font;
+            ((Guna2DataGridView)tabla).ThemeStyle.RowsStyle.Font = tabla.DefaultCellStyle.Font;
+
+            // Columnas cortas con ancho exacto (medido con la letra real);
+            // el nombre ocupa el resto y pasa a dos líneas si es largo.
+            EstiloTablas.ColumnaFija(Column_codi, 66, EstiloTablas.Centro);
+            EstiloTablas.Columna(Column_nombres, 100, 110, EstiloTablas.Izquierda, true);
+            EstiloTablas.ColumnaFija(Column1_DNI, 80, EstiloTablas.Centro);
+            EstiloTablas.ColumnaFija(Column_cargo, 104, EstiloTablas.Izquierda);
+            EstiloTablas.ColumnaFija(Column_telefono, 86, EstiloTablas.Centro);
+            EstiloTablas.ColumnaFija(Column_turno, 86, EstiloTablas.Izquierda);
+            EstiloTablas.ColumnaFija(Column_Estado, 70, EstiloTablas.Izquierda);
+            EstiloTablas.ColumnaFija(ColumnAccion, 84, EstiloTablas.Centro);
+
             tabla.SelectionChanged += (s, e) => MostrarDetalle(EmpleadoSeleccionado());
             tabla.CellContentClick += Tabla_CellContentClick;
             tabla.CellDoubleClick += (s, e) =>

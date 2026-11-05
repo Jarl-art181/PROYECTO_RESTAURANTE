@@ -123,6 +123,7 @@ namespace PROYECTO_RESTAURANTE
             Shown += FRMS_PEDIDOS_Shown;
 
             ConfigurarColumnaEliminar();
+            AjustarTablasPedidos();
             // Activar el botón X de la tabla derecha.
             dgvDetallePedido.CellContentClick -= dgvDetallePedido_CellContentClick;
             dgvDetallePedido.CellContentClick += dgvDetallePedido_CellContentClick;
@@ -368,6 +369,35 @@ namespace PROYECTO_RESTAURANTE
                 btnLimpiar.Enabled = false;
 
             MejorarDisenoTablasDetalle();
+        }
+
+        // Proporciones de las dos tablas (una sola vez, en el constructor).
+        // Se usan posiciones porque las columnas Eliminar y Ver pueden
+        // sustituirse en tiempo de ejecución por columnas de botón.
+        private void AjustarTablasPedidos()
+        {
+            if (dgvDetallePedido != null && dgvDetallePedido.Columns.Count >= 5)
+            {
+                DataGridView t = dgvDetallePedido;
+                EstiloTablas.Configurar(t, 35, 28);
+                EstiloTablas.Columna(t.Columns[0], 10, 50, EstiloTablas.Centro);
+                EstiloTablas.Columna(t.Columns[1], 43, 150, EstiloTablas.Izquierda, true);
+                EstiloTablas.Columna(t.Columns[2], 16, 70, EstiloTablas.Derecha);
+                EstiloTablas.Columna(t.Columns[3], 18, 76, EstiloTablas.Derecha);
+                EstiloTablas.Columna(t.Columns[4], 13, 62, EstiloTablas.Centro);
+            }
+
+            if (dgvPedidos != null && dgvPedidos.Columns.Count == 6)
+            {
+                DataGridView t = dgvPedidos;
+                EstiloTablas.Configurar(t, 30, 26);
+                EstiloTablas.Columna(t.Columns[0], 8, 44, EstiloTablas.Centro);
+                EstiloTablas.Columna(t.Columns[1], 18, 86, EstiloTablas.Izquierda);
+                EstiloTablas.Columna(t.Columns[2], 20, 120, EstiloTablas.Izquierda);
+                EstiloTablas.Columna(t.Columns[3], 15, 84, EstiloTablas.Derecha);
+                EstiloTablas.Columna(t.Columns[4], 27, 130, EstiloTablas.Centro);
+                EstiloTablas.Columna(t.Columns[5], 12, 60, EstiloTablas.Centro);
+            }
         }
 
         // Mejorar la legibilidad de las dos tablas de la vista detalle.
