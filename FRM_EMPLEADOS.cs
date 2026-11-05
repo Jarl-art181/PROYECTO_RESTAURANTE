@@ -36,18 +36,12 @@ namespace PROYECTO_RESTAURANTE
         
         private void guna2Button2_Click(object sender, EventArgs e)
         {
-            FRMS_PEDIDOS ventana = new FRMS_PEDIDOS();
-
-            ventana.Show(); 
-            this.Hide();    
+            Navegador.Ir<FRMS_PEDIDOS>(this);
         }
 
         private void guna2Button9_Click(object sender, EventArgs e)
         {
-            FRM_MENU ventana = new FRM_MENU();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_MENU>(this);
         }
     }
     }

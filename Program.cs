@@ -15,6 +15,11 @@ namespace PROYECTO_RESTAURANTE
             // Si ya activaste INICIAR_SESIÓN, NO reemplaces Program.cs sin adaptar
             // esta parte al formulario que mantiene abierto el programa.
             FRM_INICIO ventanaPrincipal = new FRM_INICIO();
+
+            // El Navegador reutiliza esta instancia como Inicio
+            // y nunca la cierra al cambiar de módulo.
+            Navegador.EstablecerPrincipal(ventanaPrincipal);
+
             ventanaPrincipal.Shown += (s, e) =>
                 ControlReservasAutomaticas.Iniciar(ventanaPrincipal);
 

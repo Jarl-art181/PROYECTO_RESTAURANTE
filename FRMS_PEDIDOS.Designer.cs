@@ -466,7 +466,7 @@
             this.guna2PictureCerrar.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureCerrar.Image")));
             this.guna2PictureCerrar.ImageRotate = 0F;
             this.guna2PictureCerrar.Location = new System.Drawing.Point(62, 882);
-            this.guna2PictureCerrar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2PictureCerrar.Margin = new System.Windows.Forms.Padding(4);
             this.guna2PictureCerrar.Name = "guna2PictureCerrar";
             this.guna2PictureCerrar.Size = new System.Drawing.Size(41, 57);
             this.guna2PictureCerrar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -479,7 +479,7 @@
             this.guna2HtmlLabel21.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel21.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel21.Location = new System.Drawing.Point(89, 813);
-            this.guna2HtmlLabel21.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2HtmlLabel21.Margin = new System.Windows.Forms.Padding(4);
             this.guna2HtmlLabel21.Name = "guna2HtmlLabel21";
             this.guna2HtmlLabel21.Size = new System.Drawing.Size(93, 30);
             this.guna2HtmlLabel21.TabIndex = 77;
@@ -490,7 +490,7 @@
             this.pictureBox7.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox7.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox7.Image")));
             this.pictureBox7.Location = new System.Drawing.Point(37, 806);
-            this.pictureBox7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox7.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox7.Name = "pictureBox7";
             this.pictureBox7.Size = new System.Drawing.Size(39, 44);
             this.pictureBox7.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -509,7 +509,7 @@
             this.guna2Button6.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button6.ForeColor = System.Drawing.Color.White;
             this.guna2Button6.Location = new System.Drawing.Point(12, 801);
-            this.guna2Button6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2Button6.Margin = new System.Windows.Forms.Padding(4);
             this.guna2Button6.Name = "guna2Button6";
             this.guna2Button6.Size = new System.Drawing.Size(315, 54);
             this.guna2Button6.TabIndex = 75;
@@ -520,7 +520,7 @@
             this.guna2HtmlLabel22.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel22.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel22.Location = new System.Drawing.Point(89, 752);
-            this.guna2HtmlLabel22.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2HtmlLabel22.Margin = new System.Windows.Forms.Padding(4);
             this.guna2HtmlLabel22.Name = "guna2HtmlLabel22";
             this.guna2HtmlLabel22.Size = new System.Drawing.Size(137, 30);
             this.guna2HtmlLabel22.TabIndex = 74;
@@ -531,7 +531,7 @@
             this.pictureBox8.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox8.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox8.Image")));
             this.pictureBox8.Location = new System.Drawing.Point(37, 745);
-            this.pictureBox8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox8.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox8.Name = "pictureBox8";
             this.pictureBox8.Size = new System.Drawing.Size(39, 44);
             this.pictureBox8.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -550,7 +550,7 @@
             this.guna2Button7.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button7.ForeColor = System.Drawing.Color.White;
             this.guna2Button7.Location = new System.Drawing.Point(12, 740);
-            this.guna2Button7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2Button7.Margin = new System.Windows.Forms.Padding(4);
             this.guna2Button7.Name = "guna2Button7";
             this.guna2Button7.Size = new System.Drawing.Size(315, 54);
             this.guna2Button7.TabIndex = 72;
@@ -561,7 +561,7 @@
             this.guna2HtmlLabel23.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel23.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel23.Location = new System.Drawing.Point(89, 689);
-            this.guna2HtmlLabel23.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2HtmlLabel23.Margin = new System.Windows.Forms.Padding(4);
             this.guna2HtmlLabel23.Name = "guna2HtmlLabel23";
             this.guna2HtmlLabel23.Size = new System.Drawing.Size(109, 30);
             this.guna2HtmlLabel23.TabIndex = 71;
@@ -572,7 +572,7 @@
             this.pictureBox9.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox9.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox9.Image")));
             this.pictureBox9.Location = new System.Drawing.Point(37, 682);
-            this.pictureBox9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox9.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox9.Name = "pictureBox9";
             this.pictureBox9.Size = new System.Drawing.Size(39, 44);
             this.pictureBox9.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -591,7 +591,7 @@
             this.guna2Button8.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button8.ForeColor = System.Drawing.Color.White;
             this.guna2Button8.Location = new System.Drawing.Point(12, 677);
-            this.guna2Button8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2Button8.Margin = new System.Windows.Forms.Padding(4);
             this.guna2Button8.Name = "guna2Button8";
             this.guna2Button8.Size = new System.Drawing.Size(315, 54);
             this.guna2Button8.TabIndex = 69;
@@ -602,7 +602,7 @@
             this.guna2HtmlLabel24.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel24.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel24.Location = new System.Drawing.Point(89, 626);
-            this.guna2HtmlLabel24.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2HtmlLabel24.Margin = new System.Windows.Forms.Padding(4);
             this.guna2HtmlLabel24.Name = "guna2HtmlLabel24";
             this.guna2HtmlLabel24.Size = new System.Drawing.Size(63, 30);
             this.guna2HtmlLabel24.TabIndex = 68;
@@ -613,7 +613,7 @@
             this.pictureBox10.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox10.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox10.Image")));
             this.pictureBox10.Location = new System.Drawing.Point(37, 619);
-            this.pictureBox10.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox10.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox10.Name = "pictureBox10";
             this.pictureBox10.Size = new System.Drawing.Size(39, 44);
             this.pictureBox10.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -632,7 +632,7 @@
             this.guna2Button9.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button9.ForeColor = System.Drawing.Color.White;
             this.guna2Button9.Location = new System.Drawing.Point(12, 614);
-            this.guna2Button9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2Button9.Margin = new System.Windows.Forms.Padding(4);
             this.guna2Button9.Name = "guna2Button9";
             this.guna2Button9.Size = new System.Drawing.Size(315, 54);
             this.guna2Button9.TabIndex = 66;
@@ -643,7 +643,7 @@
             this.guna2HtmlLabel17.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel17.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel17.Location = new System.Drawing.Point(89, 565);
-            this.guna2HtmlLabel17.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2HtmlLabel17.Margin = new System.Windows.Forms.Padding(4);
             this.guna2HtmlLabel17.Name = "guna2HtmlLabel17";
             this.guna2HtmlLabel17.Size = new System.Drawing.Size(117, 30);
             this.guna2HtmlLabel17.TabIndex = 65;
@@ -654,7 +654,7 @@
             this.pictureBox4.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox4.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox4.Image")));
             this.pictureBox4.Location = new System.Drawing.Point(37, 558);
-            this.pictureBox4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox4.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox4.Name = "pictureBox4";
             this.pictureBox4.Size = new System.Drawing.Size(39, 44);
             this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -673,7 +673,7 @@
             this.guna2Button3.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button3.ForeColor = System.Drawing.Color.White;
             this.guna2Button3.Location = new System.Drawing.Point(12, 553);
-            this.guna2Button3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2Button3.Margin = new System.Windows.Forms.Padding(4);
             this.guna2Button3.Name = "guna2Button3";
             this.guna2Button3.Size = new System.Drawing.Size(315, 54);
             this.guna2Button3.TabIndex = 63;
@@ -684,7 +684,7 @@
             this.guna2HtmlLabel18.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel18.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel18.Location = new System.Drawing.Point(89, 504);
-            this.guna2HtmlLabel18.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2HtmlLabel18.Margin = new System.Windows.Forms.Padding(4);
             this.guna2HtmlLabel18.Name = "guna2HtmlLabel18";
             this.guna2HtmlLabel18.Size = new System.Drawing.Size(85, 30);
             this.guna2HtmlLabel18.TabIndex = 62;
@@ -695,7 +695,7 @@
             this.pictureBox5.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox5.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox5.Image")));
             this.pictureBox5.Location = new System.Drawing.Point(37, 497);
-            this.pictureBox5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox5.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox5.Name = "pictureBox5";
             this.pictureBox5.Size = new System.Drawing.Size(39, 44);
             this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -714,7 +714,7 @@
             this.guna2Button4.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button4.ForeColor = System.Drawing.Color.White;
             this.guna2Button4.Location = new System.Drawing.Point(12, 492);
-            this.guna2Button4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2Button4.Margin = new System.Windows.Forms.Padding(4);
             this.guna2Button4.Name = "guna2Button4";
             this.guna2Button4.Size = new System.Drawing.Size(315, 54);
             this.guna2Button4.TabIndex = 60;
@@ -725,7 +725,7 @@
             this.guna2HtmlLabel20.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel20.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel20.Location = new System.Drawing.Point(89, 441);
-            this.guna2HtmlLabel20.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2HtmlLabel20.Margin = new System.Windows.Forms.Padding(4);
             this.guna2HtmlLabel20.Name = "guna2HtmlLabel20";
             this.guna2HtmlLabel20.Size = new System.Drawing.Size(76, 30);
             this.guna2HtmlLabel20.TabIndex = 59;
@@ -736,7 +736,7 @@
             this.pictureBox6.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox6.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox6.Image")));
             this.pictureBox6.Location = new System.Drawing.Point(37, 434);
-            this.pictureBox6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox6.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox6.Name = "pictureBox6";
             this.pictureBox6.Size = new System.Drawing.Size(39, 44);
             this.pictureBox6.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -755,7 +755,7 @@
             this.guna2Button5.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button5.ForeColor = System.Drawing.Color.White;
             this.guna2Button5.Location = new System.Drawing.Point(12, 429);
-            this.guna2Button5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2Button5.Margin = new System.Windows.Forms.Padding(4);
             this.guna2Button5.Name = "guna2Button5";
             this.guna2Button5.Size = new System.Drawing.Size(315, 54);
             this.guna2Button5.TabIndex = 57;
@@ -767,7 +767,7 @@
             this.guna2HtmlLabel16.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel16.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel16.Location = new System.Drawing.Point(89, 378);
-            this.guna2HtmlLabel16.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2HtmlLabel16.Margin = new System.Windows.Forms.Padding(4);
             this.guna2HtmlLabel16.Name = "guna2HtmlLabel16";
             this.guna2HtmlLabel16.Size = new System.Drawing.Size(84, 30);
             this.guna2HtmlLabel16.TabIndex = 56;
@@ -778,7 +778,7 @@
             this.pictureBox3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox3.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
             this.pictureBox3.Location = new System.Drawing.Point(37, 371);
-            this.pictureBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox3.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox3.Name = "pictureBox3";
             this.pictureBox3.Size = new System.Drawing.Size(39, 44);
             this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -797,7 +797,7 @@
             this.guna2Button2.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button2.ForeColor = System.Drawing.Color.White;
             this.guna2Button2.Location = new System.Drawing.Point(12, 366);
-            this.guna2Button2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2Button2.Margin = new System.Windows.Forms.Padding(4);
             this.guna2Button2.Name = "guna2Button2";
             this.guna2Button2.Size = new System.Drawing.Size(315, 54);
             this.guna2Button2.TabIndex = 54;
@@ -809,7 +809,7 @@
             this.guna2HtmlLabel15.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel15.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel15.Location = new System.Drawing.Point(89, 316);
-            this.guna2HtmlLabel15.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2HtmlLabel15.Margin = new System.Windows.Forms.Padding(4);
             this.guna2HtmlLabel15.Name = "guna2HtmlLabel15";
             this.guna2HtmlLabel15.Size = new System.Drawing.Size(67, 30);
             this.guna2HtmlLabel15.TabIndex = 53;
@@ -820,7 +820,7 @@
             this.pictureBox2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
             this.pictureBox2.Location = new System.Drawing.Point(37, 309);
-            this.pictureBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox2.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(39, 44);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -839,7 +839,7 @@
             this.guna2Button1.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button1.ForeColor = System.Drawing.Color.White;
             this.guna2Button1.Location = new System.Drawing.Point(12, 304);
-            this.guna2Button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2Button1.Margin = new System.Windows.Forms.Padding(4);
             this.guna2Button1.Name = "guna2Button1";
             this.guna2Button1.Size = new System.Drawing.Size(315, 54);
             this.guna2Button1.TabIndex = 51;
@@ -851,7 +851,7 @@
             this.guna2HtmlLabel19.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel19.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel19.Location = new System.Drawing.Point(89, 253);
-            this.guna2HtmlLabel19.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2HtmlLabel19.Margin = new System.Windows.Forms.Padding(4);
             this.guna2HtmlLabel19.Name = "guna2HtmlLabel19";
             this.guna2HtmlLabel19.Size = new System.Drawing.Size(63, 30);
             this.guna2HtmlLabel19.TabIndex = 47;
@@ -862,7 +862,7 @@
             this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(37, 246);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(39, 44);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -881,7 +881,7 @@
             this.ButtonINICIO.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.ButtonINICIO.ForeColor = System.Drawing.Color.White;
             this.ButtonINICIO.Location = new System.Drawing.Point(12, 241);
-            this.ButtonINICIO.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.ButtonINICIO.Margin = new System.Windows.Forms.Padding(4);
             this.ButtonINICIO.Name = "ButtonINICIO";
             this.ButtonINICIO.Size = new System.Drawing.Size(315, 54);
             this.ButtonINICIO.TabIndex = 45;
@@ -892,7 +892,7 @@
             this.guna2PictureBox8.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox8.Image")));
             this.guna2PictureBox8.ImageRotate = 0F;
             this.guna2PictureBox8.Location = new System.Drawing.Point(27, 13);
-            this.guna2PictureBox8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.guna2PictureBox8.Margin = new System.Windows.Forms.Padding(4);
             this.guna2PictureBox8.Name = "guna2PictureBox8";
             this.guna2PictureBox8.Size = new System.Drawing.Size(321, 225);
             this.guna2PictureBox8.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -911,7 +911,7 @@
             this.but_Cerrar.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.but_Cerrar.ForeColor = System.Drawing.Color.White;
             this.but_Cerrar.Location = new System.Drawing.Point(25, 875);
-            this.but_Cerrar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.but_Cerrar.Margin = new System.Windows.Forms.Padding(4);
             this.but_Cerrar.Name = "but_Cerrar";
             this.but_Cerrar.PressedColor = System.Drawing.Color.PapayaWhip;
             this.but_Cerrar.Size = new System.Drawing.Size(302, 68);
@@ -1870,7 +1870,7 @@
             this.guna2PictureBox9.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox9.Image")));
             this.guna2PictureBox9.ImageRotate = 0F;
             this.guna2PictureBox9.Location = new System.Drawing.Point(22, 11);
-            this.guna2PictureBox9.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.guna2PictureBox9.Margin = new System.Windows.Forms.Padding(2);
             this.guna2PictureBox9.Name = "guna2PictureBox9";
             this.guna2PictureBox9.Size = new System.Drawing.Size(210, 141);
             this.guna2PictureBox9.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;

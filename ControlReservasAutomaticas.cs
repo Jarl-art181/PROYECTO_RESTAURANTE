@@ -495,23 +495,14 @@ namespace PROYECTO_RESTAURANTE
                     "El número de mesa no es válido.");
             }
 
-            // Obtener la ventana actual.
+            // Obtener la ventana actual (puede ser null si el aviso
+            // apareció sin ninguna ventana activa; el Navegador
+            // busca entonces la ventana visible).
             Form ventanaActual = Form.ActiveForm;
 
-            // Abrir Pedidos enviando el número de mesa.
-            FRMS_PEDIDOS pedidos =
-                new FRMS_PEDIDOS(numeroMesa);
-
-            pedidos.Show();
-            pedidos.Activate();
-
-            // Ocultar la ventana anterior.
-            if (ventanaActual != null &&
-                ventanaActual != pedidos &&
-                !ventanaActual.IsDisposed)
-            {
-                ventanaActual.Hide();
-            }
+            // Abrir Pedidos enviando el número de mesa, sin dejar
+            // instancias anteriores ocultas en memoria.
+            Navegador.AbrirPedidosConMesa(ventanaActual, numeroMesa);
         }
         public static void ConfirmarLlegadaPorNumeroMesa(int numeroMesa)
         {

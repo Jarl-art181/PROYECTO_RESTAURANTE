@@ -36,10 +36,7 @@ namespace PROYECTO_RESTAURANTE
         
         private void guna2Button2_Click(object sender, EventArgs e)
         {
-            FRMS_PEDIDOS pedidos = new FRMS_PEDIDOS();
-
-            pedidos.Show(); 
-            this.Hide();    
+            Navegador.Ir<FRMS_PEDIDOS>(this);
         }
 
         private void guna2HtmlLabel34_Click(object sender, EventArgs e)
@@ -49,10 +46,7 @@ namespace PROYECTO_RESTAURANTE
 
         private void guna2Button8_Click(object sender, EventArgs e)
         {
-            FRM_INVENTARIO pedidos = new FRM_INVENTARIO();
-
-            pedidos.Show();
-            this.Hide();
+            Navegador.Ir<FRM_INVENTARIO>(this);
         }
     }
     }

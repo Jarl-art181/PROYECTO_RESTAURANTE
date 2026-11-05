@@ -59,8 +59,16 @@ namespace PROYECTO_RESTAURANTE
         private void FRM_MESAS_VisibleChanged(object sender, EventArgs e)
         {
             ControlReservasAutomaticas.MesasActualizadas -= RefrescarMesasAutomaticamente;
+
+            // El reloj solo trabaja mientras Mesas está visible.
+            timerReloj.Enabled = this.Visible;
+
             if (this.Visible)
             {
+                ActualizarReloj();
+
+                // Al volver a mostrarse (el Navegador reutiliza esta
+                // ventana) se recargan mesas, contadores y reservas.
                 ControlReservasAutomaticas.MesasActualizadas += RefrescarMesasAutomaticamente;
                 RefrescarMesasAutomaticamente(null, EventArgs.Empty);
             }
@@ -325,66 +333,42 @@ namespace PROYECTO_RESTAURANTE
 
         private void guna2Button2_Click(object sender, EventArgs e)
         {
-            FRMS_PEDIDOS pedidos = new FRMS_PEDIDOS();
-
-            pedidos.Show();
-            this.Hide();
+            Navegador.Ir<FRMS_PEDIDOS>(this);
         }
 
         private void guna2Button1_Click(object sender, EventArgs e)
         {
-            FRM_MESAS ventana = new FRM_MESAS();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_MESAS>(this);
         }
 
         private void guna2Button5_Click(object sender, EventArgs e)
         {
-            FRM_COCINA pedidos = new FRM_COCINA();
-
-            pedidos.Show();
-            this.Hide();
+            Navegador.Ir<FRM_COCINA>(this);
         }
 
         private void guna2Button3_Click(object sender, EventArgs e)
         {
-            FRM_EMPLEADOS ventana = new FRM_EMPLEADOS();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_EMPLEADOS>(this);
         }
 
         private void guna2Button9_Click(object sender, EventArgs e)
         {
-            FRM_MENU ventana = new FRM_MENU();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_MENU>(this);
         }
 
         private void guna2Button8_Click(object sender, EventArgs e)
         {
-            FRM_INVENTARIO ventana = new FRM_INVENTARIO();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_INVENTARIO>(this);
         }
 
         private void guna2Button7_Click(object sender, EventArgs e)
         {
-            FRM_PROMOCIONES ventana = new FRM_PROMOCIONES();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_PROMOCIONES>(this);
         }
 
         private void guna2Button6_Click(object sender, EventArgs e)
         {
-            FRM_REPORTES ventana = new FRM_REPORTES();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_REPORTES>(this);
         }
         // mostrar la fecha y hora 
 
@@ -1526,11 +1510,9 @@ namespace PROYECTO_RESTAURANTE
             }
 
             // Abrir pedidos con la mesa seleccionada.
-            FRMS_PEDIDOS pedidos =
-                new FRMS_PEDIDOS(mesaSeleccionada);
-
-            pedidos.Show();
-            this.Hide();
+            // El Navegador descarta un Pedidos anterior (avisando si
+            // tiene productos sin guardar) y crea uno para esta mesa.
+            Navegador.AbrirPedidosConMesa(this, mesaSeleccionada);
         }
 
         private void btnReservar_Click(object sender, EventArgs e)
@@ -1836,10 +1818,7 @@ FROM dbo.MESA M
         }
         private void ButtonINICIO_Click(object sender, EventArgs e)
         {
-            FRM_INICIO ventana = new FRM_INICIO();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_INICIO>(this);
         }
     }
 }

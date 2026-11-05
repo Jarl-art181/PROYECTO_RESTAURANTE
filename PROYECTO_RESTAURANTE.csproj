@@ -157,6 +157,7 @@
     <Compile Include="INICIAR_SESIÓN.Designer.cs">
       <DependentUpon>INICIAR_SESIÓN.cs</DependentUpon>
     </Compile>
+    <Compile Include="Navegador.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SesionActual.cs" />

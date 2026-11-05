@@ -36,50 +36,32 @@ namespace PROYECTO_RESTAURANTE
         
         private void guna2Button2_Click(object sender, EventArgs e)
         {
-            FRMS_PEDIDOS pedidos = new FRMS_PEDIDOS();
-
-            pedidos.Show(); 
-            this.Hide();    
+            Navegador.Ir<FRMS_PEDIDOS>(this);
         }
 
         private void ButtonINICIO_Click(object sender, EventArgs e)
         {
-            FRM_INICIO pedidos = new FRM_INICIO();
-
-            pedidos.Show();
-            this.Hide();
+            Navegador.Ir<FRM_INICIO>(this);
         }
 
         private void guna2Button1_Click(object sender, EventArgs e)
         {
-            FRM_MESAS pedidos = new FRM_MESAS();
-
-            pedidos.Show();
-            this.Hide();
+            Navegador.Ir<FRM_MESAS>(this);
         }
 
         private void guna2Button5_Click(object sender, EventArgs e)
         {
-            FRM_COCINA pedidos = new FRM_COCINA();
-
-            pedidos.Show();
-            this.Hide();
+            Navegador.Ir<FRM_COCINA>(this);
         }
 
         private void guna2Button4_Click(object sender, EventArgs e)
         {
-            FRM_CLIENTES pedidos = new FRM_CLIENTES();
-
-            pedidos.Show();
-            this.Hide();
+            Navegador.Ir<FRM_CLIENTES>(this);
         }
 
         private void guna2Button3_Click(object sender, EventArgs e)
         {
-            FRM_EMPLEADOS pedidos = new FRM_EMPLEADOS();
-
-            pedidos.Show();
-            this.Hide();
+            Navegador.Ir<FRM_EMPLEADOS>(this);
         }
     }
     }

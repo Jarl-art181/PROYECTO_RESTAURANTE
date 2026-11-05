@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace PROYECTO_RESTAURANTE
 {
-    public partial class FRM_COCINA : Form
+    public partial class FRM_COCINA : Form, IActualizableAlMostrar
     {
         private const int IdSucursal = 1;
 
@@ -71,8 +71,13 @@ namespace PROYECTO_RESTAURANTE
 
             VisibleChanged += (s, e) =>
             {
+                // El reloj y la actualización automática solo
+                // trabajan mientras Cocina está visible.
+                timerReloj.Enabled = Visible;
+
                 if (Visible && IsHandleCreated)
                 {
+                    ActualizarFechaYHora();
                     temporizadorCocina.Start();
                 }
                 else
@@ -82,6 +87,13 @@ namespace PROYECTO_RESTAURANTE
             };
 
             FormClosed += (s, e) => temporizadorCocina.Dispose();
+        }
+
+        // Llamado por el Navegador al volver a Cocina: cargar los
+        // pedidos de inmediato, sin esperar los 10 segundos.
+        public void ActualizarAlMostrar()
+        {
+            CargarPedidosSQL();
         }
 
         private void ActualizarFechaYHora()
@@ -625,26 +637,22 @@ namespace PROYECTO_RESTAURANTE
 
         private void guna2Button2_Click(object sender, EventArgs e)
         {
-            new FRMS_PEDIDOS().Show();
-            Hide();
+            Navegador.Ir<FRMS_PEDIDOS>(this);
         }
 
         private void ButtonINICIO_Click(object sender, EventArgs e)
         {
-            new FRM_INICIO().Show();
-            Hide();
+            Navegador.Ir<FRM_INICIO>(this);
         }
 
         private void guna2Button1_Click(object sender, EventArgs e)
         {
-            new FRM_MESAS().Show();
-            Hide();
+            Navegador.Ir<FRM_MESAS>(this);
         }
 
         private void guna2Button4_Click(object sender, EventArgs e)
         {
-            new FRM_CLIENTES().Show();
-            Hide();
+            Navegador.Ir<FRM_CLIENTES>(this);
         }
 
 

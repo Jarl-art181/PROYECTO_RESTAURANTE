@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace PROYECTO_RESTAURANTE
 {
-    public partial class FRM_INICIO : Form
+    public partial class FRM_INICIO : Form, IActualizableAlMostrar
     {
 
         private readonly string cadenaConexion = @"Server=LAPTOP-GH63852S\SQLEXPRESS;
@@ -49,6 +49,29 @@ namespace PROYECTO_RESTAURANTE
             CargarPedidosCobrados();
             CargarPlatosMasVendidos();
             AplicarEstiloInicio();
+
+            // El reloj solo trabaja mientras Inicio está visible.
+            this.VisibleChanged += (s, e) =>
+            {
+                timerReloj.Enabled = this.Visible;
+
+                if (this.Visible)
+                    ActualizarReloj();
+            };
+        }
+
+        // Llamado por el Navegador al volver a Inicio:
+        // recarga tarjetas, tabla, mesas y gráficos.
+        public void ActualizarAlMostrar()
+        {
+            CargarVentasHoy();
+            CargarPedidosActivos();
+            CargarMesasOcupadas();
+            CargarUltimosPedidos();
+            CargarEstadoMesas();
+            CargarVentasPorCanal();
+            CargarPedidosCobrados();
+            CargarPlatosMasVendidos();
         }
 
 
@@ -1138,74 +1161,47 @@ namespace PROYECTO_RESTAURANTE
 
         private void guna2Button2_Click(object sender, EventArgs e)
         {
-            FRMS_PEDIDOS pedidos = new FRMS_PEDIDOS();
-
-            pedidos.Show(); 
-            this.Hide();    
+            Navegador.Ir<FRMS_PEDIDOS>(this);
         }
 
         private void guna2Button1_Click(object sender, EventArgs e)
         {
-            FRM_MESAS ventana = new FRM_MESAS();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_MESAS>(this);
         }
 
         private void guna2Button5_Click(object sender, EventArgs e)
         {
-            FRM_COCINA pedidos = new FRM_COCINA();
-
-            pedidos.Show();
-            this.Hide();
+            Navegador.Ir<FRM_COCINA>(this);
         }
 
         private void guna2Button3_Click(object sender, EventArgs e)
         {
-            FRM_EMPLEADOS ventana = new FRM_EMPLEADOS();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_EMPLEADOS>(this);
         }
 
         private void guna2Button9_Click(object sender, EventArgs e)
         {
-            FRM_MENU ventana = new FRM_MENU();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_MENU>(this);
         }
 
         private void guna2Button8_Click(object sender, EventArgs e)
         {
-            FRM_INVENTARIO ventana = new FRM_INVENTARIO();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_INVENTARIO>(this);
         }
 
         private void guna2Button7_Click(object sender, EventArgs e)
         {
-            FRM_PROMOCIONES ventana = new FRM_PROMOCIONES();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_PROMOCIONES>(this);
         }
 
         private void guna2Button6_Click(object sender, EventArgs e)
         {
-            FRM_REPORTES ventana = new FRM_REPORTES();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_REPORTES>(this);
         }
 
         private void ButtonINICIO_Click(object sender, EventArgs e)
         {
-            FRM_INICIO ventana = new FRM_INICIO();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_INICIO>(this);
         }
 
         private void timerReloj_Tick(object sender, EventArgs e)

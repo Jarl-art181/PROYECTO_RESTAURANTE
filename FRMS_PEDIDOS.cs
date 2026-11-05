@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace PROYECTO_RESTAURANTE
 {
-    public partial class FRMS_PEDIDOS : Form
+    public partial class FRMS_PEDIDOS : Form, IActualizableAlMostrar
     {
         private int? idMeseroSeleccionado = null;
 
@@ -129,8 +129,79 @@ namespace PROYECTO_RESTAURANTE
 
             ActualizarPagos();
 
+            // El reloj solo trabaja mientras Pedidos está visible.
+            VisibleChanged += (s, e) =>
+            {
+                timerReloj.Enabled = Visible;
 
+                if (Visible)
+                    ActualizarReloj();
+            };
         }
+
+        // ==========================================
+        // DATOS PARA EL NAVEGADOR
+        // ==========================================
+
+        // true cuando esta ventana se abrió para una mesa concreta
+        // desde Gestión de Mesas o desde el aviso de reservas.
+        internal bool EsVistaDeMesa
+        {
+            get { return numeroMesaDesdeGestion.HasValue; }
+        }
+
+        internal bool TieneCambiosSinGuardar()
+        {
+            return CambiosPendientes();
+        }
+
+        // Llamado por el Navegador al volver a Pedidos.
+        // Conserva los productos sin guardar; si no hay cambios
+        // pendientes, vuelve a leer el pedido desde SQL o lo
+        // descarta si ya no está activo (cobrado, cancelado...).
+        public void ActualizarAlMostrar()
+        {
+            CargarTablaPedidos();
+
+            if (idPedidoSeleccionado.HasValue && !CambiosPendientes())
+            {
+                int pedido = idPedidoSeleccionado.Value;
+                bool sigueActivo = false;
+
+                if (dgvListaPedidos != null)
+                {
+                    foreach (DataGridViewRow fila in dgvListaPedidos.Rows)
+                    {
+                        if (Convert.ToString(fila.Cells[0].Value) ==
+                            pedido.ToString())
+                        {
+                            sigueActivo = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (sigueActivo)
+                {
+                    using (SqlConnection conexion =
+                        new SqlConnection(cadenaConexion))
+                    {
+                        conexion.Open();
+                        CargarDetallePedido(conexion, pedido);
+                    }
+                }
+                else
+                {
+                    LimpiarSeleccion();
+                }
+            }
+
+            if (tipoPedidoSeleccionado == "salon")
+                CargarMesasDisponibles();
+
+            ActualizarBotonCancelar();
+        }
+
         // ABRIR PEDIDOS CON UNA MESA ENVIADA DESDE GESTIÓN DE MESAS
         public FRMS_PEDIDOS(int numeroMesa) : this()
         {
@@ -3542,56 +3613,49 @@ AND NOT EXISTS
         private void guna2Button1_Click(
             object sender, EventArgs e)
         {
-            new FRM_MESAS().Show();
-            Hide();
+            Navegador.Ir<FRM_MESAS>(this);
         }
 
         // COCINA
         private void guna2Button5_Click(
             object sender, EventArgs e)
         {
-            new FRM_COCINA().Show();
-            Hide();
+            Navegador.Ir<FRM_COCINA>(this);
         }
 
         // EMPLEADOS
         private void guna2Button3_Click(
             object sender, EventArgs e)
         {
-            new FRM_EMPLEADOS().Show();
-            Hide();
+            Navegador.Ir<FRM_EMPLEADOS>(this);
         }
 
         // MENÚ
         private void guna2Button9_Click(
             object sender, EventArgs e)
         {
-            new FRM_MENU().Show();
-            Hide();
+            Navegador.Ir<FRM_MENU>(this);
         }
 
         // INVENTARIO
         private void guna2Button8_Click(
             object sender, EventArgs e)
         {
-            new FRM_INVENTARIO().Show();
-            Hide();
+            Navegador.Ir<FRM_INVENTARIO>(this);
         }
 
         // PROMOCIONES
         private void guna2Button7_Click(
             object sender, EventArgs e)
         {
-            new FRM_PROMOCIONES().Show();
-            Hide();
+            Navegador.Ir<FRM_PROMOCIONES>(this);
         }
 
         // REPORTES
         private void guna2Button6_Click(
             object sender, EventArgs e)
         {
-            new FRM_REPORTES().Show();
-            Hide();
+            Navegador.Ir<FRM_REPORTES>(this);
         }
         private void ConfigurarColumnaEliminar()
         {
@@ -4676,10 +4740,7 @@ AND NOT EXISTS
 
         private void ButtonINICIO_Click(object sender, EventArgs e)
         {
-            FRM_INICIO ventana = new FRM_INICIO();
-
-            ventana.Show();
-            this.Hide();
+            Navegador.Ir<FRM_INICIO>(this);
         }
 
         private void guna2PictureBox9_Click(object sender, EventArgs e)
