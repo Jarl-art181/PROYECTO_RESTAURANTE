@@ -31,29 +31,29 @@
         {
             this.components = new System.ComponentModel.Container();
             Guna.Charts.WinForms.GunaDoughnutDataset gunaDoughnutDataset1;
-            Guna.Charts.WinForms.LPoint lPoint5 = new Guna.Charts.WinForms.LPoint();
-            Guna.Charts.WinForms.LPoint lPoint6 = new Guna.Charts.WinForms.LPoint();
-            Guna.Charts.WinForms.LPoint lPoint7 = new Guna.Charts.WinForms.LPoint();
-            Guna.Charts.WinForms.LPoint lPoint8 = new Guna.Charts.WinForms.LPoint();
+            Guna.Charts.WinForms.LPoint lPoint1 = new Guna.Charts.WinForms.LPoint();
+            Guna.Charts.WinForms.LPoint lPoint2 = new Guna.Charts.WinForms.LPoint();
+            Guna.Charts.WinForms.LPoint lPoint3 = new Guna.Charts.WinForms.LPoint();
+            Guna.Charts.WinForms.LPoint lPoint4 = new Guna.Charts.WinForms.LPoint();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FRM_EMPLEADOS));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            Guna.Charts.WinForms.ChartFont chartFont9 = new Guna.Charts.WinForms.ChartFont();
-            Guna.Charts.WinForms.ChartFont chartFont10 = new Guna.Charts.WinForms.ChartFont();
-            Guna.Charts.WinForms.ChartFont chartFont11 = new Guna.Charts.WinForms.ChartFont();
-            Guna.Charts.WinForms.ChartFont chartFont12 = new Guna.Charts.WinForms.ChartFont();
-            Guna.Charts.WinForms.Grid grid4 = new Guna.Charts.WinForms.Grid();
-            Guna.Charts.WinForms.Tick tick4 = new Guna.Charts.WinForms.Tick();
-            Guna.Charts.WinForms.ChartFont chartFont13 = new Guna.Charts.WinForms.ChartFont();
-            Guna.Charts.WinForms.Grid grid5 = new Guna.Charts.WinForms.Grid();
-            Guna.Charts.WinForms.Tick tick5 = new Guna.Charts.WinForms.Tick();
-            Guna.Charts.WinForms.ChartFont chartFont14 = new Guna.Charts.WinForms.ChartFont();
-            Guna.Charts.WinForms.Grid grid6 = new Guna.Charts.WinForms.Grid();
-            Guna.Charts.WinForms.PointLabel pointLabel2 = new Guna.Charts.WinForms.PointLabel();
-            Guna.Charts.WinForms.ChartFont chartFont15 = new Guna.Charts.WinForms.ChartFont();
-            Guna.Charts.WinForms.Tick tick6 = new Guna.Charts.WinForms.Tick();
-            Guna.Charts.WinForms.ChartFont chartFont16 = new Guna.Charts.WinForms.ChartFont();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            Guna.Charts.WinForms.ChartFont chartFont1 = new Guna.Charts.WinForms.ChartFont();
+            Guna.Charts.WinForms.ChartFont chartFont2 = new Guna.Charts.WinForms.ChartFont();
+            Guna.Charts.WinForms.ChartFont chartFont3 = new Guna.Charts.WinForms.ChartFont();
+            Guna.Charts.WinForms.ChartFont chartFont4 = new Guna.Charts.WinForms.ChartFont();
+            Guna.Charts.WinForms.Grid grid1 = new Guna.Charts.WinForms.Grid();
+            Guna.Charts.WinForms.Tick tick1 = new Guna.Charts.WinForms.Tick();
+            Guna.Charts.WinForms.ChartFont chartFont5 = new Guna.Charts.WinForms.ChartFont();
+            Guna.Charts.WinForms.Grid grid2 = new Guna.Charts.WinForms.Grid();
+            Guna.Charts.WinForms.Tick tick2 = new Guna.Charts.WinForms.Tick();
+            Guna.Charts.WinForms.ChartFont chartFont6 = new Guna.Charts.WinForms.ChartFont();
+            Guna.Charts.WinForms.Grid grid3 = new Guna.Charts.WinForms.Grid();
+            Guna.Charts.WinForms.PointLabel pointLabel1 = new Guna.Charts.WinForms.PointLabel();
+            Guna.Charts.WinForms.ChartFont chartFont7 = new Guna.Charts.WinForms.ChartFont();
+            Guna.Charts.WinForms.Tick tick3 = new Guna.Charts.WinForms.Tick();
+            Guna.Charts.WinForms.ChartFont chartFont8 = new Guna.Charts.WinForms.ChartFont();
             this.guna2Panel1 = new Guna.UI2.WinForms.Guna2Panel();
             this.guna2PictureCerrar = new Guna.UI2.WinForms.Guna2PictureBox();
             this.guna2HtmlLabel21 = new Guna.UI2.WinForms.Guna2HtmlLabel();
@@ -135,6 +135,14 @@
             this.guna2PictureBox30 = new Guna.UI2.WinForms.Guna2PictureBox();
             this.guna2Button10 = new Guna.UI2.WinForms.Guna2Button();
             this.guna2DataGridView1 = new Guna.UI2.WinForms.Guna2DataGridView();
+            this.Column_codi = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_nombres = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column1_DNI = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_cargo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_telefono = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_turno = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_Estado = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnAccion = new System.Windows.Forms.DataGridViewButtonColumn();
             this.guna2Panel8 = new Guna.UI2.WinForms.Guna2Panel();
             this.guna2PictureBox9 = new Guna.UI2.WinForms.Guna2PictureBox();
             this.guna2HtmlLabel29 = new Guna.UI2.WinForms.Guna2HtmlLabel();
@@ -169,14 +177,6 @@
             this.guna2CircleButton4 = new Guna.UI2.WinForms.Guna2CircleButton();
             this.guna2HtmlLabel50 = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.GunaDona = new Guna.Charts.WinForms.GunaChart();
-            this.Column_codi = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_nombres = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column1_DNI = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_cargo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_telefono = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_turno = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_Estado = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnAccion = new System.Windows.Forms.DataGridViewButtonColumn();
             gunaDoughnutDataset1 = new Guna.Charts.WinForms.GunaDoughnutDataset();
             this.guna2Panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureCerrar)).BeginInit();
@@ -215,19 +215,19 @@
             // 
             // gunaDoughnutDataset1
             // 
-            lPoint5.Label = "Salón";
-            lPoint5.Y = 2D;
-            lPoint6.Label = "Delivery";
-            lPoint6.Y = 3D;
-            lPoint7.Label = "Recojo";
-            lPoint7.Y = 2D;
-            lPoint8.Label = "Promociones";
-            lPoint8.Y = 4D;
+            lPoint1.Label = "Salón";
+            lPoint1.Y = 2D;
+            lPoint2.Label = "Delivery";
+            lPoint2.Y = 3D;
+            lPoint3.Label = "Recojo";
+            lPoint3.Y = 2D;
+            lPoint4.Label = "Promociones";
+            lPoint4.Y = 4D;
             gunaDoughnutDataset1.DataPoints.AddRange(new Guna.Charts.WinForms.LPoint[] {
-            lPoint5,
-            lPoint6,
-            lPoint7,
-            lPoint8});
+            lPoint1,
+            lPoint2,
+            lPoint3,
+            lPoint4});
             gunaDoughnutDataset1.Label = "Doughnut1";
             // 
             // guna2Panel1
@@ -276,7 +276,7 @@
             this.guna2PictureCerrar.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureCerrar.Image")));
             this.guna2PictureCerrar.ImageRotate = 0F;
             this.guna2PictureCerrar.Location = new System.Drawing.Point(62, 882);
-            this.guna2PictureCerrar.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2PictureCerrar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2PictureCerrar.Name = "guna2PictureCerrar";
             this.guna2PictureCerrar.Size = new System.Drawing.Size(41, 57);
             this.guna2PictureCerrar.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -289,7 +289,7 @@
             this.guna2HtmlLabel21.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel21.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel21.Location = new System.Drawing.Point(89, 813);
-            this.guna2HtmlLabel21.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2HtmlLabel21.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel21.Name = "guna2HtmlLabel21";
             this.guna2HtmlLabel21.Size = new System.Drawing.Size(93, 30);
             this.guna2HtmlLabel21.TabIndex = 77;
@@ -300,7 +300,7 @@
             this.pictureBox7.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox7.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox7.Image")));
             this.pictureBox7.Location = new System.Drawing.Point(37, 806);
-            this.pictureBox7.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBox7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox7.Name = "pictureBox7";
             this.pictureBox7.Size = new System.Drawing.Size(39, 44);
             this.pictureBox7.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -319,7 +319,7 @@
             this.guna2Button6.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button6.ForeColor = System.Drawing.Color.White;
             this.guna2Button6.Location = new System.Drawing.Point(12, 801);
-            this.guna2Button6.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2Button6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Button6.Name = "guna2Button6";
             this.guna2Button6.Size = new System.Drawing.Size(315, 54);
             this.guna2Button6.TabIndex = 75;
@@ -330,7 +330,7 @@
             this.guna2HtmlLabel22.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel22.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel22.Location = new System.Drawing.Point(89, 752);
-            this.guna2HtmlLabel22.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2HtmlLabel22.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel22.Name = "guna2HtmlLabel22";
             this.guna2HtmlLabel22.Size = new System.Drawing.Size(137, 30);
             this.guna2HtmlLabel22.TabIndex = 74;
@@ -341,7 +341,7 @@
             this.pictureBox8.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox8.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox8.Image")));
             this.pictureBox8.Location = new System.Drawing.Point(37, 745);
-            this.pictureBox8.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBox8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox8.Name = "pictureBox8";
             this.pictureBox8.Size = new System.Drawing.Size(39, 44);
             this.pictureBox8.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -360,7 +360,7 @@
             this.guna2Button7.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button7.ForeColor = System.Drawing.Color.White;
             this.guna2Button7.Location = new System.Drawing.Point(12, 740);
-            this.guna2Button7.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2Button7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Button7.Name = "guna2Button7";
             this.guna2Button7.Size = new System.Drawing.Size(315, 54);
             this.guna2Button7.TabIndex = 72;
@@ -371,7 +371,7 @@
             this.guna2HtmlLabel23.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel23.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel23.Location = new System.Drawing.Point(89, 689);
-            this.guna2HtmlLabel23.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2HtmlLabel23.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel23.Name = "guna2HtmlLabel23";
             this.guna2HtmlLabel23.Size = new System.Drawing.Size(109, 30);
             this.guna2HtmlLabel23.TabIndex = 71;
@@ -382,7 +382,7 @@
             this.pictureBox9.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox9.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox9.Image")));
             this.pictureBox9.Location = new System.Drawing.Point(37, 682);
-            this.pictureBox9.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBox9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox9.Name = "pictureBox9";
             this.pictureBox9.Size = new System.Drawing.Size(39, 44);
             this.pictureBox9.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -401,7 +401,7 @@
             this.guna2Button8.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button8.ForeColor = System.Drawing.Color.White;
             this.guna2Button8.Location = new System.Drawing.Point(12, 677);
-            this.guna2Button8.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2Button8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Button8.Name = "guna2Button8";
             this.guna2Button8.Size = new System.Drawing.Size(315, 54);
             this.guna2Button8.TabIndex = 69;
@@ -412,7 +412,7 @@
             this.guna2HtmlLabel24.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel24.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel24.Location = new System.Drawing.Point(89, 626);
-            this.guna2HtmlLabel24.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2HtmlLabel24.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel24.Name = "guna2HtmlLabel24";
             this.guna2HtmlLabel24.Size = new System.Drawing.Size(63, 30);
             this.guna2HtmlLabel24.TabIndex = 68;
@@ -423,7 +423,7 @@
             this.pictureBox10.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox10.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox10.Image")));
             this.pictureBox10.Location = new System.Drawing.Point(37, 619);
-            this.pictureBox10.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBox10.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox10.Name = "pictureBox10";
             this.pictureBox10.Size = new System.Drawing.Size(39, 44);
             this.pictureBox10.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -442,7 +442,7 @@
             this.guna2Button9.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button9.ForeColor = System.Drawing.Color.White;
             this.guna2Button9.Location = new System.Drawing.Point(12, 614);
-            this.guna2Button9.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2Button9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Button9.Name = "guna2Button9";
             this.guna2Button9.Size = new System.Drawing.Size(315, 54);
             this.guna2Button9.TabIndex = 66;
@@ -454,7 +454,7 @@
             this.guna2HtmlLabel17.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel17.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel17.Location = new System.Drawing.Point(89, 565);
-            this.guna2HtmlLabel17.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2HtmlLabel17.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel17.Name = "guna2HtmlLabel17";
             this.guna2HtmlLabel17.Size = new System.Drawing.Size(117, 30);
             this.guna2HtmlLabel17.TabIndex = 65;
@@ -465,7 +465,7 @@
             this.pictureBox4.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox4.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox4.Image")));
             this.pictureBox4.Location = new System.Drawing.Point(37, 558);
-            this.pictureBox4.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBox4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox4.Name = "pictureBox4";
             this.pictureBox4.Size = new System.Drawing.Size(39, 44);
             this.pictureBox4.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -484,7 +484,7 @@
             this.guna2Button3.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button3.ForeColor = System.Drawing.Color.White;
             this.guna2Button3.Location = new System.Drawing.Point(12, 553);
-            this.guna2Button3.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2Button3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Button3.Name = "guna2Button3";
             this.guna2Button3.Size = new System.Drawing.Size(315, 54);
             this.guna2Button3.TabIndex = 63;
@@ -495,7 +495,7 @@
             this.guna2HtmlLabel18.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel18.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel18.Location = new System.Drawing.Point(89, 504);
-            this.guna2HtmlLabel18.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2HtmlLabel18.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel18.Name = "guna2HtmlLabel18";
             this.guna2HtmlLabel18.Size = new System.Drawing.Size(85, 30);
             this.guna2HtmlLabel18.TabIndex = 62;
@@ -506,7 +506,7 @@
             this.pictureBox5.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox5.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox5.Image")));
             this.pictureBox5.Location = new System.Drawing.Point(37, 497);
-            this.pictureBox5.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBox5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox5.Name = "pictureBox5";
             this.pictureBox5.Size = new System.Drawing.Size(39, 44);
             this.pictureBox5.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -525,7 +525,7 @@
             this.guna2Button4.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button4.ForeColor = System.Drawing.Color.White;
             this.guna2Button4.Location = new System.Drawing.Point(12, 492);
-            this.guna2Button4.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2Button4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Button4.Name = "guna2Button4";
             this.guna2Button4.Size = new System.Drawing.Size(315, 54);
             this.guna2Button4.TabIndex = 60;
@@ -536,7 +536,7 @@
             this.guna2HtmlLabel20.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel20.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel20.Location = new System.Drawing.Point(89, 441);
-            this.guna2HtmlLabel20.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2HtmlLabel20.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel20.Name = "guna2HtmlLabel20";
             this.guna2HtmlLabel20.Size = new System.Drawing.Size(76, 30);
             this.guna2HtmlLabel20.TabIndex = 59;
@@ -547,7 +547,7 @@
             this.pictureBox6.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox6.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox6.Image")));
             this.pictureBox6.Location = new System.Drawing.Point(37, 434);
-            this.pictureBox6.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBox6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox6.Name = "pictureBox6";
             this.pictureBox6.Size = new System.Drawing.Size(39, 44);
             this.pictureBox6.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -566,7 +566,7 @@
             this.guna2Button5.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button5.ForeColor = System.Drawing.Color.White;
             this.guna2Button5.Location = new System.Drawing.Point(12, 429);
-            this.guna2Button5.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2Button5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Button5.Name = "guna2Button5";
             this.guna2Button5.Size = new System.Drawing.Size(315, 54);
             this.guna2Button5.TabIndex = 57;
@@ -577,7 +577,7 @@
             this.guna2HtmlLabel16.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel16.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel16.Location = new System.Drawing.Point(89, 378);
-            this.guna2HtmlLabel16.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2HtmlLabel16.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel16.Name = "guna2HtmlLabel16";
             this.guna2HtmlLabel16.Size = new System.Drawing.Size(84, 30);
             this.guna2HtmlLabel16.TabIndex = 56;
@@ -588,7 +588,7 @@
             this.pictureBox3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox3.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
             this.pictureBox3.Location = new System.Drawing.Point(37, 371);
-            this.pictureBox3.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBox3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox3.Name = "pictureBox3";
             this.pictureBox3.Size = new System.Drawing.Size(39, 44);
             this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -607,7 +607,7 @@
             this.guna2Button2.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button2.ForeColor = System.Drawing.Color.White;
             this.guna2Button2.Location = new System.Drawing.Point(12, 366);
-            this.guna2Button2.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2Button2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Button2.Name = "guna2Button2";
             this.guna2Button2.Size = new System.Drawing.Size(315, 54);
             this.guna2Button2.TabIndex = 54;
@@ -619,7 +619,7 @@
             this.guna2HtmlLabel15.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel15.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel15.Location = new System.Drawing.Point(89, 316);
-            this.guna2HtmlLabel15.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2HtmlLabel15.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel15.Name = "guna2HtmlLabel15";
             this.guna2HtmlLabel15.Size = new System.Drawing.Size(67, 30);
             this.guna2HtmlLabel15.TabIndex = 53;
@@ -630,7 +630,7 @@
             this.pictureBox2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
             this.pictureBox2.Location = new System.Drawing.Point(37, 309);
-            this.pictureBox2.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBox2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(39, 44);
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -649,7 +649,7 @@
             this.guna2Button1.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.guna2Button1.ForeColor = System.Drawing.Color.White;
             this.guna2Button1.Location = new System.Drawing.Point(12, 304);
-            this.guna2Button1.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2Button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2Button1.Name = "guna2Button1";
             this.guna2Button1.Size = new System.Drawing.Size(315, 54);
             this.guna2Button1.TabIndex = 51;
@@ -660,7 +660,7 @@
             this.guna2HtmlLabel19.Font = new System.Drawing.Font("Calisto MT", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2HtmlLabel19.ForeColor = System.Drawing.Color.White;
             this.guna2HtmlLabel19.Location = new System.Drawing.Point(89, 253);
-            this.guna2HtmlLabel19.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2HtmlLabel19.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2HtmlLabel19.Name = "guna2HtmlLabel19";
             this.guna2HtmlLabel19.Size = new System.Drawing.Size(63, 30);
             this.guna2HtmlLabel19.TabIndex = 47;
@@ -671,7 +671,7 @@
             this.pictureBox1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(37, 246);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(39, 44);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -690,7 +690,7 @@
             this.ButtonINICIO.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(178)));
             this.ButtonINICIO.ForeColor = System.Drawing.Color.White;
             this.ButtonINICIO.Location = new System.Drawing.Point(12, 241);
-            this.ButtonINICIO.Margin = new System.Windows.Forms.Padding(4);
+            this.ButtonINICIO.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.ButtonINICIO.Name = "ButtonINICIO";
             this.ButtonINICIO.Size = new System.Drawing.Size(315, 54);
             this.ButtonINICIO.TabIndex = 45;
@@ -700,7 +700,7 @@
             this.guna2PictureBox8.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox8.Image")));
             this.guna2PictureBox8.ImageRotate = 0F;
             this.guna2PictureBox8.Location = new System.Drawing.Point(27, 13);
-            this.guna2PictureBox8.Margin = new System.Windows.Forms.Padding(4);
+            this.guna2PictureBox8.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.guna2PictureBox8.Name = "guna2PictureBox8";
             this.guna2PictureBox8.Size = new System.Drawing.Size(321, 225);
             this.guna2PictureBox8.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -719,7 +719,7 @@
             this.but_Cerrar.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.but_Cerrar.ForeColor = System.Drawing.Color.White;
             this.but_Cerrar.Location = new System.Drawing.Point(25, 875);
-            this.but_Cerrar.Margin = new System.Windows.Forms.Padding(4);
+            this.but_Cerrar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.but_Cerrar.Name = "but_Cerrar";
             this.but_Cerrar.PressedColor = System.Drawing.Color.PapayaWhip;
             this.but_Cerrar.Size = new System.Drawing.Size(302, 68);
@@ -896,6 +896,7 @@
             // 
             this.labelDataGridViewTextBoxColumn.DataPropertyName = "Label";
             this.labelDataGridViewTextBoxColumn.HeaderText = "Label";
+            this.labelDataGridViewTextBoxColumn.MinimumWidth = 6;
             this.labelDataGridViewTextBoxColumn.Name = "labelDataGridViewTextBoxColumn";
             this.labelDataGridViewTextBoxColumn.Width = 140;
             // 
@@ -903,6 +904,7 @@
             // 
             this.targetChartDataGridViewTextBoxColumn.DataPropertyName = "TargetChart";
             this.targetChartDataGridViewTextBoxColumn.HeaderText = "TargetChart";
+            this.targetChartDataGridViewTextBoxColumn.MinimumWidth = 6;
             this.targetChartDataGridViewTextBoxColumn.Name = "targetChartDataGridViewTextBoxColumn";
             this.targetChartDataGridViewTextBoxColumn.Width = 140;
             // 
@@ -910,6 +912,7 @@
             // 
             this.chartTypeDataGridViewTextBoxColumn.DataPropertyName = "ChartType";
             this.chartTypeDataGridViewTextBoxColumn.HeaderText = "ChartType";
+            this.chartTypeDataGridViewTextBoxColumn.MinimumWidth = 6;
             this.chartTypeDataGridViewTextBoxColumn.Name = "chartTypeDataGridViewTextBoxColumn";
             this.chartTypeDataGridViewTextBoxColumn.Width = 139;
             // 
@@ -917,6 +920,7 @@
             // 
             this.dataPointCountDataGridViewTextBoxColumn.DataPropertyName = "DataPointCount";
             this.dataPointCountDataGridViewTextBoxColumn.HeaderText = "DataPointCount";
+            this.dataPointCountDataGridViewTextBoxColumn.MinimumWidth = 6;
             this.dataPointCountDataGridViewTextBoxColumn.Name = "dataPointCountDataGridViewTextBoxColumn";
             this.dataPointCountDataGridViewTextBoxColumn.Width = 140;
             // 
@@ -1244,19 +1248,19 @@
             // 
             // guna2DataGridView1
             // 
-            dataGridViewCellStyle4.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.FloralWhite;
-            this.guna2DataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle4;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.Color.Gold;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Info;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.guna2DataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.guna2DataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.Gold;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Info;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.guna2DataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this.guna2DataGridView1.ColumnHeadersHeight = 22;
             this.guna2DataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.EnableResizing;
             this.guna2DataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -1268,14 +1272,14 @@
             this.Column_turno,
             this.Column_Estado,
             this.ColumnAccion});
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle6.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.guna2DataGridView1.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.guna2DataGridView1.DefaultCellStyle = dataGridViewCellStyle3;
             this.guna2DataGridView1.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(229)))), ((int)(((byte)(255)))));
             this.guna2DataGridView1.Location = new System.Drawing.Point(360, 321);
             this.guna2DataGridView1.Name = "guna2DataGridView1";
@@ -1286,15 +1290,71 @@
             this.guna2DataGridView1.ThemeStyle.AlternatingRowsStyle.BackColor = System.Drawing.Color.White;
             this.guna2DataGridView1.ThemeStyle.AlternatingRowsStyle.ForeColor = System.Drawing.Color.Black;
             this.guna2DataGridView1.ThemeStyle.AlternatingRowsStyle.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.guna2DataGridView1.ThemeStyle.AlternatingRowsStyle.SelectionForeColor = System.Drawing.Color.FloralWhite;
+            this.guna2DataGridView1.ThemeStyle.AlternatingRowsStyle.SelectionForeColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.guna2DataGridView1.ThemeStyle.HeaderStyle.BackColor = System.Drawing.Color.Gold;
             this.guna2DataGridView1.ThemeStyle.HeaderStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.guna2DataGridView1.ThemeStyle.HeaderStyle.ForeColor = System.Drawing.Color.Black;
             this.guna2DataGridView1.ThemeStyle.HeaderStyle.Height = 22;
             this.guna2DataGridView1.ThemeStyle.RowsStyle.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2DataGridView1.ThemeStyle.RowsStyle.ForeColor = System.Drawing.Color.White;
+            this.guna2DataGridView1.ThemeStyle.RowsStyle.ForeColor = System.Drawing.Color.Black;
             this.guna2DataGridView1.ThemeStyle.RowsStyle.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.guna2DataGridView1.ThemeStyle.RowsStyle.SelectionForeColor = System.Drawing.Color.White;
+            this.guna2DataGridView1.ThemeStyle.RowsStyle.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+            // 
+            // Column_codi
+            // 
+            this.Column_codi.FillWeight = 94.71999F;
+            this.Column_codi.HeaderText = "CÓDIGO";
+            this.Column_codi.MinimumWidth = 6;
+            this.Column_codi.Name = "Column_codi";
+            // 
+            // Column_nombres
+            // 
+            this.Column_nombres.FillWeight = 109.8527F;
+            this.Column_nombres.HeaderText = "NOMBRES";
+            this.Column_nombres.MinimumWidth = 6;
+            this.Column_nombres.Name = "Column_nombres";
+            // 
+            // Column1_DNI
+            // 
+            this.Column1_DNI.FillWeight = 94.71999F;
+            this.Column1_DNI.HeaderText = "DNI";
+            this.Column1_DNI.MinimumWidth = 6;
+            this.Column1_DNI.Name = "Column1_DNI";
+            // 
+            // Column_cargo
+            // 
+            this.Column_cargo.FillWeight = 94.71999F;
+            this.Column_cargo.HeaderText = "CARGO";
+            this.Column_cargo.MinimumWidth = 6;
+            this.Column_cargo.Name = "Column_cargo";
+            // 
+            // Column_telefono
+            // 
+            this.Column_telefono.FillWeight = 121.8274F;
+            this.Column_telefono.HeaderText = "TELÉFONO";
+            this.Column_telefono.MinimumWidth = 6;
+            this.Column_telefono.Name = "Column_telefono";
+            // 
+            // Column_turno
+            // 
+            this.Column_turno.FillWeight = 94.71999F;
+            this.Column_turno.HeaderText = "TURNO";
+            this.Column_turno.MinimumWidth = 6;
+            this.Column_turno.Name = "Column_turno";
+            // 
+            // Column_Estado
+            // 
+            this.Column_Estado.FillWeight = 94.71999F;
+            this.Column_Estado.HeaderText = "ESTADO";
+            this.Column_Estado.MinimumWidth = 6;
+            this.Column_Estado.Name = "Column_Estado";
+            // 
+            // ColumnAccion
+            // 
+            this.ColumnAccion.FillWeight = 94.71999F;
+            this.ColumnAccion.HeaderText = "ACCIÓN";
+            this.ColumnAccion.MinimumWidth = 6;
+            this.ColumnAccion.Name = "ColumnAccion";
             // 
             // guna2Panel8
             // 
@@ -1710,92 +1770,44 @@
             this.GunaDona.Datasets.AddRange(new Guna.Charts.Interfaces.IGunaDataset[] {
             gunaDoughnutDataset1});
             this.GunaDona.Legend.Display = false;
-            chartFont9.FontName = "Arial";
-            this.GunaDona.Legend.LabelFont = chartFont9;
+            chartFont1.FontName = "Arial";
+            this.GunaDona.Legend.LabelFont = chartFont1;
             this.GunaDona.Location = new System.Drawing.Point(93, 34);
             this.GunaDona.Name = "GunaDona";
             this.GunaDona.Size = new System.Drawing.Size(290, 215);
             this.GunaDona.TabIndex = 0;
-            chartFont10.FontName = "Arial";
-            chartFont10.Size = 12;
-            chartFont10.Style = Guna.Charts.WinForms.ChartFontStyle.Bold;
-            this.GunaDona.Title.Font = chartFont10;
-            chartFont11.FontName = "Arial";
-            this.GunaDona.Tooltips.BodyFont = chartFont11;
-            chartFont12.FontName = "Arial";
-            chartFont12.Size = 9;
-            chartFont12.Style = Guna.Charts.WinForms.ChartFontStyle.Bold;
-            this.GunaDona.Tooltips.TitleFont = chartFont12;
+            chartFont2.FontName = "Arial";
+            chartFont2.Size = 12;
+            chartFont2.Style = Guna.Charts.WinForms.ChartFontStyle.Bold;
+            this.GunaDona.Title.Font = chartFont2;
+            chartFont3.FontName = "Arial";
+            this.GunaDona.Tooltips.BodyFont = chartFont3;
+            chartFont4.FontName = "Arial";
+            chartFont4.Size = 9;
+            chartFont4.Style = Guna.Charts.WinForms.ChartFontStyle.Bold;
+            this.GunaDona.Tooltips.TitleFont = chartFont4;
             this.GunaDona.XAxes.Display = false;
-            grid4.Display = false;
-            this.GunaDona.XAxes.GridLines = grid4;
-            tick4.Display = false;
-            chartFont13.FontName = "Arial";
-            tick4.Font = chartFont13;
-            this.GunaDona.XAxes.Ticks = tick4;
+            grid1.Display = false;
+            this.GunaDona.XAxes.GridLines = grid1;
+            tick1.Display = false;
+            chartFont5.FontName = "Arial";
+            tick1.Font = chartFont5;
+            this.GunaDona.XAxes.Ticks = tick1;
             this.GunaDona.YAxes.Display = false;
-            grid5.Display = false;
-            this.GunaDona.YAxes.GridLines = grid5;
-            tick5.Display = false;
-            chartFont14.FontName = "Arial";
-            tick5.Font = chartFont14;
-            tick5.HasMaximum = true;
-            this.GunaDona.YAxes.Ticks = tick5;
-            this.GunaDona.ZAxes.GridLines = grid6;
-            chartFont15.FontName = "Arial";
-            pointLabel2.Font = chartFont15;
-            this.GunaDona.ZAxes.PointLabels = pointLabel2;
-            chartFont16.FontName = "Arial";
-            tick6.Font = chartFont16;
-            this.GunaDona.ZAxes.Ticks = tick6;
-            // 
-            // Column_codi
-            // 
-            this.Column_codi.FillWeight = 94.71999F;
-            this.Column_codi.HeaderText = "CÓDIGO";
-            this.Column_codi.Name = "Column_codi";
-            // 
-            // Column_nombres
-            // 
-            this.Column_nombres.FillWeight = 109.8527F;
-            this.Column_nombres.HeaderText = "NOMBRES";
-            this.Column_nombres.Name = "Column_nombres";
-            // 
-            // Column1_DNI
-            // 
-            this.Column1_DNI.FillWeight = 94.71999F;
-            this.Column1_DNI.HeaderText = "DNI";
-            this.Column1_DNI.Name = "Column1_DNI";
-            // 
-            // Column_cargo
-            // 
-            this.Column_cargo.FillWeight = 94.71999F;
-            this.Column_cargo.HeaderText = "CARGO";
-            this.Column_cargo.Name = "Column_cargo";
-            // 
-            // Column_telefono
-            // 
-            this.Column_telefono.FillWeight = 121.8274F;
-            this.Column_telefono.HeaderText = "TELÉFONO";
-            this.Column_telefono.Name = "Column_telefono";
-            // 
-            // Column_turno
-            // 
-            this.Column_turno.FillWeight = 94.71999F;
-            this.Column_turno.HeaderText = "TURNO";
-            this.Column_turno.Name = "Column_turno";
-            // 
-            // Column_Estado
-            // 
-            this.Column_Estado.FillWeight = 94.71999F;
-            this.Column_Estado.HeaderText = "ESTADO";
-            this.Column_Estado.Name = "Column_Estado";
-            // 
-            // ColumnAccion
-            // 
-            this.ColumnAccion.FillWeight = 94.71999F;
-            this.ColumnAccion.HeaderText = "ACCIÓN";
-            this.ColumnAccion.Name = "ColumnAccion";
+            grid2.Display = false;
+            this.GunaDona.YAxes.GridLines = grid2;
+            tick2.Display = false;
+            chartFont6.FontName = "Arial";
+            tick2.Font = chartFont6;
+            tick2.HasMaximum = true;
+            this.GunaDona.YAxes.Ticks = tick2;
+            this.GunaDona.ZAxes.GridLines = grid3;
+            chartFont7.FontName = "Arial";
+            pointLabel1.Font = chartFont7;
+            this.GunaDona.ZAxes.PointLabels = pointLabel1;
+            chartFont8.FontName = "Arial";
+            tick3.Font = chartFont8;
+            this.GunaDona.ZAxes.Ticks = tick3;
             // 
             // FRM_EMPLEADOS
             // 
