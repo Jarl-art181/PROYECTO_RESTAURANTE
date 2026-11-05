@@ -537,9 +537,8 @@ namespace PROYECTO_RESTAURANTE
             // ==========================================
 
             string sql = @"
-        SELECT
-            P.id_pedido,
-
+    SELECT TOP (10)
+        P.id_pedido,
             CASE
                 WHEN P.canal = 'salon'
                     THEN 'Mesa ' +

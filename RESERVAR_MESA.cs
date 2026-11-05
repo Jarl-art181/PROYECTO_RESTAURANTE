@@ -8,7 +8,10 @@ namespace PROYECTO_RESTAURANTE
     public partial class RESERVAR_MESA : Form
     {
         private const int IdSucursal = 1;
-        private const int DuracionReservaMinutos = 120;
+        private const int AnticipacionMaximaMinutos = 120;
+        private const int ToleranciaLlegadaMinutos = 30;
+        private static readonly TimeSpan HoraApertura = new TimeSpan(12, 0, 0);
+        private static readonly TimeSpan HoraCierre = new TimeSpan(21, 30, 0);
 
         private readonly string cadenaConexion =
             @"Server=LAPTOP-GH63852S\SQLEXPRESS;
@@ -18,154 +21,112 @@ namespace PROYECTO_RESTAURANTE
         public RESERVAR_MESA()
         {
             InitializeComponent();
-
-            Text = "Nueva Reserva";
+            Text = "Nueva reserva";
             StartPosition = FormStartPosition.CenterParent;
 
-            // El calendario debe ser Guna2DateTimePicker.
-            // Su FillColor debe ser White en el diseñador, NO Transparent.
+            // Solo reservas para hoy; el cliente elige la hora.
             dtpFechaReserva.Format = DateTimePickerFormat.Short;
-            dtpFechaReserva.MinDate = DateTime.Today;
             dtpFechaReserva.Value = DateTime.Today;
+            dtpFechaReserva.Enabled = false;
+            cmbHoraReserva.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbHoraReserva.Enabled = true;
 
             cmbMesa.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbHoraReserva.DropDownStyle = ComboBoxStyle.DropDownList;
-
-            // En el Designer, el control "Personas" se llama guna2ComboBox3.
             guna2ComboBox3.DropDownStyle = ComboBoxStyle.DropDownList;
-
-            // Cargar únicamente horarios válidos.
-            CargarHorariosDisponibles();
-
-
-            // =====================================
-            // CONFIGURAR CANTIDAD DE PERSONAS
-            // MÁXIMO 4 POR MESA
-            // =====================================
-
             guna2ComboBox3.Items.Clear();
-
             for (int i = 1; i <= 4; i++)
             {
                 guna2ComboBox3.Items.Add(i.ToString());
             }
-
-            // Seleccionar 2 personas inicialmente.
             guna2ComboBox3.SelectedItem = "2";
 
-            // No permitir escribir otros valores.
-            guna2ComboBox3.DropDownStyle =
-                ComboBoxStyle.DropDownList;
-
-
-            txtTelefono.MaxLength = 9;
             txtCliente.MaxLength = 100;
+            txtTelefono.MaxLength = 9;
             txtObservacion.MaxLength = 250;
             txtObservacion.PlaceholderText = "Observación opcional...";
 
-            // Cuando cambian la fecha, hora o personas, consultar mesas.
-            dtpFechaReserva.ValueChanged -= FechaReserva_ValueChanged;
-            dtpFechaReserva.ValueChanged += FechaReserva_ValueChanged;
-
-            cmbHoraReserva.SelectedIndexChanged -= DatosReserva_Changed;
-            cmbHoraReserva.SelectedIndexChanged += DatosReserva_Changed;
-
-            guna2ComboBox3.SelectedIndexChanged -= DatosReserva_Changed;
-            guna2ComboBox3.SelectedIndexChanged += DatosReserva_Changed;
-
-            // Un evento por botón. Quitar los eventos antiguos del Designer.
+            // En el Designer no está vinculado el botón Guardar.
             btnGuardarReserva.Click -= btnGuardarReserva_Click;
-            btnGuardarReserva.Click -= btnCancelarReserva_Click;
             btnGuardarReserva.Click += btnGuardarReserva_Click;
 
+            // Desvincular el manejador heredado del Designer antes de agregar uno solo.
             btnCancelarReserva.Click -= btnCancelarReserva_Click_1;
             btnCancelarReserva.Click -= btnCancelarReserva_Click;
             btnCancelarReserva.Click += btnCancelarReserva_Click;
 
-            btnCerrarReserva.Click -= guna2Button1_Click;
-            btnCerrarReserva.Click -= btnCancelarReserva_Click;
-            btnCerrarReserva.Click += btnCancelarReserva_Click;
+            // El botón de cierre conserva el manejador del Designer.
+            guna2ComboBox3.SelectedIndexChanged -= Personas_Changed;
+            guna2ComboBox3.SelectedIndexChanged += Personas_Changed;
+            cmbHoraReserva.SelectedIndexChanged -= Personas_Changed;
+            cmbHoraReserva.SelectedIndexChanged += Personas_Changed;
 
-            CargarMesasDisponibles();
-        }
-        private void FechaReserva_ValueChanged(
-    object sender, EventArgs e)
-        {
             CargarHorariosDisponibles();
+            CargarMesasDisponibles();
+            this.Shown += (sender, e) =>
+            {
+                if (cmbHoraReserva.Items.Count == 0)
+                {
+                    btnGuardarReserva.Enabled = false;
+
+                    MessageBox.Show(
+                        "No hay horarios disponibles para reservar hoy.\n\n" +
+                        "El restaurante atiende hasta las 9:30 p. m.\n" +
+                        "Las reservas deben respetar el horario de cierre.",
+                        "Horario de reservas",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+            };
+
         }
 
-
+        // Franja de hoy: entre apertura y cierre menos 30 minutos de tolerancia.
+        // Solamente ofrece horas posteriores a ahora y no más de 2 horas adelante.
         private void CargarHorariosDisponibles()
         {
             cmbHoraReserva.Items.Clear();
-
-            DateTime fechaSeleccionada =
-                dtpFechaReserva.Value.Date;
-
             DateTime ahora = DateTime.Now;
+            DateTime apertura = DateTime.Today.Add(HoraApertura);
+            DateTime ultimaHoraReserva = DateTime.Today.Add(HoraCierre)
+                .AddMinutes(-ToleranciaLlegadaMinutos);
 
-            // Horario de atención: 12:00 a 21:30.
-            for (int hora = 12; hora <= 21; hora++)
+            for (DateTime hora = apertura;
+                 hora <= ultimaHoraReserva;
+                 hora = hora.AddMinutes(30))
             {
-                for (int minuto = 0; minuto <= 30; minuto += 30)
-                {
-                    DateTime horario =
-                        fechaSeleccionada.AddHours(hora)
-                                          .AddMinutes(minuto);
-
-                    // Mostrar solo horarios futuros.
-                    if (horario > ahora)
-                    {
-                        cmbHoraReserva.Items.Add(
-                            horario.ToString("HH:mm"));
-                    }
-                }
+                if (hora > ahora &&
+                    hora <= ahora.AddMinutes(AnticipacionMaximaMinutos))
+                    cmbHoraReserva.Items.Add(hora.ToString("HH:mm"));
             }
 
-            // Seleccionar el primer horario disponible.
-            if (cmbHoraReserva.Items.Count > 0)
-            {
-                cmbHoraReserva.SelectedIndex = 0;
-            }
-            else
-            {
-                cmbHoraReserva.SelectedIndex = -1;
-            }
-
-            CargarMesasDisponibles();
+            cmbHoraReserva.SelectedIndex = cmbHoraReserva.Items.Count > 0 ? 0 : -1;
+            btnGuardarReserva.Enabled = cmbHoraReserva.Items.Count > 0;
         }
 
-
-        // 1. CONVERTIR FECHA Y HORA EN UNA SOLA FECHA.
         private DateTime? ObtenerFechaHora()
         {
             TimeSpan hora;
             if (!TimeSpan.TryParse(cmbHoraReserva.Text, out hora))
                 return null;
-
-            return dtpFechaReserva.Value.Date.Add(hora);
+            return DateTime.Today.Add(hora);
         }
 
-        // 2. ACTUALIZAR MESAS CUANDO CAMBIA LA RESERVA.
-        private void DatosReserva_Changed(object sender, EventArgs e)
+        private void Personas_Changed(object sender, EventArgs e)
         {
             CargarMesasDisponibles();
         }
 
-        // 3. MOSTRAR MESAS LIBRES, CON CAPACIDAD Y SIN CRUCES.
         private void CargarMesasDisponibles()
         {
             cmbMesa.DataSource = null;
             cmbMesa.Items.Clear();
 
-            DateTime? inicio = ObtenerFechaHora();
             int personas;
-            if (!inicio.HasValue ||
-                !int.TryParse(guna2ComboBox3.Text, out personas) ||
-                personas < 1 || inicio.Value <= DateTime.Now)
+            if (!int.TryParse(guna2ComboBox3.Text, out personas)
+                || personas < 1 || personas > 4 || !ObtenerFechaHora().HasValue)
+            {
                 return;
-
-            DateTime fin = inicio.Value.AddMinutes(DuracionReservaMinutos);
+            }
 
             const string sql = @"
                 SELECT M.id_mesa,
@@ -174,14 +135,10 @@ namespace PROYECTO_RESTAURANTE
                 WHERE M.id_sucursal = @Sucursal
                   AND LOWER(LTRIM(RTRIM(M.estado))) = 'libre'
                   AND M.capacidad >= @Personas
-                  AND NOT EXISTS
-                  (
-                      SELECT 1
-                      FROM dbo.RESERVA_MESA R
+                  AND NOT EXISTS (
+                      SELECT 1 FROM dbo.RESERVA_MESA R
                       WHERE R.id_mesa = M.id_mesa
                         AND R.estado = 'confirmada'
-                        AND R.fecha_hora < @Fin
-                        AND DATEADD(MINUTE, 120, R.fecha_hora) > @Inicio
                   )
                 ORDER BY M.[número];";
 
@@ -189,14 +146,11 @@ namespace PROYECTO_RESTAURANTE
             {
                 DataTable tabla = new DataTable();
                 using (SqlConnection conexion = new SqlConnection(cadenaConexion))
-                using (SqlCommand cmd = new SqlCommand(sql, conexion))
+                using (SqlCommand comando = new SqlCommand(sql, conexion))
                 {
-                    cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
-                    cmd.Parameters.Add("@Personas", SqlDbType.Int).Value = personas;
-                    cmd.Parameters.Add("@Inicio", SqlDbType.DateTime2).Value = inicio.Value;
-                    cmd.Parameters.Add("@Fin", SqlDbType.DateTime2).Value = fin;
-
-                    using (SqlDataAdapter adaptador = new SqlDataAdapter(cmd))
+                    comando.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
+                    comando.Parameters.Add("@Personas", SqlDbType.Int).Value = personas;
+                    using (SqlDataAdapter adaptador = new SqlDataAdapter(comando))
                     {
                         adaptador.Fill(tabla);
                     }
@@ -209,26 +163,24 @@ namespace PROYECTO_RESTAURANTE
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    "No se pudieron cargar las mesas:\n" + ex.Message,
-                    "Nueva Reserva", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Error al consultar las mesas: " + ex.Message,
+                    "Nueva reserva", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // 4. VALIDAR Y GUARDAR RESERVA.
         private void btnGuardarReserva_Click(object sender, EventArgs e)
         {
             string cliente = txtCliente.Text.Trim();
             string telefono = txtTelefono.Text.Trim();
             string observacion = txtObservacion.Text.Trim();
+            int personas;
 
             if (cliente.Length < 3 || cliente.Length > 100)
             {
-                MessageBox.Show("Ingrese un nombre de cliente válido (3 a 100 caracteres).");
+                MessageBox.Show("Ingrese un nombre válido de 3 a 100 caracteres.");
                 txtCliente.Focus();
                 return;
             }
-
             foreach (char caracter in cliente)
             {
                 if (char.IsDigit(caracter))
@@ -238,58 +190,55 @@ namespace PROYECTO_RESTAURANTE
                     return;
                 }
             }
-
             if (telefono.Length != 9)
             {
-                MessageBox.Show("El teléfono debe tener exactamente 9 dígitos.");
+                MessageBox.Show("El teléfono debe tener 9 dígitos.");
                 txtTelefono.Focus();
                 return;
             }
-
             foreach (char caracter in telefono)
             {
                 if (caracter < '0' || caracter > '9')
                 {
-                    MessageBox.Show("El teléfono debe contener únicamente números.");
+                    MessageBox.Show("El teléfono solo debe contener números.");
                     txtTelefono.Focus();
                     return;
                 }
             }
-
-            int personas;
-
             if (!int.TryParse(guna2ComboBox3.Text, out personas)
                 || personas < 1 || personas > 4)
             {
-                MessageBox.Show(
-                    "Solo se permiten reservas de 1 a 4 personas por mesa.",
-                    "Nueva Reserva",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                MessageBox.Show("Seleccione entre 1 y 4 personas.");
                 return;
             }
-
-            DateTime? inicio = ObtenerFechaHora();
-            if (!inicio.HasValue || inicio.Value <= DateTime.Now)
-            {
-                MessageBox.Show("Seleccione una fecha y hora futuras.");
-                return;
-            }
-
             if (cmbMesa.SelectedIndex < 0 || cmbMesa.SelectedValue == null)
             {
                 MessageBox.Show("Seleccione una mesa disponible.");
                 return;
             }
-
             if (observacion.Length > 250)
             {
                 MessageBox.Show("La observación no puede superar 250 caracteres.");
                 return;
             }
 
+            DateTime? fechaReserva = ObtenerFechaHora();
+            DateTime ahora = DateTime.Now;
+            DateTime ultimaHora = DateTime.Today.Add(HoraCierre)
+                .AddMinutes(-ToleranciaLlegadaMinutos);
+            if (!fechaReserva.HasValue || fechaReserva.Value <= ahora ||
+                fechaReserva.Value > ahora.AddMinutes(AnticipacionMaximaMinutos) ||
+                fechaReserva.Value.TimeOfDay < HoraApertura ||
+                fechaReserva.Value > ultimaHora)
+            {
+                MessageBox.Show("Elija un horario válido de hoy, dentro de las " +
+                    "próximas 2 horas y del horario de atención.");
+                CargarHorariosDisponibles();
+                CargarMesasDisponibles();
+                return;
+            }
+
             int idMesa = Convert.ToInt32(cmbMesa.SelectedValue);
-            DateTime fin = inicio.Value.AddMinutes(DuracionReservaMinutos);
             int idReserva = 0;
 
             try
@@ -302,49 +251,53 @@ namespace PROYECTO_RESTAURANTE
                     {
                         try
                         {
-                            // Bloquear la mesa para validar su estado actualizado.
-                            const string sqlMesa = @"
-                                SELECT capacidad
-                                FROM dbo.MESA WITH (UPDLOCK, HOLDLOCK)
-                                WHERE id_mesa = @Mesa
-                                  AND id_sucursal = @Sucursal
-                                  AND LOWER(LTRIM(RTRIM(estado))) = 'libre';";
-
-                            int capacidad;
-                            using (SqlCommand cmd = new SqlCommand(sqlMesa, conexion, transaccion))
+                            // Revalidar con la hora del servidor SQL; el equipo puede tener otra hora.
+                            const string validarFechaSQL = @"
+                                SELECT CASE WHEN
+                                    CONVERT(date, @Fecha) = CONVERT(date, SYSDATETIME())
+                                    AND @Fecha > SYSDATETIME()
+                                    AND @Fecha <= DATEADD(MINUTE, 120, SYSDATETIME())
+                                    AND CONVERT(time, @Fecha) >= '12:00:00'
+                                    AND CONVERT(time, @Fecha) <= '21:00:00'
+                                    THEN 1 ELSE 0 END;";
+                            using (SqlCommand cmd = new SqlCommand(validarFechaSQL, conexion, transaccion))
                             {
-                                cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
-                                cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
-                                object resultado = cmd.ExecuteScalar();
-                                if (resultado == null || resultado == DBNull.Value)
-                                    throw new Exception("La mesa ya no está disponible.");
+                                cmd.Parameters.Add("@Fecha", SqlDbType.DateTime2).Value = fechaReserva.Value;
+                                if (Convert.ToInt32(cmd.ExecuteScalar()) != 1)
+                                    throw new Exception("La hora seleccionada ya no está disponible o queda fuera del horario del local.");
+                            }
 
+                            // Bloquear la mesa: no admitir dos reservas a la vez.
+                            const string sqlMesa = @"
+                                SELECT capacidad FROM dbo.MESA WITH (UPDLOCK, HOLDLOCK)
+                                WHERE id_mesa = @Mesa AND id_sucursal = @Sucursal
+                                  AND LOWER(LTRIM(RTRIM(estado))) = 'libre';";
+                            int capacidad;
+                            using (SqlCommand comando = new SqlCommand(sqlMesa, conexion, transaccion))
+                            {
+                                comando.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
+                                comando.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
+                                object resultado = comando.ExecuteScalar();
+                                if (resultado == null || resultado == DBNull.Value)
+                                    throw new Exception("La mesa ya no está libre.");
                                 capacidad = Convert.ToInt32(resultado);
                             }
-
                             if (personas > capacidad)
-                                throw new Exception("La cantidad de personas supera la capacidad de la mesa.");
+                                throw new Exception("La mesa no tiene capacidad suficiente.");
 
-                            // Evitar doble reserva en horas que se superponen.
                             const string sqlConflicto = @"
-                                SELECT COUNT(*)
-                                FROM dbo.RESERVA_MESA WITH (UPDLOCK, HOLDLOCK)
-                                WHERE id_mesa = @Mesa
-                                  AND estado = 'confirmada'
-                                  AND fecha_hora < @Fin
-                                  AND DATEADD(MINUTE, 120, fecha_hora) > @Inicio;";
-
-                            using (SqlCommand cmd = new SqlCommand(sqlConflicto, conexion, transaccion))
+                                SELECT COUNT(*) FROM dbo.RESERVA_MESA WITH (UPDLOCK, HOLDLOCK)
+                                WHERE id_mesa = @Mesa AND estado = 'confirmada';";
+                            using (SqlCommand comando =
+                                new SqlCommand(sqlConflicto, conexion, transaccion))
                             {
-                                cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
-                                cmd.Parameters.Add("@Inicio", SqlDbType.DateTime2).Value = inicio.Value;
-                                cmd.Parameters.Add("@Fin", SqlDbType.DateTime2).Value = fin;
-
-                                if (Convert.ToInt32(cmd.ExecuteScalar()) > 0)
-                                    throw new Exception("Esta mesa ya tiene una reserva en ese horario.");
+                                comando.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
+                                if (Convert.ToInt32(comando.ExecuteScalar()) > 0)
+                                    throw new Exception("La mesa ya tiene una reserva activa.");
                             }
 
-                            const string sqlGuardar = @"
+                            // Registrar la fecha/hora elegida por el cliente, NO SYSDATETIME().
+                            const string sqlInsertar = @"
                                 INSERT INTO dbo.RESERVA_MESA
                                     (id_mesa, nombre_cliente, telefono,
                                      fecha_hora, personas, observacion, estado)
@@ -352,72 +305,76 @@ namespace PROYECTO_RESTAURANTE
                                     (@Mesa, @Cliente, @Telefono,
                                      @Fecha, @Personas, @Observacion, 'confirmada');
                                 SELECT CAST(SCOPE_IDENTITY() AS INT);";
-
-                            using (SqlCommand cmd = new SqlCommand(sqlGuardar, conexion, transaccion))
+                            using (SqlCommand comando =
+                                new SqlCommand(sqlInsertar, conexion, transaccion))
                             {
-                                cmd.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
-                                cmd.Parameters.Add("@Cliente", SqlDbType.NVarChar, 100).Value = cliente;
-                                cmd.Parameters.Add("@Telefono", SqlDbType.VarChar, 9).Value = telefono;
-                                cmd.Parameters.Add("@Fecha", SqlDbType.DateTime2).Value = inicio.Value;
-                                cmd.Parameters.Add("@Personas", SqlDbType.Int).Value = personas;
-                                cmd.Parameters.Add("@Observacion", SqlDbType.NVarChar, 250).Value =
+                                comando.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
+                                comando.Parameters.Add("@Cliente", SqlDbType.NVarChar, 100).Value = cliente;
+                                comando.Parameters.Add("@Telefono", SqlDbType.VarChar, 9).Value = telefono;
+                                comando.Parameters.Add("@Personas", SqlDbType.Int).Value = personas;
+                                comando.Parameters.Add("@Fecha", SqlDbType.DateTime2).Value = fechaReserva.Value;
+                                comando.Parameters.Add("@Observacion", SqlDbType.NVarChar, 250).Value =
                                     observacion.Length == 0 ? (object)DBNull.Value : observacion;
+                                idReserva = Convert.ToInt32(comando.ExecuteScalar());
+                            }
 
-                                idReserva = Convert.ToInt32(cmd.ExecuteScalar());
+                            const string sqlOcupar = @"
+                                UPDATE dbo.MESA SET estado = 'reservada'
+                                WHERE id_mesa = @Mesa AND id_sucursal = @Sucursal
+                                  AND LOWER(LTRIM(RTRIM(estado))) = 'libre';";
+                            using (SqlCommand comando =
+                                new SqlCommand(sqlOcupar, conexion, transaccion))
+                            {
+                                comando.Parameters.Add("@Mesa", SqlDbType.Int).Value = idMesa;
+                                comando.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
+                                if (comando.ExecuteNonQuery() != 1)
+                                    throw new Exception("No se pudo apartar la mesa.");
                             }
 
                             transaccion.Commit();
                         }
                         catch
                         {
-                            try { transaccion.Rollback(); }
-                            catch { }
+                            try { transaccion.Rollback(); } catch { }
                             throw;
                         }
                     }
                 }
 
-                MessageBox.Show(
-                    "Reserva N.º " + idReserva + " registrada correctamente.",
-                    "Nueva Reserva", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
+                MessageBox.Show("Reserva N.º " + idReserva +
+                    " registrada para las " + fechaReserva.Value.ToString("HH:mm") +
+                    ".\nTolerancia de llegada: 30 minutos.", "Reserva registrada",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 DialogResult = DialogResult.OK;
                 Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    "Error al guardar la reserva:\n" + ex.Message,
-                    "Nueva Reserva", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
+                MessageBox.Show("No se pudo guardar la reserva: " + ex.Message,
+                    "Nueva reserva", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 CargarMesasDisponibles();
             }
         }
 
-        // 5. CANCELAR O CERRAR SIN GUARDAR.
         private void btnCancelarReserva_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
             Close();
         }
 
-        // Estos eventos siguen asociados en RESERVAR_MESA.Designer.cs.
-        // Se conservan para no generar errores al compilar.
+        // Eventos referidos por RESERVAR_MESA.Designer.cs: NO borrarlos.
         private void btnCerrarBoleta_Click(object sender, EventArgs e)
         {
             Close();
         }
-
         private void guna2Button1_Click(object sender, EventArgs e)
         {
             Close();
         }
-
         private void btnCancelarReserva_Click_1(object sender, EventArgs e)
         {
             Close();
         }
-
         private void guna2Panel3_Paint(object sender, PaintEventArgs e)
         {
         }

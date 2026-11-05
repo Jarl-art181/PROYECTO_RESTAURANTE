@@ -78,6 +78,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControlReservasAutomaticas.cs" />
     <Compile Include="FRMS_PEDIDOS.cs">
       <SubType>Form</SubType>
     </Compile>

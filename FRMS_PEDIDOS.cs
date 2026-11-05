@@ -39,6 +39,11 @@ namespace PROYECTO_RESTAURANTE
 
         private int? idPedidoElegidoEnTabla = null;
 
+        // Solo se usa cuando se abre Pedidos desde Gestión de Mesas.
+        // El canal y la mesa quedan fijos; la lista muestra solo su pedido.
+        private int? numeroMesaDesdeGestion = null;
+        private bool modoMesaFija = false;
+
 
         private List<Guna2Button> botonesMesa =
             new List<Guna2Button>();
@@ -56,7 +61,7 @@ namespace PROYECTO_RESTAURANTE
 
         private decimal descuentoGeneral = 0;
         private decimal propinaActual = 0;
-    
+
 
         // ==========================================
         // 3. CLASE DEL CARRITO
@@ -126,7 +131,250 @@ namespace PROYECTO_RESTAURANTE
 
 
         }
+        // ABRIR PEDIDOS CON UNA MESA ENVIADA DESDE GESTIÓN DE MESAS
+        public FRMS_PEDIDOS(int numeroMesa) : this()
+        {
+            numeroMesaDesdeGestion = numeroMesa;
 
+            Shown += AbrirMesaSeleccionada;
+        }
+
+        private void AbrirMesaSeleccionada(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!numeroMesaDesdeGestion.HasValue)
+                    return;
+
+                int numeroMesa = numeroMesaDesdeGestion.Value;
+
+                if (numeroMesa < 1 || numeroMesa > 10)
+                {
+                    MessageBox.Show("El número de mesa no es válido.");
+                    return;
+                }
+
+                // Primero marcar Salón y cargar las diez mesas desde SQL.
+                SeleccionarTipoPedido("salon");
+
+                if (tipoPedidoSeleccionado != "salon")
+                    return;
+
+                Guna2Button boton = botonesMesa[numeroMesa - 1];
+                MesaInfo info = boton.Tag as MesaInfo;
+
+                if (info == null)
+                {
+                    MessageBox.Show("No se encontró la Mesa " + numeroMesa);
+                    return;
+                }
+
+                // Una mesa ocupada NO se selecciona como si estuviera libre.
+                // Se consulta su pedido activo directamente por id_mesa.
+                if (info.Estado == "ocupada")
+                {
+                    idMesaSeleccionada = info.IdMesa;
+                    numeroMesaSeleccionada = info.Numero;
+
+                    CargarPedidoMesaOcupada(info.IdMesa);
+
+                    if (!idPedidoSeleccionado.HasValue)
+                    {
+                        MessageBox.Show(
+                            "La Mesa " + numeroMesa +
+                            " está ocupada, pero no tiene un pedido activo.");
+                        return;
+                    }
+
+                    // Mantener identificado el mismo pedido para VER / Boleta.
+                    idPedidoElegidoEnTabla = idPedidoSeleccionado.Value;
+
+                    // Cargar solamente este pedido en la tabla inferior.
+                    CargarTablaPedidos();
+
+                    // El canal y la mesa son informativos, no modificables.
+                    modoMesaFija = true;
+                    BloquearSeleccionCanalYMesa();
+                    return;
+                }
+
+                // Una mesa libre (o ya liberada tras confirmar la llegada)
+                // permite comenzar un pedido nuevo con Salón y mesa elegidos.
+                if (info.Estado == "libre")
+                {
+                    BotonMesa_Click(boton, EventArgs.Empty);
+                    CargarTablaPedidos();
+                    return;
+                }
+
+                MessageBox.Show(
+                    "La Mesa " + numeroMesa +
+                    " continúa reservada. Confirme primero la llegada.",
+                    "Gestión de pedidos",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "No se pudo cargar el detalle de la mesa:\n" +
+                    ex.Message,
+                    "Gestión de pedidos",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        // Vista detalle: Salón y Mesa son solo informativos.
+        // Los botones seleccionados conservan el dorado y el borde negro.
+        private void BloquearSeleccionCanalYMesa()
+        {
+            // Cambiar títulos solo en esta vista, sin tocar el diseñador.
+            guna2HtmlLabel3.Text = "DETALLE DEL PEDIDO";
+            guna2HtmlLabel8.Text = "Productos de Mesa " + numeroMesaSeleccionada;
+            guna2HtmlLabel9.Text = "Pedido de Mesa " + numeroMesaSeleccionada;
+
+            Guna2Button[] canales =
+            {
+                btnTipoSalon,
+                btnTipoDelivery,
+                btnTipoRecojo
+            };
+
+            for (int i = 0; i < canales.Length; i++)
+            {
+                bool seleccionado = (i == 0); // Salón
+                Guna2Button boton = canales[i];
+
+                Color fondo = seleccionado
+                    ? Color.FromArgb(255, 214, 0)
+                    : Color.FromArgb(231, 234, 239);
+                Color texto = seleccionado ? Color.Black : Color.DimGray;
+                Color borde = seleccionado ? Color.Black : Color.LightGray;
+
+                boton.FillColor = fondo;
+                boton.ForeColor = texto;
+                boton.BorderThickness = seleccionado ? 3 : 1;
+                boton.BorderColor = borde;
+
+                // Estilos necesarios porque los botones están deshabilitados.
+                boton.DisabledState.FillColor = fondo;
+                boton.DisabledState.ForeColor = texto;
+                boton.DisabledState.BorderColor = borde;
+                boton.Enabled = false;
+            }
+
+            for (int i = 0; i < botonesMesa.Count; i++)
+            {
+                Guna2Button boton = botonesMesa[i];
+                bool seleccionada = (i + 1 == numeroMesaSeleccionada);
+
+                Color fondo = seleccionada
+                    ? Color.FromArgb(255, 214, 0)
+                    : Color.FromArgb(238, 240, 243);
+                Color texto = seleccionada ? Color.Black : Color.DimGray;
+                Color borde = seleccionada ? Color.Black : Color.LightGray;
+
+                boton.FillColor = fondo;
+                boton.ForeColor = texto;
+                boton.BorderThickness = seleccionada ? 4 : 1;
+                boton.BorderColor = borde;
+                boton.DisabledState.FillColor = fondo;
+                boton.DisabledState.ForeColor = texto;
+                boton.DisabledState.BorderColor = borde;
+                boton.Enabled = false;
+            }
+
+            // Conservar Guardar y Generar Boleta para trabajar
+            // sobre el mismo pedido; no cambiar el canal ni la mesa.
+            Control nuevo = btnNuevo;
+            if (nuevo == null)
+                nuevo = BuscarControl("but_nuevopedido");
+            if (nuevo != null)
+                nuevo.Enabled = false;
+
+            if (btnLimpiar != null)
+                btnLimpiar.Enabled = false;
+
+            MejorarDisenoTablasDetalle();
+        }
+
+        // Mejorar la legibilidad de las dos tablas de la vista detalle.
+        private void MejorarDisenoTablasDetalle()
+        {
+            if (!modoMesaFija)
+                return;
+
+            // Tabla derecha: permitir ver nombres largos de platos.
+            if (dgvDetallePedido != null && dgvDetallePedido.Columns.Count >= 5)
+            {
+                DataGridView tabla = dgvDetallePedido;
+                tabla.BackgroundColor = Color.White;
+                tabla.GridColor = Color.FromArgb(225, 228, 233);
+                tabla.BorderStyle = BorderStyle.None;
+                tabla.RowHeadersVisible = false;
+                tabla.EnableHeadersVisualStyles = false;
+                tabla.ColumnHeadersHeight = 38;
+                tabla.ColumnHeadersDefaultCellStyle.BackColor = Color.Gold;
+                tabla.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
+                tabla.ColumnHeadersDefaultCellStyle.Font =
+                    new Font("Segoe UI", 9, FontStyle.Bold);
+                tabla.DefaultCellStyle.Font =
+                    new Font("Segoe UI", 9, FontStyle.Regular);
+                tabla.DefaultCellStyle.ForeColor = Color.Black;
+                tabla.DefaultCellStyle.SelectionBackColor =
+                    Color.FromArgb(255, 247, 207);
+                tabla.DefaultCellStyle.SelectionForeColor = Color.Black;
+                tabla.DefaultCellStyle.WrapMode = DataGridViewTriState.True;
+                tabla.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                tabla.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+                tabla.RowTemplate.MinimumHeight = 32;
+
+                float[] anchos = { 10f, 43f, 16f, 18f, 13f };
+                for (int i = 0; i < 5; i++)
+                    tabla.Columns[i].FillWeight = anchos[i];
+
+                tabla.Columns[1].MinimumWidth = 120;
+                tabla.Columns[0].DefaultCellStyle.Alignment =
+                    DataGridViewContentAlignment.MiddleCenter;
+                tabla.Columns[2].DefaultCellStyle.Alignment =
+                    DataGridViewContentAlignment.MiddleRight;
+                tabla.Columns[3].DefaultCellStyle.Alignment =
+                    DataGridViewContentAlignment.MiddleRight;
+                tabla.ClearSelection();
+            }
+
+            // Tabla inferior: dar espacio a la fecha/hora y a la mesa.
+            if (dgvListaPedidos != null && dgvListaPedidos.Columns.Count == 6)
+            {
+                DataGridView tabla = dgvListaPedidos;
+                tabla.BackgroundColor = Color.White;
+                tabla.GridColor = Color.FromArgb(225, 228, 233);
+                tabla.BorderStyle = BorderStyle.None;
+                tabla.RowHeadersVisible = false;
+                tabla.EnableHeadersVisualStyles = false;
+                tabla.ColumnHeadersHeight = 36;
+                tabla.ColumnHeadersDefaultCellStyle.BackColor = Color.Gold;
+                tabla.ColumnHeadersDefaultCellStyle.ForeColor = Color.Black;
+                tabla.ColumnHeadersDefaultCellStyle.Font =
+                    new Font("Segoe UI", 9, FontStyle.Bold);
+                tabla.DefaultCellStyle.Font =
+                    new Font("Segoe UI", 9, FontStyle.Regular);
+                tabla.DefaultCellStyle.SelectionBackColor =
+                    Color.FromArgb(255, 247, 207);
+                tabla.DefaultCellStyle.SelectionForeColor = Color.Black;
+                tabla.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                tabla.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
+                tabla.RowTemplate.Height = 34;
+
+                float[] anchos = { 8f, 20f, 15f, 16f, 29f, 12f };
+                for (int i = 0; i < 6; i++)
+                    tabla.Columns[i].FillWeight = anchos[i];
+
+                tabla.Columns[4].MinimumWidth = 140;
+                tabla.ClearSelection();
+            }
+        }
 
 
         private int? SeleccionarMeseroActivo()
@@ -274,8 +522,10 @@ namespace PROYECTO_RESTAURANTE
         private void FRMS_PEDIDOS_Shown(
             object sender, EventArgs e)
         {
-            // Mostrar pedidos guardados al abrir.
-            CargarTablaPedidos();
+            // Al entrar desde Mesas, el otro evento Shown cargará
+            // solamente el pedido asociado a la mesa seleccionada.
+            if (!numeroMesaDesdeGestion.HasValue)
+                CargarTablaPedidos();
         }
 
         // ==========================================
@@ -1117,6 +1367,10 @@ namespace PROYECTO_RESTAURANTE
 
         private void SeleccionarTipoPedido(string tipo)
         {
+            // Desde "Detalle pedido" el canal Salón permanece fijo.
+            if (modoMesaFija)
+                return;
+
             if (tipo != "salon" && tipo != "delivery" && tipo != "recojo")
                 return;
 
@@ -1262,6 +1516,11 @@ namespace PROYECTO_RESTAURANTE
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
+
+            // Cargar la información de SQL vuelve a configurar los botones.
+            // En vista detalle debemos mantener Salón y la mesa bloqueados.
+            if (modoMesaFija)
+                BloquearSeleccionCanalYMesa();
         }
 
 
@@ -1273,6 +1532,10 @@ namespace PROYECTO_RESTAURANTE
         private void BotonMesa_Click(
             object sender, EventArgs e)
         {
+            // No cambiar la mesa cuando se consulta su pedido.
+            if (modoMesaFija)
+                return;
+
             if (tipoPedidoSeleccionado != "salon")
                 return;
 
@@ -2283,6 +2546,9 @@ namespace PROYECTO_RESTAURANTE
 
                 WHERE P.id_sucursal = @Sucursal
 
+                -- Desde Gestión de Mesas, mostrar únicamente su pedido.
+                AND (@PedidoFiltrado = 0 OR P.id_pedido = @PedidoFiltrado)
+
                 AND P.estado IN
                 (
                     'pendiente',
@@ -2336,6 +2602,20 @@ AND NOT EXISTS
                     cmd.Parameters.Add(
                         "@Sucursal", SqlDbType.Int
                     ).Value = IdSucursal;
+
+                    // 0 = acceso normal a Pedidos: mostrar todos.
+                    // -1 = mesa libre desde Gestión: aún sin pedido.
+                    // >0 = mesa ocupada desde Gestión: solo su pedido.
+                    int pedidoFiltrado = 0;
+                    if (numeroMesaDesdeGestion.HasValue)
+                    {
+                        pedidoFiltrado = idPedidoSeleccionado.HasValue
+                            ? idPedidoSeleccionado.Value : -1;
+                    }
+
+                    cmd.Parameters.Add(
+                        "@PedidoFiltrado", SqlDbType.Int
+                    ).Value = pedidoFiltrado;
 
                     using (SqlDataAdapter adaptador =
                         new SqlDataAdapter(cmd))
@@ -2608,6 +2888,15 @@ AND NOT EXISTS
 
         private void NuevoPedido_Click(object sender, EventArgs e)
         {
+            if (modoMesaFija)
+            {
+                MessageBox.Show(
+                    "Esta ventana muestra el pedido de la mesa " +
+                    numeroMesaSeleccionada +
+                    ". Regrese a Gestión de Mesas para elegir otra.");
+                return;
+            }
+
             // 1. Confirmar si existen productos sin guardar.
             if (CambiosPendientes())
             {
@@ -3924,6 +4213,9 @@ AND NOT EXISTS
 
         private void btnLimpiarPedido_Click(object sender, EventArgs e)
         {
+            if (modoMesaFija)
+                return;
+
 
 
             // ==========================================

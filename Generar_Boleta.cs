@@ -17,6 +17,9 @@ namespace PROYECTO_RESTAURANTE
 {
     public partial class Generar_Boleta : Form
     {
+      
+
+
         private Random aleatorio = new Random();
         private string numeroBoletaDemo = "";
         private readonly string cadenaConexion =
@@ -94,8 +97,24 @@ namespace PROYECTO_RESTAURANTE
             CargarImpresoras();
 
             this.Shown += Generar_Boleta_Shown;
+
+           
+
         }
 
+
+        
+        private void ActualizarImporteMixto()
+        {
+            decimal efectivo = numMontoRecibido.Value;
+            decimal tarjeta = total - efectivo;
+
+            if (tarjeta < 0)
+                tarjeta = 0;
+
+            txtVueltoBoleta.Text = "S/ " +
+                tarjeta.ToString("N2");
+        }
 
 
         private void Generar_Boleta_Shown(object sender, EventArgs e)
@@ -164,6 +183,247 @@ namespace PROYECTO_RESTAURANTE
             }
         }
 
+
+       
+
+        private void RegistrarCobroSQL(
+            List<KeyValuePair<string, decimal>> pagos)
+        {
+            if (!SesionActual.IdEmpleado.HasValue)
+                throw new Exception(
+                    "Debe iniciar sesión como cajero para cobrar.");
+
+            int idCajero = SesionActual.IdEmpleado.Value;
+
+            decimal suma = 0;
+
+            foreach (KeyValuePair<string, decimal> pago in pagos)
+            {
+                if (pago.Value <= 0)
+                    throw new Exception("Hay un importe inválido.");
+
+                suma += pago.Value;
+            }
+
+            if (suma != total)
+                throw new Exception(
+                    "La suma de los pagos no coincide con el total.");
+
+            using (SqlConnection conexion =
+                new SqlConnection(cadenaConexion))
+            {
+                conexion.Open();
+
+                using (SqlTransaction transaccion =
+                    conexion.BeginTransaction(
+                        IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        // 1. Verificar que el empleado sea cajero activo.
+                        using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT COUNT(*)
+                    FROM dbo.CAJERO C
+                    INNER JOIN dbo.EMPLEADO E
+                        ON C.id_empleado = E.id_empleado
+                    WHERE C.id_empleado = @Cajero
+                      AND E.id_sucursal = 1
+                      AND LOWER(LTRIM(RTRIM(E.estado)))
+                          = 'activo';",
+                            conexion, transaccion))
+                        {
+                            cmd.Parameters.Add(
+                                "@Cajero", SqlDbType.Int).Value =
+                                idCajero;
+
+                            if (Convert.ToInt32(
+                                cmd.ExecuteScalar()) != 1)
+                            {
+                                throw new Exception(
+                                    "El empleado no es un cajero activo.");
+                            }
+                        }
+
+                        // 2. Bloquear y verificar el pedido.
+                        decimal totalSQL;
+
+                        using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT
+                        CAST(
+                            ISNULL((
+                                SELECT SUM(
+                                    cantidad * precio_unitario
+                                    - ISNULL(descuento, 0))
+                                FROM dbo.DETALLE_PEDIDO_PLATO
+                                WHERE id_pedido = P.id_pedido
+                            ), 0)
+                            +
+                            ISNULL((
+                                SELECT SUM(
+                                    cantidad * precio_unitario
+                                    - ISNULL(descuento, 0))
+                                FROM dbo.DETALLE_PEDIDO_COMBO
+                                WHERE id_pedido = P.id_pedido
+                            ), 0)
+                            -
+                            ISNULL(P.descuento_aplicado, 0)
+                            +
+                            ISNULL(P.propina, 0)
+                        AS DECIMAL(18,2))
+                    FROM dbo.PEDIDO P WITH (UPDLOCK, HOLDLOCK)
+                    WHERE P.id_pedido = @Pedido
+                      AND P.id_sucursal = 1
+                      AND P.estado IN ('listo', 'entregado');",
+                            conexion, transaccion))
+                        {
+                            cmd.Parameters.Add(
+                                "@Pedido", SqlDbType.Int).Value =
+                                idPedido;
+
+                            object resultado = cmd.ExecuteScalar();
+
+                            if (resultado == null ||
+                                resultado == DBNull.Value)
+                            {
+                                throw new Exception(
+                                    "El pedido debe estar Listo o Entregado " +
+                                    "y no debe estar cobrado.");
+                            }
+
+                            totalSQL = Convert.ToDecimal(resultado);
+                        }
+
+                        if (totalSQL != total || totalSQL != suma)
+                        {
+                            throw new Exception(
+                                "El total cambió. Vuelva a cargar el pedido.");
+                        }
+
+                        // 3. Evitar cualquier cobro duplicado.
+                        using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT
+                        (SELECT COUNT(*) FROM dbo.PAGO
+                         WHERE id_pedido = @Pedido)
+                        +
+                        (SELECT COUNT(*) FROM dbo.COMPROBANTE
+                         WHERE id_pedido = @Pedido)
+                        +
+                        (SELECT COUNT(*) FROM dbo.VENTA_INTERNA
+                         WHERE id_pedido = @Pedido);",
+                            conexion, transaccion))
+                        {
+                            cmd.Parameters.Add(
+                                "@Pedido", SqlDbType.Int).Value =
+                                idPedido;
+
+                            if (Convert.ToInt32(
+                                cmd.ExecuteScalar()) > 0)
+                            {
+                                throw new Exception(
+                                    "Este pedido ya tiene un pago o venta registrada.");
+                            }
+                        }
+
+                        // 4. Registrar cada método de pago.
+                        foreach (KeyValuePair<string, decimal> pago in pagos)
+                        {
+                            InsertarPago(
+                                conexion, transaccion,
+                                idCajero, pago.Key, pago.Value);
+                        }
+
+                        // 5. Marcar el pedido como cobrado.
+                        // El trigger verifica la suma de pagos.
+                        using (SqlCommand cmd = new SqlCommand(@"
+                    UPDATE dbo.PEDIDO
+                    SET estado = 'cobrado'
+                    WHERE id_pedido = @Pedido
+                      AND id_sucursal = 1
+                      AND estado IN ('listo', 'entregado');",
+                            conexion, transaccion))
+                        {
+                            cmd.Parameters.Add(
+                                "@Pedido", SqlDbType.Int).Value =
+                                idPedido;
+
+                            if (cmd.ExecuteNonQuery() != 1)
+                            {
+                                throw new Exception(
+                                    "No se pudo cerrar el pedido.");
+                            }
+                        }
+
+                        transaccion.Commit();
+                    }
+                    catch
+                    {
+                        try
+                        {
+                            transaccion.Rollback();
+                        }
+                        catch
+                        {
+                            // SQL Server pudo finalizar la transacción.
+                        }
+
+                        throw;
+                    }
+                }
+            }
+        }
+
+        private void InsertarPago(
+            SqlConnection conexion,
+            SqlTransaction transaccion,
+            int idCajero,
+            string metodo,
+            decimal importe)
+        {
+            const string sql = @"
+        INSERT INTO dbo.PAGO
+        (
+            fecha_hora,
+            [método],
+            importe,
+            nro_referencia,
+            id_pedido,
+            id_cajero,
+            id_cierre
+        )
+        VALUES
+        (
+            SYSDATETIME(),
+            @Metodo,
+            @Importe,
+            NULL,
+            @Pedido,
+            @Cajero,
+            NULL
+        );";
+
+            using (SqlCommand cmd =
+                new SqlCommand(sql, conexion, transaccion))
+            {
+                cmd.Parameters.Add(
+                    "@Metodo", SqlDbType.VarChar, 20
+                ).Value = metodo;
+
+                SqlParameter monto = cmd.Parameters.Add(
+                    "@Importe", SqlDbType.Decimal);
+
+                monto.Precision = 18;
+                monto.Scale = 2;
+                monto.Value = importe;
+
+                cmd.Parameters.Add(
+                    "@Pedido", SqlDbType.Int).Value = idPedido;
+
+                cmd.Parameters.Add(
+                    "@Cajero", SqlDbType.Int).Value = idCajero;
+
+                cmd.ExecuteNonQuery();
+            }
+        }
 
 
         // ==================================================
@@ -888,79 +1148,61 @@ namespace PROYECTO_RESTAURANTE
 
 
 
+
         private void btnImprimirBoleta_Click(
             object sender, EventArgs e)
         {
-            if (!ValidarPago())
-                return;
-
-            DialogResult respuesta = MessageBox.Show(
-                "¿Desea imprimir el recibo?\n\n" +
-                "Pedido: " + idPedido + "\n" +
-                "Total: " + FormatoSoles(total),
-                "Confirmar impresión",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (respuesta != DialogResult.Yes)
-                return;
-
-            // 1. Enviar el recibo a la impresora.
             try
             {
+                // No imprimir como pagado sin verificar SQL.
+                using (SqlConnection conexion =
+                    new SqlConnection(cadenaConexion))
+                using (SqlCommand cmd = new SqlCommand(@"
+            SELECT COUNT(*)
+            FROM dbo.PEDIDO P
+            WHERE P.id_pedido = @Pedido
+              AND P.estado = 'cobrado'
+              AND (
+                  EXISTS (
+                      SELECT 1 FROM dbo.PAGO PG
+                      WHERE PG.id_pedido = P.id_pedido
+                  )
+                  OR EXISTS (
+                      SELECT 1 FROM dbo.VENTA_INTERNA V
+                      WHERE V.id_pedido = P.id_pedido
+                  )
+              );", conexion))
+                {
+                    cmd.Parameters.Add(
+                        "@Pedido", SqlDbType.Int).Value = idPedido;
+
+                    conexion.Open();
+
+                    if (Convert.ToInt32(cmd.ExecuteScalar()) != 1)
+                    {
+                        MessageBox.Show(
+                            "Primero registre el cobro del pedido.");
+                        return;
+                    }
+                }
+
                 using (PrintDocument documento =
                     CrearDocumentoImpresion())
                 {
                     documento.Print();
                 }
-            }
-            catch (Exception ex)
-            {
+
                 MessageBox.Show(
-                    "No se pudo enviar el recibo:\n" +
-                    ex.Message,
+                    "Recibo enviado a la impresora.\n" +
+                    "No se ha registrado un segundo cobro.",
                     "Impresión",
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-
-                return;
-            }
-
-            // 2. Registrar la operación en SQL Server.
-            try
-            {
-                bool nuevaVenta = RegistrarVentaInterna();
-
-                if (nuevaVenta)
-                {
-                    MessageBox.Show(
-                        "Recibo enviado a la impresora.\n\n" +
-                        "Venta interna registrada: " +
-                        FormatoSoles(total),
-                        "Venta registrada",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                }
-                else
-                {
-                    MessageBox.Show(
-                        "Recibo enviado a la impresora.\n\n" +
-                        "Este pedido ya estaba contabilizado.\n" +
-                        "No se sumará nuevamente.",
-                        "Reimpresión",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information);
-                }
+                    MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "El recibo se envió a la impresora, " +
-                    "pero no se pudo registrar la venta:\n" +
-                    ex.Message,
-                    "Registro pendiente",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                    "Error al imprimir:\n" + ex.Message);
             }
         }
 

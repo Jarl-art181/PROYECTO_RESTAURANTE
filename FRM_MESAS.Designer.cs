@@ -30,14 +30,14 @@
         {
             this.components = new System.ComponentModel.Container();
             Guna.Charts.WinForms.GunaDoughnutDataset gunaDoughnutDataset1;
-            Guna.Charts.WinForms.LPoint lPoint1 = new Guna.Charts.WinForms.LPoint();
-            Guna.Charts.WinForms.LPoint lPoint2 = new Guna.Charts.WinForms.LPoint();
-            Guna.Charts.WinForms.LPoint lPoint3 = new Guna.Charts.WinForms.LPoint();
-            Guna.Charts.WinForms.LPoint lPoint4 = new Guna.Charts.WinForms.LPoint();
+            Guna.Charts.WinForms.LPoint lPoint9 = new Guna.Charts.WinForms.LPoint();
+            Guna.Charts.WinForms.LPoint lPoint10 = new Guna.Charts.WinForms.LPoint();
+            Guna.Charts.WinForms.LPoint lPoint11 = new Guna.Charts.WinForms.LPoint();
+            Guna.Charts.WinForms.LPoint lPoint12 = new Guna.Charts.WinForms.LPoint();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FRM_MESAS));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             this.guna2Panel1 = new Guna.UI2.WinForms.Guna2Panel();
             this.guna2PictureCerrar = new Guna.UI2.WinForms.Guna2PictureBox();
             this.guna2HtmlLabel21 = new Guna.UI2.WinForms.Guna2HtmlLabel();
@@ -323,19 +323,19 @@
             // 
             // gunaDoughnutDataset1
             // 
-            lPoint1.Label = "Salón";
-            lPoint1.Y = 2D;
-            lPoint2.Label = "Delivery";
-            lPoint2.Y = 3D;
-            lPoint3.Label = "Recojo";
-            lPoint3.Y = 2D;
-            lPoint4.Label = "Promociones";
-            lPoint4.Y = 4D;
+            lPoint9.Label = "Salón";
+            lPoint9.Y = 2D;
+            lPoint10.Label = "Delivery";
+            lPoint10.Y = 3D;
+            lPoint11.Label = "Recojo";
+            lPoint11.Y = 2D;
+            lPoint12.Label = "Promociones";
+            lPoint12.Y = 4D;
             gunaDoughnutDataset1.DataPoints.AddRange(new Guna.Charts.WinForms.LPoint[] {
-            lPoint1,
-            lPoint2,
-            lPoint3,
-            lPoint4});
+            lPoint9,
+            lPoint10,
+            lPoint11,
+            lPoint12});
             gunaDoughnutDataset1.Label = "Doughnut1";
             // 
             // guna2Panel1
@@ -2645,7 +2645,7 @@
             // 
             this.guna2PictureBox23.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox23.Image")));
             this.guna2PictureBox23.ImageRotate = 0F;
-            this.guna2PictureBox23.Location = new System.Drawing.Point(110, 409);
+            this.guna2PictureBox23.Location = new System.Drawing.Point(90, 409);
             this.guna2PictureBox23.Name = "guna2PictureBox23";
             this.guna2PictureBox23.Size = new System.Drawing.Size(43, 42);
             this.guna2PictureBox23.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -2701,7 +2701,7 @@
             this.btnAbrirPedido.Name = "btnAbrirPedido";
             this.btnAbrirPedido.Size = new System.Drawing.Size(350, 55);
             this.btnAbrirPedido.TabIndex = 81;
-            this.btnAbrirPedido.Text = "       Abrir pedido";
+            this.btnAbrirPedido.Text = "       Detalle pedido";
             this.btnAbrirPedido.Click += new System.EventHandler(this.btnAbrirPedido_Click);
             // 
             // lblDetalleTiempo
@@ -2914,20 +2914,20 @@
             this.dgvHistorialMesas.AllowUserToAddRows = false;
             this.dgvHistorialMesas.AllowUserToResizeColumns = false;
             this.dgvHistorialMesas.AllowUserToResizeRows = false;
-            dataGridViewCellStyle1.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.Black;
-            this.dgvHistorialMesas.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle7.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle7.ForeColor = System.Drawing.Color.Black;
+            this.dgvHistorialMesas.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle7;
             this.dgvHistorialMesas.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.dgvHistorialMesas.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.Color.Gold;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Maiandra GD", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.Gold;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvHistorialMesas.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle8.BackColor = System.Drawing.Color.Gold;
+            dataGridViewCellStyle8.Font = new System.Drawing.Font("Maiandra GD", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle8.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.Color.Gold;
+            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvHistorialMesas.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle8;
             this.dgvHistorialMesas.ColumnHeadersHeight = 50;
             this.dgvHistorialMesas.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colNumeroPedido,
@@ -2935,14 +2935,14 @@
             this.colEstado,
             this.colTotal,
             this.Columnobservación});
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvHistorialMesas.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle9.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle9.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle9.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvHistorialMesas.DefaultCellStyle = dataGridViewCellStyle9;
             this.dgvHistorialMesas.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(229)))), ((int)(((byte)(255)))));
             this.dgvHistorialMesas.Location = new System.Drawing.Point(8, 41);
             this.dgvHistorialMesas.Margin = new System.Windows.Forms.Padding(4);

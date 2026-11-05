@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Windows.Forms;
 
 namespace PROYECTO_RESTAURANTE
@@ -12,11 +11,21 @@ namespace PROYECTO_RESTAURANTE
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // Inicio de sesión desactivado temporalmente.
-            // Application.Run(new INICIAR_SESIÓN());
+            // Conserva el comportamiento del repositorio: arranca en Inicio.
+            // Si ya activaste INICIAR_SESIÓN, NO reemplaces Program.cs sin adaptar
+            // esta parte al formulario que mantiene abierto el programa.
+            FRM_INICIO ventanaPrincipal = new FRM_INICIO();
+            ventanaPrincipal.Shown += (s, e) =>
+                ControlReservasAutomaticas.Iniciar(ventanaPrincipal);
 
-            // Abrir directamente la ventana principal.
-            Application.Run(new FRM_INICIO());
+            try
+            {
+                Application.Run(ventanaPrincipal);
+            }
+            finally
+            {
+                ControlReservasAutomaticas.Detener();
+            }
         }
     }
 }

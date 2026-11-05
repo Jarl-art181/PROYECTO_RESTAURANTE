@@ -12,9 +12,9 @@ using System.Windows.Forms;
 namespace PROYECTO_RESTAURANTE
 {
     public partial class FRM_MESAS : Form
-    
+
     {
-        
+
         // Guarda el número de mesa que seleccionamos.
         private int mesaSeleccionada = 0;
         private string filtroActual = "todas";
@@ -28,10 +28,16 @@ namespace PROYECTO_RESTAURANTE
 
 
             InitializeComponent();
+            this.VisibleChanged += FRM_MESAS_VisibleChanged;
+            this.FormClosed += (s, args) =>
+                ControlReservasAutomaticas.MesasActualizadas -= RefrescarMesasAutomaticamente;
 
             // Conectar el botón Liberar mesa.
             btnLiberarMesa.Click -= btnLiberarMesa_Click;
             btnLiberarMesa.Click += btnLiberarMesa_Click;
+            // abrir mesa
+            btnAbrirPedido.Click -= btnAbrirPedido_Click;
+            btnAbrirPedido.Click += btnAbrirPedido_Click;
 
             // Configuración de la ventana.
             this.WindowState = FormWindowState.Maximized;
@@ -50,8 +56,28 @@ namespace PROYECTO_RESTAURANTE
         }
 
 
+        private void FRM_MESAS_VisibleChanged(object sender, EventArgs e)
+        {
+            ControlReservasAutomaticas.MesasActualizadas -= RefrescarMesasAutomaticamente;
+            if (this.Visible)
+            {
+                ControlReservasAutomaticas.MesasActualizadas += RefrescarMesasAutomaticamente;
+                RefrescarMesasAutomaticamente(null, EventArgs.Empty);
+            }
+        }
 
-        
+        private void RefrescarMesasAutomaticamente(object sender, EventArgs e)
+        {
+            if (this.IsDisposed || !this.Visible) return;
+            CargarContadoresMesas();
+            CargarEstadosMesas();
+            CargarHistorialMesas();
+            if (mesaSeleccionada > 0)
+                CargarDetalleMesa();
+            FiltrarMesas();
+        }
+
+
 
 
         private void btnLiberarMesa_Click(
@@ -71,6 +97,15 @@ namespace PROYECTO_RESTAURANTE
 
                 return;
             }
+
+            // Si la mesa está ocupada, abrir primero el cobro.
+            if (lblDetalleEstado.Text.Trim().ToLower() == "ocupada")
+            {
+                CobrarYLiberarMesaOcupada();
+                return;
+            }
+
+           
 
             // =====================================
             // 2. SOLO CANCELAR RESERVAS
@@ -468,7 +503,13 @@ namespace PROYECTO_RESTAURANTE
         WHERE PD.id_mesa = M.id_mesa
           AND PD.id_sucursal = M.id_sucursal
           AND PD.canal = 'salon'
-          AND PD.estado = 'pendiente'
+        AND PD.estado IN
+(
+    'pendiente',
+    'en_preparacion',
+    'listo',
+    'entregado'
+)
         ORDER BY PD.fecha_hora DESC,
                  PD.id_pedido DESC
     ) P
@@ -599,17 +640,12 @@ namespace PROYECTO_RESTAURANTE
 
                                 else if (estado == "reservada")
                                 {
-                                    estados[posicion].Text =
-                                        "Reservada";
-
+                                    estados[posicion].Text = "Reservada";
                                     estados[posicion].FillColor =
-                                        Color.FromArgb(
-                                            242, 230, 139);
+                                        Color.FromArgb(242, 230, 139);
 
-                                    // Una reserva no muestra
-                                    // pedido ni mesero.
-                                    panelesPedido[posicion].Visible =
-                                        false;
+                                    // No mostrar detalle en la tarjeta.
+                                    panelesPedido[posicion].Visible = false;
                                 }
 
                                 // ==============================
@@ -618,41 +654,15 @@ namespace PROYECTO_RESTAURANTE
 
                                 else if (estado == "ocupada")
                                 {
-                                    estados[posicion].Text =
-                                        "Ocupada";
-
+                                    estados[posicion].Text = "Ocupada";
                                     estados[posicion].FillColor =
-                                        Color.FromArgb(
-                                            250, 128, 120);
+                                        Color.FromArgb(250, 128, 120);
 
-                                    // Mostrar datos únicamente
-                                    // si existe un pedido activo.
-                                    if (numeroPedido != "")
-                                    {
-                                        pedidos[posicion].Text =
-                                            "Pedido #" + numeroPedido;
-
-                                        if (nombreMesero != "")
-                                        {
-                                            meseros[posicion].Text =
-                                                "Mesero: " + nombreMesero;
-                                        }
-                                        else
-                                        {
-                                            meseros[posicion].Text =
-                                                "Mesero: Sin asignar";
-                                        }
-
-                                        panelesPedido[posicion].Visible =
-                                            true;
-
-                                        panelesPedido[posicion].BringToFront();
-                                    }
-                                    else
-                                    {
-                                        panelesPedido[posicion].Visible =
-                                            false;
-                                    }
+                                    // IMPORTANTE: NO mostrar pedido ni mesero
+                                    // en la tarjeta antes de pulsar Detalle pedido.
+                                    pedidos[posicion].Text = "";
+                                    meseros[posicion].Text = "";
+                                    panelesPedido[posicion].Visible = false;
                                 }
 
                                 // ==============================
@@ -831,25 +841,24 @@ namespace PROYECTO_RESTAURANTE
 
 
 
+
         private void SeleccionarMesa(object sender, EventArgs e)
         {
-            // Identificar qué control recibió el clic.
-            Control control = (Control)sender;
+            Control control = sender as Control;
 
-            // Obtener el número de mesa guardado en Tag.
+            if (control == null || control.Tag == null)
+                return;
+
             int numeroMesa;
 
-            if (control.Tag != null)
-            {
-                if (int.TryParse(control.Tag.ToString(), out numeroMesa))
-                {
-                    // Guardar la mesa seleccionada.
-                    mesaSeleccionada = numeroMesa;
+            if (!int.TryParse(control.Tag.ToString(), out numeroMesa))
+                return;
 
-                    // Actualizar el panel derecho desde SQL.
-                    CargarDetalleMesa();
-                }
-            }
+            mesaSeleccionada = numeroMesa;
+
+            // Solo datos basicos, estado y botones.
+            // Los productos se muestran al pulsar Detalle pedido.
+            CargarDetalleMesa();
         }
 
         private void CargarDetalleMesa()
@@ -898,7 +907,13 @@ namespace PROYECTO_RESTAURANTE
         WHERE PD.id_mesa = M.id_mesa
           AND PD.id_sucursal = M.id_sucursal
           AND PD.canal = 'salon'
-          AND PD.estado = 'pendiente'
+          AND PD.estado IN
+          (
+              'pendiente',
+              'en_preparacion',
+              'listo',
+              'entregado'
+          )
 
         ORDER BY PD.fecha_hora DESC,
                  PD.id_pedido DESC
@@ -961,7 +976,7 @@ namespace PROYECTO_RESTAURANTE
                                 // ========================================
 
                                 lblTituloDetalleMesa.Text =
-                                    "Mesa " + numeroMesa;
+                                 "Mesa " + numeroMesa + " de 10";
 
                                 lblDetalleNumero.Text =
                                     numeroMesa.ToString();
@@ -1008,9 +1023,7 @@ namespace PROYECTO_RESTAURANTE
                                 else if (estado == "ocupada")
                                 {
                                     lblDetalleEstado.Text = "Ocupada";
-
                                     textEstadoDetalleMesa.Text = "Ocupada";
-
                                     textEstadoDetalleMesa.FillColor =
                                         Color.FromArgb(250, 128, 120);
                                 }
@@ -1048,119 +1061,61 @@ namespace PROYECTO_RESTAURANTE
                                 // ========================================
                                 // 9. MOSTRAR PEDIDO Y MESERO
                                 // ========================================
-
-                                if (estado == "ocupada" && tienePedido == true)
+                                // Mostrar información básica al seleccionar mesa.
+                                if (estado == "ocupada")
                                 {
-                                    // Obtener número de pedido.
-                                    int idPedido =
-                                        Convert.ToInt32(
-                                            lector["NumeroPedido"]);
-
-                                    lblDetallePedido.Text =
-                                        "Pedido #" + idPedido.ToString("D4");
-
-                                    // Obtener cliente.
-                                    if (lector["Cliente"] != DBNull.Value)
-                                    {
-                                        string cliente =
-                                            lector["Cliente"].ToString().Trim();
-
-                                        if (cliente != "")
-                                        {
-                                            lblDetalleCliente.Text = cliente;
-                                        }
-                                        else
-                                        {
-                                            lblDetalleCliente.Text = "No registrado";
-                                        }
-                                    }
-                                    else
-                                    {
-                                        lblDetalleCliente.Text = "No registrado";
-                                    }
-
-                                    // Obtener mesero.
-                                    if (lector["NombreMesero"] != DBNull.Value)
-                                    {
-                                        string nombreMesero =
-                                            lector["NombreMesero"].ToString().Trim();
-
-                                        if (nombreMesero != "")
-                                        {
-                                            lblDetalleMesero.Text = nombreMesero;
-                                        }
-                                        else
-                                        {
-                                            lblDetalleMesero.Text = "Sin asignar";
-                                        }
-                                    }
-                                    else
-                                    {
-                                        lblDetalleMesero.Text = "Sin asignar";
-                                    }
-
-                                    // ====================================
-                                    // 10. CALCULAR TIEMPO OCUPADO
-                                    // ====================================
-
-                                    if (lector["FechaPedido"] != DBNull.Value)
-                                    {
-                                        DateTime fechaPedido =
-                                            Convert.ToDateTime(
-                                                lector["FechaPedido"]);
-
-                                        TimeSpan tiempo =
-                                            DateTime.Now - fechaPedido;
-
-                                        int minutos =
-                                            (int)tiempo.TotalMinutes;
-
-                                        if (minutos >= 0)
-                                        {
-                                            if (minutos < 60)
-                                            {
-                                                lblDetalleTiempo.Text =
-                                                    minutos + " minutos";
-                                            }
-                                            else
-                                            {
-                                                int horas = minutos / 60;
-                                                int minutosRestantes = minutos % 60;
-
-                                                lblDetalleTiempo.Text =
-                                                    horas + " h " +
-                                                    minutosRestantes + " min";
-                                            }
-                                        }
-                                    }
+                                    lblDetallePedido.Text = "En curso";
+                                    lblDetalleCliente.Text = "Consultar detalle";
+                                    lblDetalleMesero.Text = "Consultar detalle";
+                                    lblDetalleTiempo.Text = "Consultar detalle";
                                 }
+                                else
+                                {
+                                    lblDetallePedido.Text = "Ninguno";
+                                    lblDetalleCliente.Text = "-";
+                                    lblDetalleMesero.Text = "-";
+                                    lblDetalleTiempo.Text = "-";
+                                }
+
+                                // No mostrar los detalles todavía.
+                                lblDetalleCliente.Text = "-";
+                                lblDetalleMesero.Text = "-";
+                                lblDetalleTiempo.Text = "-";
+
 
                                 // ========================================
                                 // 11. CONFIGURAR BOTONES SEGÚN EL ESTADO
                                 // ========================================
 
 
+
                                 if (estado == "libre")
                                 {
+                                    btnAbrirPedido.Text = "Nuevo pedido";
                                     btnAbrirPedido.Enabled = true;
                                     btnReservar.Enabled = true;
                                     btnLiberarMesa.Enabled = false;
                                 }
                                 else if (estado == "ocupada")
                                 {
+                                    btnAbrirPedido.Text = "Detalle pedido";
                                     btnAbrirPedido.Enabled = tienePedido;
                                     btnReservar.Enabled = false;
-
-                                    // No liberar hasta comprobar el cobro.
-                                    btnLiberarMesa.Enabled = false;
+                                    btnLiberarMesa.Enabled = true;
                                 }
                                 else if (estado == "reservada")
                                 {
+                                    btnAbrirPedido.Text = "Confirmar llegada";
+                                    btnAbrirPedido.Enabled = true;
+                                    btnReservar.Enabled = false;
+                                    btnLiberarMesa.Enabled = true;
+                                }
+                                else
+                                {
+                                    btnAbrirPedido.Text = "No disponible";
                                     btnAbrirPedido.Enabled = false;
                                     btnReservar.Enabled = false;
-
-                                    // Permitir cancelar la reserva.
-                                    btnLiberarMesa.Enabled = true;
+                                    btnLiberarMesa.Enabled = false;
                                 }
 
                                 // ========================================
@@ -1538,7 +1493,41 @@ namespace PROYECTO_RESTAURANTE
 
         private void btnAbrirPedido_Click(object sender, EventArgs e)
         {
-            FRMS_PEDIDOS pedidos = new FRMS_PEDIDOS();
+            if (mesaSeleccionada <= 0)
+            {
+                MessageBox.Show("Seleccione una mesa.");
+                return;
+            }
+
+            // Si la mesa está reservada, conservar aquí
+            // la confirmación de llegada que ya implementamos.
+            if (lblDetalleEstado.Text.Trim().ToLower() == "reservada")
+            {
+                DialogResult respuesta = MessageBox.Show(
+                    "¿Llegó el comensal de la Mesa " +
+                    mesaSeleccionada + "?",
+                    "Confirmar llegada",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (respuesta != DialogResult.Yes)
+                    return;
+
+                try
+                {
+                    ControlReservasAutomaticas
+                        .ConfirmarLlegadaPorNumeroMesa(mesaSeleccionada);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                    return;
+                }
+            }
+
+            // Abrir pedidos con la mesa seleccionada.
+            FRMS_PEDIDOS pedidos =
+                new FRMS_PEDIDOS(mesaSeleccionada);
 
             pedidos.Show();
             this.Hide();
@@ -1650,10 +1639,201 @@ FROM dbo.MESA M
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
-        
 
-    }
 
+        }
+        private void CobrarYLiberarMesaOcupada()
+        {
+            try
+            {
+                int idPedido = 0;
+
+                // 1. Buscar el pedido activo de la mesa.
+                using (SqlConnection conexion =
+                    new SqlConnection(cadenaConexion))
+                {
+                    conexion.Open();
+
+                    string sql = @"
+                SELECT TOP (2) P.id_pedido
+                FROM dbo.PEDIDO P
+                INNER JOIN dbo.MESA M
+                    ON P.id_mesa = M.id_mesa
+                WHERE M.[número] = @Mesa
+                  AND M.id_sucursal = 1
+                  AND M.estado = 'ocupada'
+                  AND P.canal = 'salon'
+                  AND P.estado IN
+                  (
+                      'pendiente',
+                      'en_preparacion',
+                      'listo',
+                      'entregado'
+                  )
+                ORDER BY P.fecha_hora DESC;";
+
+                    using (SqlCommand cmd =
+                        new SqlCommand(sql, conexion))
+                    {
+                        cmd.Parameters.Add(
+                            "@Mesa", SqlDbType.Int).Value =
+                            mesaSeleccionada;
+
+                        using (SqlDataReader lector =
+                            cmd.ExecuteReader())
+                        {
+                            if (!lector.Read())
+                            {
+                                MessageBox.Show(
+                                    "No se encontró un pedido activo. " +
+                                    "Revise el estado de la mesa.");
+                                return;
+                            }
+
+                            idPedido = Convert.ToInt32(
+                                lector["id_pedido"]);
+
+                            if (lector.Read())
+                            {
+                                MessageBox.Show(
+                                    "La mesa tiene más de un pedido activo. " +
+                                    "Revise los pedidos antes de cobrar.");
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                // 2. Solicitar confirmación.
+                DialogResult respuesta = MessageBox.Show(
+                    "Mesa " + mesaSeleccionada +
+                    "\nPedido #" + idPedido.ToString("D4") +
+                    "\n\n¿Desea abrir el cobro para liberar la mesa?",
+                    "Cobrar pedido",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (respuesta != DialogResult.Yes)
+                    return;
+
+                // 3. Abrir el formulario de cobro existente.
+                using (Generar_Boleta boleta =
+                    new Generar_Boleta())
+                {
+                    boleta.Tag = idPedido;
+                    boleta.ShowDialog(this);
+                }
+
+                // 4. Liberar solamente si el sistema
+                // registró el cobro según el flujo actual.
+                using (SqlConnection conexion =
+                    new SqlConnection(cadenaConexion))
+                {
+                    conexion.Open();
+
+                    using (SqlTransaction transaccion =
+                        conexion.BeginTransaction(
+                            IsolationLevel.Serializable))
+                    {
+                        string sql = @"
+                    UPDATE M
+                    SET estado = 'libre'
+                    FROM dbo.MESA M
+                    WHERE M.[número] = @Mesa
+                      AND M.id_sucursal = 1
+                      AND M.estado = 'ocupada'
+
+                      AND EXISTS
+                      (
+                          SELECT 1
+                          FROM dbo.PEDIDO P
+                          WHERE P.id_pedido = @Pedido
+                            AND P.id_mesa = M.id_mesa
+                            AND P.canal = 'salon'
+                            AND P.estado = 'cobrado'
+                            AND EXISTS
+                            (
+                                SELECT 1
+                                FROM dbo.VENTA_INTERNA V
+                                WHERE V.id_pedido =
+                                      P.id_pedido
+                            )
+                      )
+
+                      AND NOT EXISTS
+                      (
+                          SELECT 1
+                          FROM dbo.PEDIDO P
+                          WHERE P.id_mesa = M.id_mesa
+                            AND P.canal = 'salon'
+                            AND P.estado IN
+                            (
+                                'pendiente',
+                                'en_preparacion',
+                                'listo',
+                                'entregado'
+                            )
+                      );";
+
+                        using (SqlCommand cmd =
+                            new SqlCommand(
+                                sql, conexion, transaccion))
+                        {
+                            cmd.Parameters.Add(
+                                "@Mesa", SqlDbType.Int).Value =
+                                mesaSeleccionada;
+
+                            cmd.Parameters.Add(
+                                "@Pedido", SqlDbType.Int).Value =
+                                idPedido;
+
+                            int filas = cmd.ExecuteNonQuery();
+
+                            if (filas != 1)
+                            {
+                                transaccion.Rollback();
+
+                                MessageBox.Show(
+                                    "La mesa continúa ocupada.\n\n" +
+                                    "El cobro no quedó registrado " +
+                                    "o existe otro pedido activo.",
+                                    "Cobro pendiente",
+                                    MessageBoxButtons.OK,
+                                    MessageBoxIcon.Warning);
+
+                                return;
+                            }
+                        }
+
+                        transaccion.Commit();
+                    }
+                }
+
+                // 5. Actualizar la interfaz.
+                CargarContadoresMesas();
+                CargarEstadosMesas();
+                CargarDetalleMesa();
+                FiltrarMesas();
+
+                MessageBox.Show(
+                    "Pedido #" + idPedido.ToString("D4") +
+                    " cobrado según el registro actual.\n\n" +
+                    "Mesa " + mesaSeleccionada +
+                    " liberada correctamente.",
+                    "Mesa disponible",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "No se pudo completar la operación:\n" +
+                    ex.Message,
+                    "Liberar mesa",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
         private void ButtonINICIO_Click(object sender, EventArgs e)
         {
             FRM_INICIO ventana = new FRM_INICIO();
@@ -1664,10 +1844,9 @@ FROM dbo.MESA M
     }
 }
 
-       
 
-    
 
-        
 
-     
+
+
+
