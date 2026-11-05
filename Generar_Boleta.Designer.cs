@@ -45,14 +45,33 @@
             this.guna2PictureBox1 = new Guna.UI2.WinForms.Guna2PictureBox();
             this.guna2Panel2 = new Guna.UI2.WinForms.Guna2Panel();
             this.guna2Panel7 = new Guna.UI2.WinForms.Guna2Panel();
+            this.cmbMetodoPago2 = new Guna.UI2.WinForms.Guna2ComboBox();
+            this.btnCalcularVuelto = new Guna.UI2.WinForms.Guna2Button();
+            this.txtVueltoBoleta = new Guna.UI2.WinForms.Guna2TextBox();
+            this.lblVuelto = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.numMontoRecibido = new Guna.UI2.WinForms.Guna2NumericUpDown();
+            this.lblMontoRecibido = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.guna2PictureBox6 = new Guna.UI2.WinForms.Guna2PictureBox();
+            this.lblTituloCambio = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.guna2HtmlLabel21 = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.txtMontoPago2 = new Guna.UI2.WinForms.Guna2NumericUpDown();
+            this.guna2HtmlLabel30 = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.lblTituloPago2 = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.lblMontoPago1 = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.numMontoPago1 = new Guna.UI2.WinForms.Guna2NumericUpDown();
+            this.lblMetodoPago1 = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.txtMetodoPago1 = new Guna.UI2.WinForms.Guna2TextBox();
+            this.lblTituloPago1 = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.guna2HtmlLabel22 = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.btnRegistrarCobro = new Guna.UI2.WinForms.Guna2Button();
             this.guna2RadioButton1 = new Guna.UI2.WinForms.Guna2RadioButton();
             this.guna2PictureBox16 = new Guna.UI2.WinForms.Guna2PictureBox();
-            this.guna2HtmlLabel59 = new Guna.UI2.WinForms.Guna2HtmlLabel();
+            this.lblTituloPagoMixto = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.txtObservacionesBoleta = new Guna.UI2.WinForms.Guna2TextBox();
             this.guna2PictureBox15 = new Guna.UI2.WinForms.Guna2PictureBox();
             this.guna2HtmlLabel58 = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.rbPagoTransferencia = new Guna.UI2.WinForms.Guna2RadioButton();
-            this.rbPagoPlin = new Guna.UI2.WinForms.Guna2RadioButton();
+            this.rbPagoMixto = new Guna.UI2.WinForms.Guna2RadioButton();
             this.rbPagoYape = new Guna.UI2.WinForms.Guna2RadioButton();
             this.rbPagoTarjeta = new Guna.UI2.WinForms.Guna2RadioButton();
             this.rbPagoEfectivo = new Guna.UI2.WinForms.Guna2RadioButton();
@@ -158,19 +177,15 @@
             this.guna2HtmlLabel43 = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.guna2HtmlLabel42 = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.guna2HtmlLabel41 = new Guna.UI2.WinForms.Guna2HtmlLabel();
-            this.guna2Button3 = new Guna.UI2.WinForms.Guna2Button();
-            this.guna2HtmlLabel22 = new Guna.UI2.WinForms.Guna2HtmlLabel();
-            this.guna2HtmlLabel11 = new Guna.UI2.WinForms.Guna2HtmlLabel();
-            this.guna2HtmlLabel21 = new Guna.UI2.WinForms.Guna2HtmlLabel();
-            this.guna2TextBox1 = new Guna.UI2.WinForms.Guna2TextBox();
-            this.guna2HtmlLabel24 = new Guna.UI2.WinForms.Guna2HtmlLabel();
-            this.guna2NumericUpDown1 = new Guna.UI2.WinForms.Guna2NumericUpDown();
-            this.guna2HtmlLabel29 = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.guna2Panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.btnCerrarBoleta)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox1)).BeginInit();
             this.guna2Panel2.SuspendLayout();
             this.guna2Panel7.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numMontoRecibido)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox6)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtMontoPago2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMontoPago1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox16)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox15)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox14)).BeginInit();
@@ -194,7 +209,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.guna2NumericUpDown1)).BeginInit();
             this.SuspendLayout();
             // 
             // guna2Panel1
@@ -286,22 +300,33 @@
             // 
             this.guna2Panel7.BackColor = System.Drawing.Color.White;
             this.guna2Panel7.BorderRadius = 10;
-            this.guna2Panel7.Controls.Add(this.guna2HtmlLabel29);
-            this.guna2Panel7.Controls.Add(this.guna2NumericUpDown1);
-            this.guna2Panel7.Controls.Add(this.guna2HtmlLabel24);
-            this.guna2Panel7.Controls.Add(this.guna2TextBox1);
+            this.guna2Panel7.Controls.Add(this.cmbMetodoPago2);
+            this.guna2Panel7.Controls.Add(this.btnCalcularVuelto);
+            this.guna2Panel7.Controls.Add(this.txtVueltoBoleta);
+            this.guna2Panel7.Controls.Add(this.lblVuelto);
+            this.guna2Panel7.Controls.Add(this.numMontoRecibido);
+            this.guna2Panel7.Controls.Add(this.lblMontoRecibido);
+            this.guna2Panel7.Controls.Add(this.guna2PictureBox6);
+            this.guna2Panel7.Controls.Add(this.lblTituloCambio);
             this.guna2Panel7.Controls.Add(this.guna2HtmlLabel21);
-            this.guna2Panel7.Controls.Add(this.guna2HtmlLabel11);
+            this.guna2Panel7.Controls.Add(this.txtMontoPago2);
+            this.guna2Panel7.Controls.Add(this.guna2HtmlLabel30);
+            this.guna2Panel7.Controls.Add(this.lblTituloPago2);
+            this.guna2Panel7.Controls.Add(this.lblMontoPago1);
+            this.guna2Panel7.Controls.Add(this.numMontoPago1);
+            this.guna2Panel7.Controls.Add(this.lblMetodoPago1);
+            this.guna2Panel7.Controls.Add(this.txtMetodoPago1);
+            this.guna2Panel7.Controls.Add(this.lblTituloPago1);
             this.guna2Panel7.Controls.Add(this.guna2HtmlLabel22);
-            this.guna2Panel7.Controls.Add(this.guna2Button3);
+            this.guna2Panel7.Controls.Add(this.btnRegistrarCobro);
             this.guna2Panel7.Controls.Add(this.guna2RadioButton1);
             this.guna2Panel7.Controls.Add(this.guna2PictureBox16);
-            this.guna2Panel7.Controls.Add(this.guna2HtmlLabel59);
+            this.guna2Panel7.Controls.Add(this.lblTituloPagoMixto);
             this.guna2Panel7.Controls.Add(this.txtObservacionesBoleta);
             this.guna2Panel7.Controls.Add(this.guna2PictureBox15);
             this.guna2Panel7.Controls.Add(this.guna2HtmlLabel58);
             this.guna2Panel7.Controls.Add(this.rbPagoTransferencia);
-            this.guna2Panel7.Controls.Add(this.rbPagoPlin);
+            this.guna2Panel7.Controls.Add(this.rbPagoMixto);
             this.guna2Panel7.Controls.Add(this.rbPagoYape);
             this.guna2Panel7.Controls.Add(this.rbPagoTarjeta);
             this.guna2Panel7.Controls.Add(this.rbPagoEfectivo);
@@ -324,6 +349,251 @@
             this.guna2Panel7.Name = "guna2Panel7";
             this.guna2Panel7.Size = new System.Drawing.Size(381, 807);
             this.guna2Panel7.TabIndex = 35;
+            // 
+            // cmbMetodoPago2
+            // 
+            this.cmbMetodoPago2.BackColor = System.Drawing.Color.Transparent;
+            this.cmbMetodoPago2.BorderRadius = 10;
+            this.cmbMetodoPago2.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbMetodoPago2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbMetodoPago2.FocusedColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.cmbMetodoPago2.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.cmbMetodoPago2.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.cmbMetodoPago2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(68)))), ((int)(((byte)(88)))), ((int)(((byte)(112)))));
+            this.cmbMetodoPago2.ItemHeight = 30;
+            this.cmbMetodoPago2.Location = new System.Drawing.Point(95, 332);
+            this.cmbMetodoPago2.Name = "cmbMetodoPago2";
+            this.cmbMetodoPago2.Size = new System.Drawing.Size(104, 36);
+            this.cmbMetodoPago2.TabIndex = 106;
+            // 
+            // btnCalcularVuelto
+            // 
+            this.btnCalcularVuelto.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.btnCalcularVuelto.BorderRadius = 10;
+            this.btnCalcularVuelto.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnCalcularVuelto.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnCalcularVuelto.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnCalcularVuelto.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnCalcularVuelto.FillColor = System.Drawing.Color.Gold;
+            this.btnCalcularVuelto.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCalcularVuelto.ForeColor = System.Drawing.Color.Black;
+            this.btnCalcularVuelto.Location = new System.Drawing.Point(256, 459);
+            this.btnCalcularVuelto.Name = "btnCalcularVuelto";
+            this.btnCalcularVuelto.Size = new System.Drawing.Size(102, 43);
+            this.btnCalcularVuelto.TabIndex = 105;
+            this.btnCalcularVuelto.Text = "Calcular";
+            // 
+            // txtVueltoBoleta
+            // 
+            this.txtVueltoBoleta.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.txtVueltoBoleta.BorderColor = System.Drawing.Color.LightGray;
+            this.txtVueltoBoleta.BorderRadius = 10;
+            this.txtVueltoBoleta.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.txtVueltoBoleta.DefaultText = "";
+            this.txtVueltoBoleta.DisabledState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(208)))), ((int)(((byte)(208)))), ((int)(((byte)(208)))));
+            this.txtVueltoBoleta.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(226)))), ((int)(((byte)(226)))));
+            this.txtVueltoBoleta.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
+            this.txtVueltoBoleta.DisabledState.PlaceholderForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
+            this.txtVueltoBoleta.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.txtVueltoBoleta.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtVueltoBoleta.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.txtVueltoBoleta.Location = new System.Drawing.Point(132, 465);
+            this.txtVueltoBoleta.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.txtVueltoBoleta.Name = "txtVueltoBoleta";
+            this.txtVueltoBoleta.PlaceholderText = "Efectivo";
+            this.txtVueltoBoleta.SelectedText = "";
+            this.txtVueltoBoleta.Size = new System.Drawing.Size(97, 37);
+            this.txtVueltoBoleta.TabIndex = 104;
+            // 
+            // lblVuelto
+            // 
+            this.lblVuelto.BackColor = System.Drawing.Color.Transparent;
+            this.lblVuelto.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblVuelto.Location = new System.Drawing.Point(52, 468);
+            this.lblVuelto.Name = "lblVuelto";
+            this.lblVuelto.Size = new System.Drawing.Size(48, 20);
+            this.lblVuelto.TabIndex = 103;
+            this.lblVuelto.Text = "Vuelto:";
+            // 
+            // numMontoRecibido
+            // 
+            this.numMontoRecibido.BackColor = System.Drawing.Color.Transparent;
+            this.numMontoRecibido.BorderRadius = 5;
+            this.numMontoRecibido.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.numMontoRecibido.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.numMontoRecibido.Location = new System.Drawing.Point(192, 416);
+            this.numMontoRecibido.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.numMontoRecibido.Name = "numMontoRecibido";
+            this.numMontoRecibido.Size = new System.Drawing.Size(75, 36);
+            this.numMontoRecibido.TabIndex = 102;
+            this.numMontoRecibido.UpDownButtonFillColor = System.Drawing.Color.Gold;
+            // 
+            // lblMontoRecibido
+            // 
+            this.lblMontoRecibido.BackColor = System.Drawing.Color.Transparent;
+            this.lblMontoRecibido.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMontoRecibido.Location = new System.Drawing.Point(43, 421);
+            this.lblMontoRecibido.Name = "lblMontoRecibido";
+            this.lblMontoRecibido.Size = new System.Drawing.Size(112, 20);
+            this.lblMontoRecibido.TabIndex = 101;
+            this.lblMontoRecibido.Text = "Monto Recibido:";
+            // 
+            // guna2PictureBox6
+            // 
+            this.guna2PictureBox6.ErrorImage = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox6.ErrorImage")));
+            this.guna2PictureBox6.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox6.Image")));
+            this.guna2PictureBox6.ImageRotate = 0F;
+            this.guna2PictureBox6.InitialImage = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox6.InitialImage")));
+            this.guna2PictureBox6.Location = new System.Drawing.Point(11, 375);
+            this.guna2PictureBox6.Name = "guna2PictureBox6";
+            this.guna2PictureBox6.Size = new System.Drawing.Size(28, 32);
+            this.guna2PictureBox6.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.guna2PictureBox6.TabIndex = 99;
+            this.guna2PictureBox6.TabStop = false;
+            // 
+            // lblTituloCambio
+            // 
+            this.lblTituloCambio.BackColor = System.Drawing.Color.Transparent;
+            this.lblTituloCambio.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTituloCambio.Location = new System.Drawing.Point(48, 379);
+            this.lblTituloCambio.Name = "lblTituloCambio";
+            this.lblTituloCambio.Size = new System.Drawing.Size(74, 26);
+            this.lblTituloCambio.TabIndex = 100;
+            this.lblTituloCambio.Text = "Cambio";
+            // 
+            // guna2HtmlLabel21
+            // 
+            this.guna2HtmlLabel21.BackColor = System.Drawing.Color.Transparent;
+            this.guna2HtmlLabel21.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.guna2HtmlLabel21.Location = new System.Drawing.Point(205, 341);
+            this.guna2HtmlLabel21.Name = "guna2HtmlLabel21";
+            this.guna2HtmlLabel21.Size = new System.Drawing.Size(59, 20);
+            this.guna2HtmlLabel21.TabIndex = 98;
+            this.guna2HtmlLabel21.Text = "Saldo S/";
+            // 
+            // txtMontoPago2
+            // 
+            this.txtMontoPago2.BackColor = System.Drawing.Color.Transparent;
+            this.txtMontoPago2.BorderRadius = 5;
+            this.txtMontoPago2.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.txtMontoPago2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtMontoPago2.Location = new System.Drawing.Point(283, 332);
+            this.txtMontoPago2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.txtMontoPago2.Name = "txtMontoPago2";
+            this.txtMontoPago2.Size = new System.Drawing.Size(75, 36);
+            this.txtMontoPago2.TabIndex = 97;
+            this.txtMontoPago2.UpDownButtonFillColor = System.Drawing.Color.Gold;
+            // 
+            // guna2HtmlLabel30
+            // 
+            this.guna2HtmlLabel30.BackColor = System.Drawing.Color.Transparent;
+            this.guna2HtmlLabel30.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.guna2HtmlLabel30.Location = new System.Drawing.Point(23, 341);
+            this.guna2HtmlLabel30.Name = "guna2HtmlLabel30";
+            this.guna2HtmlLabel30.Size = new System.Drawing.Size(58, 20);
+            this.guna2HtmlLabel30.TabIndex = 96;
+            this.guna2HtmlLabel30.Text = "Metodo:";
+            // 
+            // lblTituloPago2
+            // 
+            this.lblTituloPago2.BackColor = System.Drawing.Color.Transparent;
+            this.lblTituloPago2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTituloPago2.Location = new System.Drawing.Point(23, 314);
+            this.lblTituloPago2.Name = "lblTituloPago2";
+            this.lblTituloPago2.Size = new System.Drawing.Size(52, 18);
+            this.lblTituloPago2.TabIndex = 94;
+            this.lblTituloPago2.Text = "Pago 2";
+            // 
+            // lblMontoPago1
+            // 
+            this.lblMontoPago1.BackColor = System.Drawing.Color.Transparent;
+            this.lblMontoPago1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMontoPago1.Location = new System.Drawing.Point(205, 280);
+            this.lblMontoPago1.Name = "lblMontoPago1";
+            this.lblMontoPago1.Size = new System.Drawing.Size(59, 20);
+            this.lblMontoPago1.TabIndex = 93;
+            this.lblMontoPago1.Text = "Saldo S/";
+            // 
+            // numMontoPago1
+            // 
+            this.numMontoPago1.BackColor = System.Drawing.Color.Transparent;
+            this.numMontoPago1.BorderRadius = 5;
+            this.numMontoPago1.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.numMontoPago1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.numMontoPago1.Location = new System.Drawing.Point(283, 271);
+            this.numMontoPago1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.numMontoPago1.Name = "numMontoPago1";
+            this.numMontoPago1.Size = new System.Drawing.Size(75, 36);
+            this.numMontoPago1.TabIndex = 92;
+            this.numMontoPago1.UpDownButtonFillColor = System.Drawing.Color.Gold;
+            // 
+            // lblMetodoPago1
+            // 
+            this.lblMetodoPago1.BackColor = System.Drawing.Color.Transparent;
+            this.lblMetodoPago1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMetodoPago1.Location = new System.Drawing.Point(23, 280);
+            this.lblMetodoPago1.Name = "lblMetodoPago1";
+            this.lblMetodoPago1.Size = new System.Drawing.Size(58, 20);
+            this.lblMetodoPago1.TabIndex = 91;
+            this.lblMetodoPago1.Text = "Metodo:";
+            // 
+            // txtMetodoPago1
+            // 
+            this.txtMetodoPago1.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.txtMetodoPago1.BorderColor = System.Drawing.Color.LightGray;
+            this.txtMetodoPago1.BorderRadius = 10;
+            this.txtMetodoPago1.Cursor = System.Windows.Forms.Cursors.IBeam;
+            this.txtMetodoPago1.DefaultText = "";
+            this.txtMetodoPago1.DisabledState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(208)))), ((int)(((byte)(208)))), ((int)(((byte)(208)))));
+            this.txtMetodoPago1.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(226)))), ((int)(((byte)(226)))));
+            this.txtMetodoPago1.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
+            this.txtMetodoPago1.DisabledState.PlaceholderForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
+            this.txtMetodoPago1.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.txtMetodoPago1.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtMetodoPago1.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.txtMetodoPago1.Location = new System.Drawing.Point(101, 277);
+            this.txtMetodoPago1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.txtMetodoPago1.Name = "txtMetodoPago1";
+            this.txtMetodoPago1.PlaceholderText = "Efectivo";
+            this.txtMetodoPago1.SelectedText = "";
+            this.txtMetodoPago1.Size = new System.Drawing.Size(76, 26);
+            this.txtMetodoPago1.TabIndex = 90;
+            // 
+            // lblTituloPago1
+            // 
+            this.lblTituloPago1.BackColor = System.Drawing.Color.Transparent;
+            this.lblTituloPago1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTituloPago1.Location = new System.Drawing.Point(23, 253);
+            this.lblTituloPago1.Name = "lblTituloPago1";
+            this.lblTituloPago1.Size = new System.Drawing.Size(52, 18);
+            this.lblTituloPago1.TabIndex = 88;
+            this.lblTituloPago1.Text = "Pago 1 ";
+            // 
+            // guna2HtmlLabel22
+            // 
+            this.guna2HtmlLabel22.BackColor = System.Drawing.Color.Khaki;
+            this.guna2HtmlLabel22.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.guna2HtmlLabel22.Location = new System.Drawing.Point(279, 746);
+            this.guna2HtmlLabel22.Name = "guna2HtmlLabel22";
+            this.guna2HtmlLabel22.Size = new System.Drawing.Size(55, 20);
+            this.guna2HtmlLabel22.TabIndex = 87;
+            this.guna2HtmlLabel22.Text = "Cobrar";
+            // 
+            // btnRegistrarCobro
+            // 
+            this.btnRegistrarCobro.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.btnRegistrarCobro.BorderRadius = 10;
+            this.btnRegistrarCobro.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
+            this.btnRegistrarCobro.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
+            this.btnRegistrarCobro.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
+            this.btnRegistrarCobro.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
+            this.btnRegistrarCobro.FillColor = System.Drawing.Color.Khaki;
+            this.btnRegistrarCobro.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.btnRegistrarCobro.ForeColor = System.Drawing.Color.White;
+            this.btnRegistrarCobro.Location = new System.Drawing.Point(205, 718);
+            this.btnRegistrarCobro.Name = "btnRegistrarCobro";
+            this.btnRegistrarCobro.Size = new System.Drawing.Size(158, 75);
+            this.btnRegistrarCobro.TabIndex = 86;
             // 
             // guna2RadioButton1
             // 
@@ -359,15 +629,15 @@
             this.guna2PictureBox16.TabIndex = 71;
             this.guna2PictureBox16.TabStop = false;
             // 
-            // guna2HtmlLabel59
+            // lblTituloPagoMixto
             // 
-            this.guna2HtmlLabel59.BackColor = System.Drawing.Color.Transparent;
-            this.guna2HtmlLabel59.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel59.Location = new System.Drawing.Point(48, 221);
-            this.guna2HtmlLabel59.Name = "guna2HtmlLabel59";
-            this.guna2HtmlLabel59.Size = new System.Drawing.Size(107, 26);
-            this.guna2HtmlLabel59.TabIndex = 72;
-            this.guna2HtmlLabel59.Text = "Pago Mixto";
+            this.lblTituloPagoMixto.BackColor = System.Drawing.Color.Transparent;
+            this.lblTituloPagoMixto.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblTituloPagoMixto.Location = new System.Drawing.Point(48, 221);
+            this.lblTituloPagoMixto.Name = "lblTituloPagoMixto";
+            this.lblTituloPagoMixto.Size = new System.Drawing.Size(107, 26);
+            this.lblTituloPagoMixto.TabIndex = 72;
+            this.lblTituloPagoMixto.Text = "Pago Mixto";
             // 
             // txtObservacionesBoleta
             // 
@@ -434,26 +704,26 @@
             this.rbPagoTransferencia.UncheckedState.InnerColor = System.Drawing.Color.Transparent;
             this.rbPagoTransferencia.UseVisualStyleBackColor = false;
             // 
-            // rbPagoPlin
+            // rbPagoMixto
             // 
-            this.rbPagoPlin.AutoSize = true;
-            this.rbPagoPlin.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.rbPagoPlin.CheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.rbPagoPlin.CheckedState.BorderThickness = 0;
-            this.rbPagoPlin.CheckedState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.rbPagoPlin.CheckedState.InnerColor = System.Drawing.Color.White;
-            this.rbPagoPlin.CheckedState.InnerOffset = -4;
-            this.rbPagoPlin.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rbPagoPlin.Location = new System.Drawing.Point(301, 176);
-            this.rbPagoPlin.Name = "rbPagoPlin";
-            this.rbPagoPlin.Size = new System.Drawing.Size(62, 22);
-            this.rbPagoPlin.TabIndex = 65;
-            this.rbPagoPlin.Text = "Mixto";
-            this.rbPagoPlin.UncheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
-            this.rbPagoPlin.UncheckedState.BorderThickness = 2;
-            this.rbPagoPlin.UncheckedState.FillColor = System.Drawing.Color.Transparent;
-            this.rbPagoPlin.UncheckedState.InnerColor = System.Drawing.Color.Transparent;
-            this.rbPagoPlin.UseVisualStyleBackColor = false;
+            this.rbPagoMixto.AutoSize = true;
+            this.rbPagoMixto.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.rbPagoMixto.CheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.rbPagoMixto.CheckedState.BorderThickness = 0;
+            this.rbPagoMixto.CheckedState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.rbPagoMixto.CheckedState.InnerColor = System.Drawing.Color.White;
+            this.rbPagoMixto.CheckedState.InnerOffset = -4;
+            this.rbPagoMixto.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F);
+            this.rbPagoMixto.Location = new System.Drawing.Point(301, 176);
+            this.rbPagoMixto.Name = "rbPagoMixto";
+            this.rbPagoMixto.Size = new System.Drawing.Size(62, 22);
+            this.rbPagoMixto.TabIndex = 65;
+            this.rbPagoMixto.Text = "Mixto";
+            this.rbPagoMixto.UncheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
+            this.rbPagoMixto.UncheckedState.BorderThickness = 2;
+            this.rbPagoMixto.UncheckedState.FillColor = System.Drawing.Color.Transparent;
+            this.rbPagoMixto.UncheckedState.InnerColor = System.Drawing.Color.Transparent;
+            this.rbPagoMixto.UseVisualStyleBackColor = false;
             // 
             // rbPagoYape
             // 
@@ -1755,107 +2025,6 @@
             this.guna2HtmlLabel41.TabIndex = 39;
             this.guna2HtmlLabel41.Text = "Tel: 987 654 321";
             // 
-            // guna2Button3
-            // 
-            this.guna2Button3.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.guna2Button3.BorderRadius = 10;
-            this.guna2Button3.DisabledState.BorderColor = System.Drawing.Color.DarkGray;
-            this.guna2Button3.DisabledState.CustomBorderColor = System.Drawing.Color.DarkGray;
-            this.guna2Button3.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(169)))), ((int)(((byte)(169)))));
-            this.guna2Button3.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(141)))), ((int)(((byte)(141)))), ((int)(((byte)(141)))));
-            this.guna2Button3.FillColor = System.Drawing.Color.Khaki;
-            this.guna2Button3.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.guna2Button3.ForeColor = System.Drawing.Color.White;
-            this.guna2Button3.Location = new System.Drawing.Point(205, 718);
-            this.guna2Button3.Name = "guna2Button3";
-            this.guna2Button3.Size = new System.Drawing.Size(158, 75);
-            this.guna2Button3.TabIndex = 86;
-            // 
-            // guna2HtmlLabel22
-            // 
-            this.guna2HtmlLabel22.BackColor = System.Drawing.Color.Khaki;
-            this.guna2HtmlLabel22.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel22.Location = new System.Drawing.Point(279, 746);
-            this.guna2HtmlLabel22.Name = "guna2HtmlLabel22";
-            this.guna2HtmlLabel22.Size = new System.Drawing.Size(55, 20);
-            this.guna2HtmlLabel22.TabIndex = 87;
-            this.guna2HtmlLabel22.Text = "Cobrar";
-            // 
-            // guna2HtmlLabel11
-            // 
-            this.guna2HtmlLabel11.BackColor = System.Drawing.Color.Transparent;
-            this.guna2HtmlLabel11.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel11.Location = new System.Drawing.Point(23, 253);
-            this.guna2HtmlLabel11.Name = "guna2HtmlLabel11";
-            this.guna2HtmlLabel11.Size = new System.Drawing.Size(52, 18);
-            this.guna2HtmlLabel11.TabIndex = 88;
-            this.guna2HtmlLabel11.Text = "Pago 1 ";
-            // 
-            // guna2HtmlLabel21
-            // 
-            this.guna2HtmlLabel21.BackColor = System.Drawing.Color.Transparent;
-            this.guna2HtmlLabel21.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel21.Location = new System.Drawing.Point(23, 320);
-            this.guna2HtmlLabel21.Name = "guna2HtmlLabel21";
-            this.guna2HtmlLabel21.Size = new System.Drawing.Size(52, 18);
-            this.guna2HtmlLabel21.TabIndex = 89;
-            this.guna2HtmlLabel21.Text = "Pago 1 ";
-            // 
-            // guna2TextBox1
-            // 
-            this.guna2TextBox1.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.guna2TextBox1.BorderColor = System.Drawing.Color.LightGray;
-            this.guna2TextBox1.BorderRadius = 10;
-            this.guna2TextBox1.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.guna2TextBox1.DefaultText = "";
-            this.guna2TextBox1.DisabledState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(208)))), ((int)(((byte)(208)))), ((int)(((byte)(208)))));
-            this.guna2TextBox1.DisabledState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(226)))), ((int)(((byte)(226)))), ((int)(((byte)(226)))));
-            this.guna2TextBox1.DisabledState.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
-            this.guna2TextBox1.DisabledState.PlaceholderForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(138)))), ((int)(((byte)(138)))), ((int)(((byte)(138)))));
-            this.guna2TextBox1.FocusedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.guna2TextBox1.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.guna2TextBox1.HoverState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.guna2TextBox1.Location = new System.Drawing.Point(101, 277);
-            this.guna2TextBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.guna2TextBox1.Name = "guna2TextBox1";
-            this.guna2TextBox1.PlaceholderText = "Efectivo";
-            this.guna2TextBox1.SelectedText = "";
-            this.guna2TextBox1.Size = new System.Drawing.Size(76, 26);
-            this.guna2TextBox1.TabIndex = 90;
-            // 
-            // guna2HtmlLabel24
-            // 
-            this.guna2HtmlLabel24.BackColor = System.Drawing.Color.Transparent;
-            this.guna2HtmlLabel24.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel24.Location = new System.Drawing.Point(36, 280);
-            this.guna2HtmlLabel24.Name = "guna2HtmlLabel24";
-            this.guna2HtmlLabel24.Size = new System.Drawing.Size(58, 20);
-            this.guna2HtmlLabel24.TabIndex = 91;
-            this.guna2HtmlLabel24.Text = "Metodo:";
-            // 
-            // guna2NumericUpDown1
-            // 
-            this.guna2NumericUpDown1.BackColor = System.Drawing.Color.Transparent;
-            this.guna2NumericUpDown1.BorderRadius = 5;
-            this.guna2NumericUpDown1.Cursor = System.Windows.Forms.Cursors.IBeam;
-            this.guna2NumericUpDown1.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.guna2NumericUpDown1.Location = new System.Drawing.Point(283, 271);
-            this.guna2NumericUpDown1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.guna2NumericUpDown1.Name = "guna2NumericUpDown1";
-            this.guna2NumericUpDown1.Size = new System.Drawing.Size(75, 36);
-            this.guna2NumericUpDown1.TabIndex = 92;
-            this.guna2NumericUpDown1.UpDownButtonFillColor = System.Drawing.Color.Gold;
-            // 
-            // guna2HtmlLabel29
-            // 
-            this.guna2HtmlLabel29.BackColor = System.Drawing.Color.Transparent;
-            this.guna2HtmlLabel29.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.guna2HtmlLabel29.Location = new System.Drawing.Point(205, 280);
-            this.guna2HtmlLabel29.Name = "guna2HtmlLabel29";
-            this.guna2HtmlLabel29.Size = new System.Drawing.Size(59, 20);
-            this.guna2HtmlLabel29.TabIndex = 93;
-            this.guna2HtmlLabel29.Text = "Saldo S/";
-            // 
             // Generar_Boleta
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1879,6 +2048,10 @@
             this.guna2Panel2.ResumeLayout(false);
             this.guna2Panel7.ResumeLayout(false);
             this.guna2Panel7.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numMontoRecibido)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox6)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtMontoPago2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMontoPago1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox16)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox15)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox14)).EndInit();
@@ -1910,7 +2083,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.guna2NumericUpDown1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -2020,13 +2192,13 @@
         private Guna.UI2.WinForms.Guna2PictureBox guna2PictureBox15;
         private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel58;
         private Guna.UI2.WinForms.Guna2RadioButton rbPagoTransferencia;
-        private Guna.UI2.WinForms.Guna2RadioButton rbPagoPlin;
+        private Guna.UI2.WinForms.Guna2RadioButton rbPagoMixto;
         private Guna.UI2.WinForms.Guna2RadioButton rbPagoYape;
         private Guna.UI2.WinForms.Guna2RadioButton rbPagoTarjeta;
         private Guna.UI2.WinForms.Guna2RadioButton rbPagoEfectivo;
         private Guna.UI2.WinForms.Guna2TextBox txtObservacionesBoleta;
         private Guna.UI2.WinForms.Guna2PictureBox guna2PictureBox16;
-        private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel59;
+        private Guna.UI2.WinForms.Guna2HtmlLabel lblTituloPagoMixto;
         private Guna.UI2.WinForms.Guna2HtmlLabel lblValorAtendido;
         private Guna.UI2.WinForms.Guna2HtmlLabel lblValorFecha;
         private Guna.UI2.WinForms.Guna2HtmlLabel lblValorMesa;
@@ -2039,12 +2211,23 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
         private Guna.UI2.WinForms.Guna2RadioButton guna2RadioButton1;
         private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel22;
-        private Guna.UI2.WinForms.Guna2Button guna2Button3;
-        private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel29;
-        private Guna.UI2.WinForms.Guna2NumericUpDown guna2NumericUpDown1;
-        private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel24;
-        private Guna.UI2.WinForms.Guna2TextBox guna2TextBox1;
+        private Guna.UI2.WinForms.Guna2Button btnRegistrarCobro;
+        private Guna.UI2.WinForms.Guna2HtmlLabel lblMontoPago1;
+        private Guna.UI2.WinForms.Guna2NumericUpDown numMontoPago1;
+        private Guna.UI2.WinForms.Guna2HtmlLabel lblMetodoPago1;
+        private Guna.UI2.WinForms.Guna2TextBox txtMetodoPago1;
+        private Guna.UI2.WinForms.Guna2HtmlLabel lblTituloPago1;
+        private Guna.UI2.WinForms.Guna2Button btnCalcularVuelto;
+        private Guna.UI2.WinForms.Guna2TextBox txtVueltoBoleta;
+        private Guna.UI2.WinForms.Guna2HtmlLabel lblVuelto;
+        private Guna.UI2.WinForms.Guna2NumericUpDown numMontoRecibido;
+        private Guna.UI2.WinForms.Guna2HtmlLabel lblMontoRecibido;
+        private Guna.UI2.WinForms.Guna2PictureBox guna2PictureBox6;
+        private Guna.UI2.WinForms.Guna2HtmlLabel lblTituloCambio;
         private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel21;
-        private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel11;
+        private Guna.UI2.WinForms.Guna2NumericUpDown txtMontoPago2;
+        private Guna.UI2.WinForms.Guna2HtmlLabel guna2HtmlLabel30;
+        private Guna.UI2.WinForms.Guna2HtmlLabel lblTituloPago2;
+        private Guna.UI2.WinForms.Guna2ComboBox cmbMetodoPago2;
     }
 }

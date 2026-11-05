@@ -15,7 +15,7 @@ namespace PROYECTO_RESTAURANTE
 {
     public partial class Generar_Boleta : Form
     {
-      
+
 
 
         private Random aleatorio = new Random();
@@ -70,7 +70,7 @@ namespace PROYECTO_RESTAURANTE
             rbPagoYape.CheckedChanged -=
                 rbPagoTarjeta_CheckedChanged;
 
-            rbPagoPlin.CheckedChanged -=
+            rbPagoMixto.CheckedChanged -=
                 rbPagoTarjeta_CheckedChanged;
 
             rbPagoTransferencia.CheckedChanged -=
@@ -79,7 +79,7 @@ namespace PROYECTO_RESTAURANTE
             rbPagoYape.CheckedChanged +=
                 rbPagoTarjeta_CheckedChanged;
 
-            rbPagoPlin.CheckedChanged +=
+            rbPagoMixto.CheckedChanged +=
                 rbPagoTarjeta_CheckedChanged;
 
             rbPagoTransferencia.CheckedChanged +=
@@ -96,26 +96,245 @@ namespace PROYECTO_RESTAURANTE
             // CONFIGURACIÓN ORIGINAL
             // =====================================
 
-         
+
 
             this.Shown += Generar_Boleta_Shown;
 
-           
+            ConfigurarMetodosPagoMixto();
 
         }
 
 
-        
+
+
+        // ==============================================
+        // PAGO MIXTO: efectivo fijo + segundo metodo
+        // ==============================================
+
+
         private void ActualizarImporteMixto()
         {
-            decimal efectivo = numMontoRecibido.Value;
-            decimal tarjeta = total - efectivo;
+            bool esMixto = rbPagoMixto.Checked;
+            bool esEfectivo = rbPagoEfectivo.Checked;
 
-            if (tarjeta < 0)
-                tarjeta = 0;
+            // ============================================
+            // 1. APARTADO CAMBIO
+            // SIEMPRE VISIBLE
+            // ============================================
 
-            txtVueltoBoleta.Text = "S/ " +
-                tarjeta.ToString("N2");
+            lblTituloCambio.Visible = true;
+            lblMontoRecibido.Visible = true;
+            numMontoRecibido.Visible = true;
+            lblVuelto.Visible = true;
+            txtVueltoBoleta.Visible = true;
+            btnCalcularVuelto.Visible = true;
+           
+
+            // Habilitar solamente cuando se elige Efectivo.
+            numMontoRecibido.Enabled = esEfectivo;
+            txtVueltoBoleta.Enabled = esEfectivo;
+            btnCalcularVuelto.Enabled = esEfectivo;
+
+            // Colores del apartado Cambio.
+            lblTituloCambio.ForeColor =
+                esEfectivo ? Color.Black : Color.Gray;
+
+            lblMontoRecibido.ForeColor =
+                esEfectivo ? Color.Black : Color.Gray;
+
+            lblVuelto.ForeColor =
+                esEfectivo ? Color.Black : Color.Gray;
+
+            btnCalcularVuelto.FillColor =
+                esEfectivo ? Color.Gold : Color.Gainsboro;
+
+            btnCalcularVuelto.ForeColor =
+                esEfectivo ? Color.Black : Color.Gray;
+
+            // ============================================
+            // 2. APARTADO PAGO MIXTO
+            // SIEMPRE VISIBLE
+            // ============================================
+
+            lblTituloPagoMixto.Visible = true;
+            lblTituloPago1.Visible = true;
+            lblTituloPago2.Visible = true;
+
+            lblMetodoPago1.Visible = true;
+            lblMontoPago1.Visible = true;
+
+            txtMetodoPago1.Visible = true;
+            numMontoPago1.Visible = true;
+
+            // ESTE ES EL COMBO DE LOS MÉTODOS DE PAGO.
+            cmbMetodoPago2.Visible = true;
+
+            // Monto automático del segundo pago.
+            txtMontoPago2.Visible = true;
+
+            // ============================================
+            // 3. HABILITAR O DESHABILITAR PAGO MIXTO
+            // ============================================
+
+            txtMetodoPago1.Enabled = esMixto;
+            numMontoPago1.Enabled = esMixto;
+
+            // Permitir elegir Yape, Plin,
+            // Tarjeta o Transferencia cuando es Mixto.
+            cmbMetodoPago2.Enabled = esMixto;
+
+            // El monto 2 es automático.
+            txtMontoPago2.Enabled = false;
+
+            // ============================================
+            // 4. CAMBIAR COLORES
+            // ============================================
+
+            lblTituloPagoMixto.ForeColor =
+                esMixto ? Color.Black : Color.Gray;
+
+            lblTituloPago1.ForeColor =
+                esMixto ? Color.Black : Color.Gray;
+
+            lblTituloPago2.ForeColor =
+                esMixto ? Color.Black : Color.Gray;
+
+            lblMetodoPago1.ForeColor =
+                esMixto ? Color.Black : Color.Gray;
+
+            lblMontoPago1.ForeColor =
+                esMixto ? Color.Black : Color.Gray;
+
+            cmbMetodoPago2.FillColor =
+                esMixto ? Color.White : Color.Gainsboro;
+
+            cmbMetodoPago2.ForeColor =
+                esMixto ? Color.Black : Color.Gray;
+
+            // ============================================
+            // 5. TIPO DE TARJETA
+            // ============================================
+
+            bool esTarjeta =
+                esMixto &&
+                cmbMetodoPago2.Text == "Tarjeta";
+
+            // Débito y Crédito solo cuando elige Tarjeta.
+            cmbMetodoPago2.Visible = esTarjeta;
+            cmbMetodoPago2.Enabled = esTarjeta;
+
+            // ============================================
+            // 6. VERIFICAR SI ESTÁ SELECCIONADO MIXTO
+            // ============================================
+
+            if (!esMixto)
+            {
+                return;
+            }
+
+            // ============================================
+            // 7. PAGO 1: EFECTIVO FIJO
+            // ============================================
+
+            txtMetodoPago1.Text = "Efectivo";
+
+            decimal efectivo = numMontoPago1.Value;
+
+            // ============================================
+            // 8. CALCULAR EL SEGUNDO PAGO
+            // ============================================
+
+            decimal restante = total - efectivo;
+
+            if (restante < 0)
+            {
+                restante = 0;
+            }
+
+            // txtMontoPago2 es Guna2NumericUpDown.
+            if (txtMontoPago2.Maximum < restante)
+            {
+                txtMontoPago2.Maximum = restante;
+            }
+
+            txtMontoPago2.Value = restante;
+
+            // ============================================
+            // 9. ACTUALIZAR FORMA DE PAGO
+            // ============================================
+
+            if (cmbMetodoPago2.SelectedIndex >= 0)
+            {
+                lblBoletaFormaPago.Text =
+                    "Efectivo + " + cmbMetodoPago2.Text;
+            }
+            else
+            {
+                lblBoletaFormaPago.Text = "Mixto";
+            }
+        }
+
+
+        private void ConfigurarMetodosPagoMixto()
+        {
+            // Pago 1: efectivo obligatorio.
+            txtMetodoPago1.Text = "Efectivo";
+            txtMetodoPago1.ReadOnly = true;
+            numMontoPago1.DecimalPlaces = 2;
+            numMontoPago1.Minimum = 0;
+            numMontoPago1.Maximum = 1000000;
+
+            // Pago 2: TODOS LOS METODOS EXCEPTO EFECTIVO.
+            cmbMetodoPago2.Items.Clear();
+            cmbMetodoPago2.Items.Add("Yape");
+            cmbMetodoPago2.Items.Add("Plin");
+            cmbMetodoPago2.Items.Add("Tarjeta");
+            cmbMetodoPago2.Items.Add("Transferencia");
+            cmbMetodoPago2.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbMetodoPago2.SelectedIndex = -1;
+
+            // Este control es numerico, no TextBox.
+            txtMontoPago2.DecimalPlaces = 2;
+            txtMontoPago2.Minimum = 0;
+            txtMontoPago2.Maximum = 1000000;
+            txtMontoPago2.Enabled = false;
+            txtMontoPago2.Value = 0;
+
+            // ComboBox distinto: SOLO para tipo de tarjeta.
+            cmbMetodoPago2.Items.Clear();
+            cmbMetodoPago2.Items.Add("Débito");
+            cmbMetodoPago2.Items.Add("Crédito");
+            cmbMetodoPago2.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbMetodoPago2.SelectedIndex = -1;
+            cmbMetodoPago2.Visible = false;
+
+            // Vincular una sola vez desde el constructor.
+            rbPagoMixto.CheckedChanged +=
+                (s, e) => ActualizarImporteMixto();
+            rbPagoEfectivo.CheckedChanged +=
+                (s, e) => ActualizarImporteMixto();
+            rbPagoTarjeta.CheckedChanged +=
+                (s, e) => ActualizarImporteMixto();
+            rbPagoYape.CheckedChanged +=
+                (s, e) => ActualizarImporteMixto();
+            rbPagoMixto.CheckedChanged +=
+                (s, e) => ActualizarImporteMixto();
+            rbPagoTransferencia.CheckedChanged +=
+                (s, e) => ActualizarImporteMixto();
+            numMontoPago1.ValueChanged +=
+                (s, e) => ActualizarImporteMixto();
+            cmbMetodoPago2.SelectedIndexChanged +=
+                (s, e) =>
+                {
+                    // No conservar una tarjeta seleccionada
+                    // cuando cambia el segundo metodo de pago.
+                    cmbMetodoPago2.SelectedIndex = -1;
+                    ActualizarImporteMixto();
+                };
+            cmbMetodoPago2.SelectedIndexChanged +=
+                (s, e) => ActualizarImporteMixto();
+
+            ActualizarImporteMixto();
         }
 
 
@@ -163,6 +382,9 @@ namespace PROYECTO_RESTAURANTE
                 // Mostrar datos del pedido.
                 MostrarPedido();
 
+                // Calcular Pago 2 utilizando el total real del pedido.
+                ActualizarImporteMixto();
+
                 // Generar los códigos.
                 GenerarCodigos();
 
@@ -189,7 +411,7 @@ namespace PROYECTO_RESTAURANTE
         }
 
 
-       
+
 
         private void RegistrarCobroSQL(
             List<KeyValuePair<string, decimal>> pagos)
@@ -780,7 +1002,7 @@ namespace PROYECTO_RESTAURANTE
         {
 
 
-          
+
 
             // ======================================
             // 1. GENERAR NÚMERO DE BOLETA DE PRUEBA
@@ -1055,7 +1277,7 @@ namespace PROYECTO_RESTAURANTE
             {
                 metodoPago = "Yape";
             }
-            else if (rbPagoPlin.Checked)
+            else if (rbPagoMixto.Checked)
             {
                 metodoPago = "Plin";
             }
@@ -1111,8 +1333,9 @@ namespace PROYECTO_RESTAURANTE
                 rbPagoEfectivo.Checked ||
                 rbPagoTarjeta.Checked ||
                 rbPagoYape.Checked ||
-                rbPagoPlin.Checked ||
-                rbPagoTransferencia.Checked;
+                rbPagoMixto.Checked ||
+                rbPagoTransferencia.Checked ||
+                rbPagoMixto.Checked;
 
             if (!metodoSeleccionado)
             {
@@ -1146,12 +1369,63 @@ namespace PROYECTO_RESTAURANTE
                     return false;
                 }
             }
-
+            if (rbPagoMixto.Checked)
+            {
+                return ValidarPagoMixto();
+            }
             // Todas las validaciones son correctas.
             return true;
+
         }
 
 
+        private bool ValidarPagoMixto()
+        {
+            if (total <= 0)
+            {
+                MessageBox.Show("El total del pedido no es valido.",
+                    "Pago mixto", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return false;
+            }
+
+            decimal efectivo = numMontoPago1.Value;
+            decimal segundoPago = total - efectivo;
+
+            // Los dos pagos deben tener importe mayor que cero.
+            if (efectivo <= 0m || segundoPago <= 0m)
+            {
+                MessageBox.Show(
+                    "El efectivo debe ser mayor que cero y menor " +
+                    "que el total del pedido.",
+                    "Pago mixto", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return false;
+            }
+
+            // El segundo metodo nunca puede ser Efectivo.
+            if (cmbMetodoPago2.SelectedIndex == -1 ||
+                cmbMetodoPago2.Text == "Efectivo")
+            {
+                MessageBox.Show(
+                    "Seleccione Yape, Plin, Tarjeta o Transferencia " +
+                    "para el segundo pago.",
+                    "Pago mixto", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return false;
+            }
+
+            if (cmbMetodoPago2.Text == "Tarjeta" &&
+                cmbMetodoPago2.SelectedIndex == -1)
+            {
+                MessageBox.Show("Seleccione Debito o Credito.",
+                    "Pago mixto", MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return false;
+            }
+
+            return true;
+        }
 
 
         private void btnImprimirBoleta_Click(
@@ -1392,7 +1666,7 @@ namespace PROYECTO_RESTAURANTE
 
                 y += 22;
 
-              
+
 
                 g.DrawString(
                     numeroBoletaDemo,
@@ -1955,9 +2229,17 @@ namespace PROYECTO_RESTAURANTE
             {
                 metodo = "Yape";
             }
-            else if (rbPagoPlin.Checked)
+            else if (rbPagoMixto.Checked)
             {
                 metodo = "Plin";
+            }
+            else if (rbPagoMixto.Checked)
+            {
+                // Esta rutina guarda un UNICO pago.
+                // Mixto necesita dos importes en RegistrarCobroSQL.
+                throw new InvalidOperationException(
+                    "Pago mixto requiere registrar ambos medios " +
+                    "mediante RegistrarCobroSQL.");
             }
             else if (rbPagoTransferencia.Checked)
             {
@@ -2522,6 +2804,6 @@ namespace PROYECTO_RESTAURANTE
             this.Close();
         }
 
-       
+
     }
 }
