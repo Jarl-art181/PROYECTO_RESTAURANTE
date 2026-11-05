@@ -137,9 +137,7 @@ namespace PROYECTO_RESTAURANTE
             DataTable tabla = new DataTable();
 
             string conexionSQL =
-                @"Server=LAPTOP-GH63852S\SQLEXPRESS;
-          Database=AL_ESTILO_PIURA;
-          Integrated Security=True;";
+                BaseDatos.CadenaConexion;
 
             string consulta = @"
         SELECT

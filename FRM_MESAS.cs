@@ -22,9 +22,7 @@ namespace PROYECTO_RESTAURANTE
         // La tabla de reservas crea sus columnas una sola vez.
         private bool historialConfigurado = false;
         private readonly string cadenaConexion =
-    @"Server=LAPTOP-GH63852S\SQLEXPRESS;
-      Database=AL_ESTILO_PIURA;
-      Integrated Security=True;";
+    BaseDatos.CadenaConexion;
 
         public FRM_MESAS()
         {
@@ -48,14 +46,11 @@ namespace PROYECTO_RESTAURANTE
             this.DoubleBuffered = true;
 
             ConfigurarBotonesIniciales();
-
-            CargarContadoresMesas();
-            CargarEstadosMesas();
-
-            FiltrarMesas();
             PrepararSeleccionMesas();
 
-            CargarHistorialMesas();
+            // Los datos (contadores, tarjetas, reservas y filtro) se cargan
+            // al mostrarse la ventana (FRM_MESAS_VisibleChanged). Antes se
+            // cargaban aquí Y otra vez al mostrarse: consultas duplicadas.
         }
 
 
@@ -116,128 +111,93 @@ namespace PROYECTO_RESTAURANTE
                 return;
             }
 
-           
-
             // =====================================
-            // 2. SOLO CANCELAR RESERVAS
+            // 2. RESERVA: CANCELACIÓN EXPLÍCITA
             // =====================================
+            // Antes este botón solo cambiaba MESA a 'libre' y la
+            // reserva quedaba 'confirmada' para siempre (por ejemplo,
+            // la reserva N.º 6 de la Mesa 8). Ahora se identifica la
+            // reserva por su id_reserva y se cancela junto con la mesa
+            // en UNA transacción; la reserva queda en el historial.
 
-            if (lblDetalleEstado.Text.Trim().ToLower()
-                != "reservada")
+            ControlReservasAutomaticas.ReservaVigente reserva;
+            try
+            {
+                reserva = ControlReservasAutomaticas.ObtenerReservaConfirmada(mesaSeleccionada);
+            }
+            catch (Exception ex)
+            {
+                Registro.Error("Mesas", ex);
+                MessageBox.Show("No se pudo consultar la reserva:\n" + ex.Message,
+                    "Gestión de mesas", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (reserva == null)
             {
                 MessageBox.Show(
-                    "Por ahora, este botón solo permite " +
-                    "liberar mesas reservadas.\n\n" +
-                    "Las mesas ocupadas necesitan " +
-                    "validación del cobro y cierre " +
-                    "del pedido.",
+                    "La Mesa " + mesaSeleccionada + " no tiene reservas confirmadas.\n\n" +
+                    (lblDetalleEstado.Text.Trim().ToLower() == "libre"
+                        ? "Ya está libre."
+                        : "Las mesas ocupadas se liberan al registrar el cobro."),
                     "Liberar mesa",
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                    MessageBoxIcon.Information);
 
+                ActualizarTodo();
                 return;
             }
-
-            // =====================================
-            // 3. CONFIRMAR OPERACIÓN
-            // =====================================
 
             DialogResult respuesta = MessageBox.Show(
-                "¿Desea cancelar la reserva de la Mesa " +
-                mesaSeleccionada + "?",
-                "Confirmar liberación",
+                "Se cancelará la reserva:\n\n" +
+                "Reserva N.º " + reserva.IdReserva + "\n" +
+                "Mesa: " + reserva.NumeroMesa + "\n" +
+                "Cliente: " + reserva.Cliente + "\n" +
+                "Fecha y hora: " + reserva.FechaHora.ToString("dd/MM/yyyy HH:mm") + "\n\n" +
+                "La reserva quedará registrada como cancelada en el historial.\n" +
+                "¿Desea cancelarla?",
+                "Cancelar reserva",
                 MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
 
             if (respuesta != DialogResult.Yes)
-            {
                 return;
-            }
-
-            // =====================================
-            // 4. ACTUALIZAR SQL SERVER
-            // =====================================
-
-            string sql = @"
-        UPDATE M
-        SET estado = 'libre'
-        FROM dbo.MESA M
-        WHERE M.[número] = @NumeroMesa
-          AND M.id_sucursal = @Sucursal
-          AND LOWER(LTRIM(RTRIM(M.estado)))
-              = 'reservada'
-          AND NOT EXISTS
-          (
-              SELECT 1
-              FROM dbo.PEDIDO P
-              WHERE P.id_mesa = M.id_mesa
-                AND P.estado IN
-                (
-                    'pendiente',
-                    'en_preparacion',
-                    'listo',
-                    'entregado'
-                )
-          );";
 
             try
             {
-                using (SqlConnection conexion =
-                    new SqlConnection(cadenaConexion))
-                using (SqlCommand cmd =
-                    new SqlCommand(sql, conexion))
-                {
-                    cmd.Parameters.Add(
-                        "@NumeroMesa",
-                        SqlDbType.Int).Value =
-                        mesaSeleccionada;
+                bool liberada = ControlReservasAutomaticas.CancelarReserva(reserva.IdReserva);
 
-                    cmd.Parameters.Add(
-                        "@Sucursal",
-                        SqlDbType.Int).Value = 1;
-
-                    conexion.Open();
-
-                    int filas = cmd.ExecuteNonQuery();
-
-                    if (filas != 1)
-                    {
-                        MessageBox.Show(
-                            "No se pudo liberar la mesa.\n" +
-                            "Compruebe su estado actual.",
-                            "Gestión de mesas",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
-
-                        return;
-                    }
-                }
-
-                // =====================================
-                // 5. ACTUALIZAR LOS CONTROLES
-                // =====================================
-
-                CargarContadoresMesas();
-                CargarEstadosMesas();
-                CargarDetalleMesa();
-                FiltrarMesas();
+                ActualizarTodo();
 
                 MessageBox.Show(
-                    "Mesa " + mesaSeleccionada +
-                    " liberada correctamente.",
+                    "Reserva N.º " + reserva.IdReserva + " cancelada." +
+                    (liberada
+                        ? "\nMesa " + reserva.NumeroMesa + " disponible."
+                        : "\nEl estado de la mesa no cambió (tiene otra reserva o un pedido activo)."),
                     "Gestión de mesas",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
+                Registro.Error("Mesas", ex);
+                ActualizarTodo();
                 MessageBox.Show(
-                    "Error al liberar la mesa:\n" +
-                    ex.Message,
+                    "No se pudo cancelar la reserva:\n" + ex.Message,
                     "Gestión de mesas",
                     MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                    MessageBoxIcon.Warning);
             }
+        }
+
+        // Refresca tarjetas, contadores, detalle, filtros y reservas.
+        private void ActualizarTodo()
+        {
+            CargarContadoresMesas();
+            CargarEstadosMesas();
+            CargarHistorialMesas();
+            CargarDetalleMesa();
         }
 
 
@@ -259,20 +219,13 @@ namespace PROYECTO_RESTAURANTE
                 THEN 1
             END) AS MesasOcupadas,
 
-            (
-                SELECT COUNT(DISTINCT R.id_mesa)
-                FROM dbo.RESERVA_MESA R
-
-                INNER JOIN dbo.MESA M2
-                    ON R.id_mesa = M2.id_mesa
-
-                WHERE M2.id_sucursal = @Sucursal
-                  AND R.estado = 'confirmada'
-                  AND DATEADD(
-                      MINUTE, 120, R.fecha_hora
-                  ) > SYSDATETIME()
-
-            ) AS MesasReservadas
+            -- Mismo dato que las tarjetas y el filtro Reservada
+            -- (antes se contaba RESERVA_MESA y no coincidía con MESA).
+            COUNT(CASE
+                WHEN LOWER(LTRIM(RTRIM(M.estado))) =
+                    'reservada'
+                THEN 1
+            END) AS MesasReservadas
 
         FROM dbo.MESA M
 
@@ -1635,6 +1588,23 @@ FROM dbo.MESA M
 
 
         }
+        // true si el pedido quedó cobrado y su mesa ya está libre.
+        private static bool MesaLiberadaPorCobro(
+            SqlConnection conexion, SqlTransaction transaccion, int idPedido)
+        {
+            using (SqlCommand cmd = new SqlCommand(@"
+                SELECT COUNT(*)
+                FROM dbo.PEDIDO P
+                INNER JOIN dbo.MESA M ON M.id_mesa = P.id_mesa
+                WHERE P.id_pedido = @Pedido
+                  AND P.estado = 'cobrado'
+                  AND M.estado = 'libre';", conexion, transaccion))
+            {
+                cmd.Parameters.Add("@Pedido", SqlDbType.Int).Value = idPedido;
+                return Convert.ToInt32(cmd.ExecuteScalar()) == 1;
+            }
+        }
+
         private void CobrarYLiberarMesaOcupada()
         {
             try
@@ -1744,12 +1714,15 @@ FROM dbo.MESA M
                             AND P.id_mesa = M.id_mesa
                             AND P.canal = 'salon'
                             AND P.estado = 'cobrado'
-                            AND EXISTS
+                            -- El cobro se registra en PAGO (antes solo
+                            -- se aceptaba VENTA_INTERNA, que nunca se
+                            -- escribe, y la mesa no se liberaba jamás).
+                            AND
                             (
-                                SELECT 1
-                                FROM dbo.VENTA_INTERNA V
-                                WHERE V.id_pedido =
-                                      P.id_pedido
+                                EXISTS (SELECT 1 FROM dbo.PAGO PG
+                                        WHERE PG.id_pedido = P.id_pedido)
+                                OR EXISTS (SELECT 1 FROM dbo.VENTA_INTERNA V
+                                           WHERE V.id_pedido = P.id_pedido)
                             )
                       )
 
@@ -1781,6 +1754,11 @@ FROM dbo.MESA M
                                 idPedido;
 
                             int filas = cmd.ExecuteNonQuery();
+
+                            // El cobro ya libera la mesa en su propia
+                            // transacción: si quedó libre, todo correcto.
+                            if (filas != 1 && MesaLiberadaPorCobro(conexion, transaccion, idPedido))
+                                filas = 1;
 
                             if (filas != 1)
                             {

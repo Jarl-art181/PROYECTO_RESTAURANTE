@@ -22,9 +22,7 @@ namespace PROYECTO_RESTAURANTE
         private Random aleatorio = new Random();
         private string numeroBoletaDemo = "";
         private readonly string cadenaConexion =
-            @"Server=LAPTOP-GH63852S\SQLEXPRESS;
-      Database=AL_ESTILO_PIURA;
-      Integrated Security=True;";
+            BaseDatos.CadenaConexion;
 
         // Datos del pedido seleccionado
         private int idPedido = 0;

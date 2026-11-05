@@ -14,9 +14,7 @@ namespace PROYECTO_RESTAURANTE
         private static readonly TimeSpan HoraCierre = new TimeSpan(21, 30, 0);
 
         private readonly string cadenaConexion =
-            @"Server=LAPTOP-GH63852S\SQLEXPRESS;
-              Database=AL_ESTILO_PIURA;
-              Integrated Security=True;";
+            BaseDatos.CadenaConexion;
 
         public RESERVAR_MESA()
         {

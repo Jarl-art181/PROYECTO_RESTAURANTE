@@ -19,9 +19,7 @@ namespace PROYECTO_RESTAURANTE
         // ==========================================
 
         private readonly string cadenaConexion =
-            @"Server=LAPTOP-GH63852S\SQLEXPRESS;
-              Database=AL_ESTILO_PIURA;
-              Integrated Security=True;";
+            BaseDatos.CadenaConexion;
 
         private Action reiniciarFiltroProductos;
 

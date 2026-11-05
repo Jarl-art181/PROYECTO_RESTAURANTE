@@ -13,9 +13,7 @@ namespace PROYECTO_RESTAURANTE
     public partial class FRM_INICIO : Form, IActualizableAlMostrar
     {
 
-        private readonly string cadenaConexion = @"Server=LAPTOP-GH63852S\SQLEXPRESS;
-        Database=AL_ESTILO_PIURA;
-        Integrated Security=True;";
+        private readonly string cadenaConexion = BaseDatos.CadenaConexion;
         private Image imagenLibre;
         private Image imagenOcupada;
         private Image imagenReservada;

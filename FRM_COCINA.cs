@@ -6,6 +6,8 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PROYECTO_RESTAURANTE
@@ -15,9 +17,7 @@ namespace PROYECTO_RESTAURANTE
         private const int IdSucursal = 1;
 
         private readonly string cadenaConexion =
-            @"Server=LAPTOP-GH63852S\SQLEXPRESS;
-              Database=AL_ESTILO_PIURA;
-              Integrated Security=True;";
+            BaseDatos.CadenaConexion;
 
         private readonly List<PedidoCocina> pedidos = new List<PedidoCocina>();
         private readonly Timer temporizadorCocina = new Timer();
@@ -157,14 +157,19 @@ namespace PROYECTO_RESTAURANTE
             }
         }
 
-        private void CargarPedidosSQL()
-        {
-            if (cargando || IsDisposed || !Visible)
-                return;
-
-            cargando = true;
-
-            const string sql = @"
+        // ======================================================
+        // CARGA DE PEDIDOS (asíncrona)
+        // ------------------------------------------------------
+        // * La consulta se ejecuta en segundo plano: la interfaz
+        //   no se congela aunque SQL Server tarde en responder.
+        // * Solo se reconstruyen las tarjetas si los pedidos
+        //   cambiaron (o cambió el minuto, para "Hace N min").
+        // * Si falla, se conservan los últimos datos, se avisa en
+        //   la cabecera (sin ventanas bloqueantes), se registra en
+        //   el archivo de diagnóstico y se reintenta con espera
+        //   creciente (10 → 20 → 40 → 60 s).
+        // ======================================================
+        private const string SqlPedidosCocina = @"
                 SELECT
                     P.id_pedido,
                     P.canal,
@@ -208,21 +213,30 @@ namespace PROYECTO_RESTAURANTE
                   AND D.NombreProducto IS NOT NULL
                 ORDER BY P.fecha_hora ASC, P.id_pedido ASC, D.NombreProducto ASC;";
 
+        private const int IntervaloNormal = 10000;
+        private string firmaPedidos = null;
+        private int fallosSeguidos = 0;
+        private Label lblEstadoConexion;
+
+        private async void CargarPedidosSQL()
+        {
+            if (cargando || IsDisposed || !Visible)
+                return;
+
+            cargando = true;
+
             try
             {
-                DataTable datos = new DataTable();
-                using (SqlConnection conexion = new SqlConnection(cadenaConexion))
-                using (SqlCommand cmd = new SqlCommand(sql, conexion))
-                {
-                    cmd.CommandTimeout = 30;
-                    cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
-                    using (SqlDataAdapter adaptador = new SqlDataAdapter(cmd))
-                        adaptador.Fill(datos);
-                }
+                string cadena = cadenaConexion;
+                DataTable datos = await Task.Run(() => ConsultarPedidos(cadena));
 
-                pedidos.Clear();
-                Dictionary<int, PedidoCocina> indice =
-                    new Dictionary<int, PedidoCocina>();
+                if (IsDisposed)
+                    return;
+
+                List<PedidoCocina> nuevos = new List<PedidoCocina>();
+                Dictionary<int, PedidoCocina> indice = new Dictionary<int, PedidoCocina>();
+                StringBuilder firma = new StringBuilder();
+                DateTime hora = DateTime.Now;
 
                 foreach (DataRow fila in datos.Rows)
                 {
@@ -237,29 +251,97 @@ namespace PROYECTO_RESTAURANTE
                         pedido.Estado = Convert.ToString(fila["estado"]).Trim().ToLowerInvariant();
                         pedido.FechaHora = Convert.ToDateTime(fila["fecha_hora"]);
                         indice.Add(id, pedido);
-                        pedidos.Add(pedido);
+                        nuevos.Add(pedido);
+                        firma.Append('|').Append(id).Append(':').Append(pedido.Estado);
                     }
 
                     int cantidad = Convert.ToInt32(fila["Cantidad"]);
                     string nombre = Convert.ToString(fila["NombreProducto"]);
                     pedido.Productos.Add(cantidad + " x " + nombre);
-                    horaServidor = Convert.ToDateTime(fila["HoraServidor"]);
+                    firma.Append(',').Append(cantidad).Append(nombre);
+                    hora = Convert.ToDateTime(fila["HoraServidor"]);
                 }
+
+                // Conexión correcta: restablecer el ciclo normal.
+                if (fallosSeguidos > 0)
+                    Registro.Info("Cocina", "Carga restablecida tras " + fallosSeguidos + " intento(s) fallido(s).");
+                fallosSeguidos = 0;
+                temporizadorCocina.Interval = IntervaloNormal;
+                MostrarEstadoConexion(null);
+
+                // El minuto entra en la firma para refrescar "Hace N min".
+                firma.Append("#").Append(hora.ToString("yyyyMMddHHmm"));
+                string nuevaFirma = firma.ToString();
+
+                if (nuevaFirma == firmaPedidos)
+                    return;   // Nada cambió: no se reconstruyen las tarjetas.
+
+                firmaPedidos = nuevaFirma;
+                horaServidor = hora;
+                pedidos.Clear();
+                pedidos.AddRange(nuevos);
 
                 ActualizarContadores();
                 MostrarPedidos();
             }
             catch (Exception ex)
             {
-                temporizadorCocina.Stop();
-                MessageBox.Show(
-                    "No se pudieron cargar los pedidos de cocina:\n" + ex.Message,
-                    "Panel de Cocina", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (IsDisposed)
+                    return;
+
+                fallosSeguidos++;
+                Registro.Error("Cocina", ex);
+
+                int espera = Math.Min(60000, IntervaloNormal * (1 << Math.Min(fallosSeguidos, 3)));
+                temporizadorCocina.Interval = espera;
+
+                MostrarEstadoConexion(
+                    "⚠ SQL Server no respondió (" + DateTime.Now.ToString("HH:mm:ss") +
+                    "). Se muestran los últimos pedidos; nuevo intento en " + (espera / 1000) + " s.");
             }
             finally
             {
                 cargando = false;
             }
+        }
+
+        // Se ejecuta en segundo plano: no toca controles.
+        private static DataTable ConsultarPedidos(string cadena)
+        {
+            DataTable datos = new DataTable();
+            using (SqlConnection conexion = new SqlConnection(cadena))
+            using (SqlCommand cmd = new SqlCommand(SqlPedidosCocina, conexion))
+            {
+                cmd.CommandTimeout = 20;
+                cmd.Parameters.Add("@Sucursal", SqlDbType.Int).Value = IdSucursal;
+                using (SqlDataAdapter adaptador = new SqlDataAdapter(cmd))
+                    adaptador.Fill(datos);
+            }
+            return datos;
+        }
+
+        // Aviso no bloqueante en la cabecera amarilla.
+        private void MostrarEstadoConexion(string mensaje)
+        {
+            if (lblEstadoConexion == null)
+            {
+                if (string.IsNullOrEmpty(mensaje))
+                    return;
+
+                lblEstadoConexion = new Label();
+                lblEstadoConexion.AutoSize = false;
+                lblEstadoConexion.BackColor = Color.Transparent;
+                lblEstadoConexion.ForeColor = Color.Firebrick;
+                lblEstadoConexion.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+                lblEstadoConexion.TextAlign = ContentAlignment.MiddleRight;
+                lblEstadoConexion.Location = new Point(560, 48);
+                lblEstadoConexion.Size = new Size(620, 24);
+                guna2Panel3.Controls.Add(lblEstadoConexion);
+                lblEstadoConexion.BringToFront();
+            }
+
+            lblEstadoConexion.Text = mensaje ?? "";
+            lblEstadoConexion.Visible = !string.IsNullOrEmpty(mensaje);
         }
 
         private void ActualizarContadores()

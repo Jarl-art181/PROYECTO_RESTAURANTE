@@ -57,6 +57,7 @@
     <Reference Include="System">
       <HintPath>C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.dll</HintPath>
     </Reference>
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Design" />
     <Reference Include="System.Management" />
@@ -170,6 +171,7 @@
     </Compile>
     <Compile Include="Navegador.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Registro.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SesionActual.cs" />
     <EmbeddedResource Include="FRMS_PEDIDOS.resx">
