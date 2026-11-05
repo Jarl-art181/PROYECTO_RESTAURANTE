@@ -300,46 +300,50 @@ namespace PROYECTO_RESTAURANTE
 
 
 
+
         private void CargarVentasHoy()
         {
-            // =====================================
-            // 1. CONSULTAR TODAS LAS VENTAS
-            // =====================================
-
             string sql = @"
+        WITH PagosPorPedido AS
+        (
+            SELECT
+                PG.id_pedido,
+                SUM(PG.importe) AS importe
+            FROM dbo.PAGO PG
+            INNER JOIN dbo.PEDIDO P
+                ON P.id_pedido = PG.id_pedido
+            WHERE P.id_sucursal = @Sucursal
+              AND P.estado <> 'cancelado'
+            GROUP BY PG.id_pedido
+        ),
+        VentasInternas AS
+        (
+            SELECT
+                VI.id_pedido,
+                VI.importe
+            FROM dbo.VENTA_INTERNA VI
+            INNER JOIN dbo.PEDIDO P
+                ON P.id_pedido = VI.id_pedido
+            WHERE P.id_sucursal = @Sucursal
+              AND P.estado <> 'cancelado'
+              AND NOT EXISTS
+              (
+                  SELECT 1
+                  FROM dbo.PAGO PG
+                  WHERE PG.id_pedido = VI.id_pedido
+              )
+        )
         SELECT
             COUNT(*) AS CantidadVentas,
             ISNULL(SUM(V.importe), 0) AS TotalVentas
         FROM
         (
-            -- Pagos registrados.
-            SELECT
-                PG.id_pedido,
-                SUM(PG.importe) AS importe
-            FROM dbo.PAGO PG
-            GROUP BY PG.id_pedido
+            SELECT importe FROM PagosPorPedido
 
             UNION ALL
 
-            -- Ventas internas sin pago duplicado.
-            SELECT
-                VI.id_pedido,
-                VI.importe
-            FROM dbo.VENTA_INTERNA VI
-            WHERE NOT EXISTS
-            (
-                SELECT 1
-                FROM dbo.PAGO PG
-                WHERE PG.id_pedido = VI.id_pedido
-            )
-        ) V
-
-        INNER JOIN dbo.PEDIDO P
-            ON P.id_pedido = V.id_pedido
-
-        WHERE P.id_sucursal = @Sucursal
-          AND LOWER(LTRIM(RTRIM(P.estado)))
-              <> 'cancelado';";
+            SELECT importe FROM VentasInternas
+        ) V;";
 
             try
             {
@@ -351,6 +355,9 @@ namespace PROYECTO_RESTAURANTE
                     cmd.Parameters.Add(
                         "@Sucursal", SqlDbType.Int).Value = 1;
 
+                    // Tiempo de espera temporal.
+                    cmd.CommandTimeout = 60;
+
                     conexion.Open();
 
                     using (SqlDataReader lector =
@@ -358,18 +365,43 @@ namespace PROYECTO_RESTAURANTE
                     {
                         if (lector.Read())
                         {
-                           
-                            decimal ventas = Convert.ToDecimal(
-                                lector["TotalVentas"]);
+                            decimal ventas =
+                                Convert.ToDecimal(
+                                    lector["TotalVentas"]);
 
-                            // Mostrar el importe acumulado.
                             lblVentasHoy.Text =
                                 "S/ " + ventas.ToString("N2");
 
-                            // Mostrar cuántas ventas existen.
-                            guna2HtmlLabel3.Text = "VENTAS TOTALES";
+                            guna2HtmlLabel3.Text =
+                                "VENTAS TOTALES";
                         }
                     }
+                }
+            }
+            catch (SqlException ex)
+            {
+                lblVentasHoy.Text = "No disponible";
+
+                if (ex.Number == -2)
+                {
+                    MessageBox.Show(
+                        "SQL Server tardó demasiado en " +
+                        "consultar las ventas.\n\n" +
+                        "Es posible que exista una " +
+                        "transacción bloqueando las tablas.\n\n" +
+                        "Detalle: " + ex.Message,
+                        "Tiempo de espera agotado",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Error de SQL Server:\n" +
+                        ex.Message,
+                        "INICIO",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
@@ -384,6 +416,7 @@ namespace PROYECTO_RESTAURANTE
                     MessageBoxIcon.Error);
             }
         }
+
 
 
 

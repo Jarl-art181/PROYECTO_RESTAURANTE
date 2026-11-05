@@ -613,13 +613,16 @@ namespace PROYECTO_RESTAURANTE
             }
 
             // ==========================================
-            // CONECTAR BOTÓN LIMPIAR
+            // BOTÓN LIMPIAR
             // ==========================================
 
+            // btnLimpiarPedido ya llama a btnLimpiarPedido_Click
+            // desde el Designer (con confirmación).
+            // No se conecta un segundo manejador: solo se
+            // retira cualquier conexión duplicada.
             if (btnLimpiar != null)
             {
                 btnLimpiar.Click -= LimpiarPedido_Click;
-                btnLimpiar.Click += LimpiarPedido_Click;
             }
 
             // ==========================================

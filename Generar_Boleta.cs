@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Guna.UI2.WinForms;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -101,6 +102,16 @@ namespace PROYECTO_RESTAURANTE
             this.Shown += Generar_Boleta_Shown;
 
             ConfigurarMetodosPagoMixto();
+            // El Designer ya conecta btnRegistrarCobro_Click.
+            // Quitar y volver a agregar deja UNA sola conexión,
+            // aunque el Designer cambie en el futuro.
+            btnRegistrarCobro.Click -= btnRegistrarCobro_Click;
+            btnRegistrarCobro.Click += btnRegistrarCobro_Click;
+
+            // El texto "Cobrar" está sobre el botón.
+            // También debe responder al clic (una sola vez).
+            guna2HtmlLabel22.Click -= btnRegistrarCobro_Click;
+            guna2HtmlLabel22.Click += btnRegistrarCobro_Click;
 
         }
 
@@ -215,13 +226,13 @@ namespace PROYECTO_RESTAURANTE
             // 5. TIPO DE TARJETA
             // ============================================
 
-            bool esTarjeta =
-                esMixto &&
-                cmbMetodoPago2.Text == "Tarjeta";
+            // El ComboBox de Pago 2 siempre permanece visible.
+            cmbMetodoPago2.Visible = true;
 
-            // Débito y Crédito solo cuando elige Tarjeta.
-            cmbMetodoPago2.Visible = esTarjeta;
-            cmbMetodoPago2.Enabled = esTarjeta;
+            // Solo se habilita cuando seleccionas Mixto.
+            cmbMetodoPago2.Enabled = esMixto;
+
+
 
             // ============================================
             // 6. VERIFICAR SI ESTÁ SELECCIONADO MIXTO
@@ -275,67 +286,62 @@ namespace PROYECTO_RESTAURANTE
         }
 
 
+
         private void ConfigurarMetodosPagoMixto()
         {
-            // Pago 1: efectivo obligatorio.
+            // PAGO 1: SIEMPRE EFECTIVO
             txtMetodoPago1.Text = "Efectivo";
             txtMetodoPago1.ReadOnly = true;
+
             numMontoPago1.DecimalPlaces = 2;
             numMontoPago1.Minimum = 0;
             numMontoPago1.Maximum = 1000000;
 
-            // Pago 2: TODOS LOS METODOS EXCEPTO EFECTIVO.
+            // PAGO 2: TODOS LOS MÉTODOS MENOS EFECTIVO
             cmbMetodoPago2.Items.Clear();
+
             cmbMetodoPago2.Items.Add("Yape");
             cmbMetodoPago2.Items.Add("Plin");
             cmbMetodoPago2.Items.Add("Tarjeta");
             cmbMetodoPago2.Items.Add("Transferencia");
-            cmbMetodoPago2.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            cmbMetodoPago2.DropDownStyle =
+                ComboBoxStyle.DropDownList;
+
             cmbMetodoPago2.SelectedIndex = -1;
 
-            // Este control es numerico, no TextBox.
+            // MONTO DEL SEGUNDO PAGO: AUTOMÁTICO
             txtMontoPago2.DecimalPlaces = 2;
             txtMontoPago2.Minimum = 0;
             txtMontoPago2.Maximum = 1000000;
             txtMontoPago2.Enabled = false;
             txtMontoPago2.Value = 0;
 
-            // ComboBox distinto: SOLO para tipo de tarjeta.
-            cmbMetodoPago2.Items.Clear();
-            cmbMetodoPago2.Items.Add("Débito");
-            cmbMetodoPago2.Items.Add("Crédito");
-            cmbMetodoPago2.DropDownStyle = ComboBoxStyle.DropDownList;
-            cmbMetodoPago2.SelectedIndex = -1;
-            cmbMetodoPago2.Visible = false;
-
-            // Vincular una sola vez desde el constructor.
+            // EVENTOS: CONECTAR UNA SOLA VEZ
             rbPagoMixto.CheckedChanged +=
                 (s, e) => ActualizarImporteMixto();
+
             rbPagoEfectivo.CheckedChanged +=
                 (s, e) => ActualizarImporteMixto();
+
             rbPagoTarjeta.CheckedChanged +=
                 (s, e) => ActualizarImporteMixto();
+
             rbPagoYape.CheckedChanged +=
                 (s, e) => ActualizarImporteMixto();
-            rbPagoMixto.CheckedChanged +=
-                (s, e) => ActualizarImporteMixto();
+
             rbPagoTransferencia.CheckedChanged +=
                 (s, e) => ActualizarImporteMixto();
+
             numMontoPago1.ValueChanged +=
                 (s, e) => ActualizarImporteMixto();
-            cmbMetodoPago2.SelectedIndexChanged +=
-                (s, e) =>
-                {
-                    // No conservar una tarjeta seleccionada
-                    // cuando cambia el segundo metodo de pago.
-                    cmbMetodoPago2.SelectedIndex = -1;
-                    ActualizarImporteMixto();
-                };
+
             cmbMetodoPago2.SelectedIndexChanged +=
                 (s, e) => ActualizarImporteMixto();
 
             ActualizarImporteMixto();
         }
+
 
 
         private void Generar_Boleta_Shown(object sender, EventArgs e)
@@ -1277,7 +1283,7 @@ namespace PROYECTO_RESTAURANTE
             {
                 metodoPago = "Yape";
             }
-            else if (rbPagoMixto.Checked)
+            else if (rbPagoPlin.Checked)
             {
                 metodoPago = "Plin";
             }
@@ -1330,13 +1336,12 @@ namespace PROYECTO_RESTAURANTE
 
             // 3. Verificar la forma de pago.
             bool metodoSeleccionado =
-                rbPagoEfectivo.Checked ||
-                rbPagoTarjeta.Checked ||
-                rbPagoYape.Checked ||
-                rbPagoMixto.Checked ||
-                rbPagoTransferencia.Checked ||
-                rbPagoMixto.Checked;
-
+    rbPagoEfectivo.Checked ||
+    rbPagoTarjeta.Checked ||
+    rbPagoYape.Checked ||
+    rbPagoPlin.Checked ||
+    rbPagoTransferencia.Checked ||
+    rbPagoMixto.Checked;
             if (!metodoSeleccionado)
             {
                 MessageBox.Show(
@@ -2804,6 +2809,147 @@ namespace PROYECTO_RESTAURANTE
             this.Close();
         }
 
+        private void btnRegistrarCobro_Click(object sender, EventArgs e)
+        {
+            // Validar el pedido y la forma de pago.
+            if (!ValidarPago())
+                return;
 
+            List<KeyValuePair<string, decimal>> pagos =
+                new List<KeyValuePair<string, decimal>>();
+
+            try
+            {
+                // ======================================
+                // 1. PAGO MIXTO
+                // ======================================
+                if (rbPagoMixto.Checked)
+                {
+                    decimal efectivo = numMontoPago1.Value;
+                    decimal segundoPago = total - efectivo;
+
+                    string metodo2 = cmbMetodoPago2.Text.Trim();
+
+                    if (efectivo <= 0 || segundoPago <= 0)
+                    {
+                        MessageBox.Show(
+                            "Los dos pagos deben ser mayores que cero.");
+                        return;
+                    }
+
+                    if (metodo2 != "Yape" &&
+                        metodo2 != "Plin" &&
+                        metodo2 != "Tarjeta" &&
+                        metodo2 != "Transferencia")
+                    {
+                        MessageBox.Show(
+                            "Seleccione el segundo método de pago.");
+                        return;
+                    }
+
+                    pagos.Add(
+                        new KeyValuePair<string, decimal>(
+                            "Efectivo", efectivo));
+
+                    pagos.Add(
+                        new KeyValuePair<string, decimal>(
+                            metodo2, segundoPago));
+                }
+                else
+                {
+                    // ======================================
+                    // 2. PAGO CON UN SOLO MÉTODO
+                    // ======================================
+                    string metodo = "";
+
+                    if (rbPagoEfectivo.Checked)
+                        metodo = "Efectivo";
+
+                    else if (rbPagoYape.Checked)
+                        metodo = "Yape";
+
+                    else if (rbPagoTarjeta.Checked)
+                        metodo = "Tarjeta";
+
+                    else if (rbPagoTransferencia.Checked)
+                        metodo = "Transferencia";
+
+                   
+                    else if (rbPagoPlin.Checked)
+                        metodo = "Plin";
+
+                    if (metodo == "")
+                    {
+                        MessageBox.Show(
+                            "Seleccione una forma de pago.");
+                        return;
+                    }
+
+                    pagos.Add(
+                        new KeyValuePair<string, decimal>(
+                            metodo, total));
+                }
+
+                // ======================================
+                // 3. CONFIRMAR EL COBRO
+                // ======================================
+                DialogResult respuesta = MessageBox.Show(
+                    "Pedido N.º " + idPedido +
+                    "\nTotal: S/ " + total.ToString("N2") +
+                    "\n\n¿Desea confirmar el cobro?",
+                    "Confirmar cobro",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (respuesta != DialogResult.Yes)
+                    return;
+
+                // Evitar doble clic mientras se procesa.
+                btnRegistrarCobro.Enabled = false;
+                guna2HtmlLabel22.Enabled = false;
+
+                // ======================================
+                // 4. GUARDAR EN SQL SERVER
+                // ======================================
+                RegistrarCobroSQL(pagos);
+
+                // Actualizar el texto del comprobante.
+                if (rbPagoMixto.Checked)
+                {
+                    lblBoletaFormaPago.Text =
+                        "Efectivo + " + cmbMetodoPago2.Text;
+                }
+                else
+                {
+                    lblBoletaFormaPago.Text = pagos[0].Key;
+                }
+
+                // El pedido ya se cobró.
+                // Permitir imprimir, sin volver a cobrar.
+                btnImprimirBoleta.Enabled = true;
+
+                MessageBox.Show(
+                    "Cobro registrado correctamente.\n\n" +
+                    "Pedido N.º " + idPedido +
+                    "\nTotal: S/ " + total.ToString("N2") +
+                    "\n\nYa puede imprimir el recibo.",
+                    "Cobro exitoso",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                // Si falló el registro, permitir reintentar.
+                btnRegistrarCobro.Enabled = true;
+                guna2HtmlLabel22.Enabled = true;
+
+                MessageBox.Show(
+                    "No se pudo registrar el cobro:\n\n" +
+                    ex.Message,
+                    "Error de cobro",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
     }
 }
