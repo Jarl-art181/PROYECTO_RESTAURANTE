@@ -138,6 +138,7 @@ namespace PROYECTO_RESTAURANTE
             ConfigurarColumnaEliminar();
             AjustarTablasPedidos();
             CrearSelectorPromocion();
+            CrearBotonReimprimir();
             // Activar el botón X de la tabla derecha.
             dgvDetallePedido.CellContentClick -= dgvDetallePedido_CellContentClick;
             dgvDetallePedido.CellContentClick += dgvDetallePedido_CellContentClick;
@@ -3911,6 +3912,33 @@ AND NOT EXISTS
                     : (nota != null ? Color.Firebrick : Color.DimGray);
                 consejoPromocion.SetToolTip(lblDescuentoPromo, nota ?? "");
             }
+        }
+
+        // Botón "Reimprimir recibo" a la derecha del título
+        // "Pedidos Guardados" (Administrador y Cajero).
+        private void CrearBotonReimprimir()
+        {
+            Control titulo = Controls.Find("guna2HtmlLabel9", true).FirstOrDefault(c => c.Text == "Pedidos Guardados");
+            Control tabla = BuscarControl("dgvPedidos") ?? BuscarControl("dgvListaPedidos");
+            if (titulo == null || titulo.Parent == null)
+                return;
+
+            Control panel = titulo.Parent;
+            int derecha = tabla != null && tabla.Parent == panel ? tabla.Right : panel.ClientSize.Width - 10;
+            Guna2Button boton = new Guna2Button
+            {
+                Text = "Reimprimir recibo",
+                BorderRadius = 10,
+                FillColor = Color.Gold,
+                ForeColor = Color.Black,
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            panel.Controls.Add(boton);
+            boton.Bounds = new Rectangle(derecha - 170, titulo.Top - 4, 170, 32);
+            boton.BringToFront();
+            boton.Visible = SesionActual.Iniciada && Permisos.PuedeCobrar(SesionActual.Cargo);
+            boton.Click += (s, e) => Generar_Boleta.ReimprimirRecibo(this);
         }
 
         // ==========================================

@@ -19,8 +19,38 @@ namespace PROYECTO_RESTAURANTE
 
 
 
-        private Random aleatorio = new Random();
+        // Número que muestran la vista previa, el QR y la impresión:
+        // "PEDIDO-000021" antes del cobro y el número del recibo
+        // guardado (R001-00000001) después del cobro o al reimprimir.
         private string numeroBoletaDemo = "";
+
+        // ==================================================
+        // RECIBO INTERNO Y DATOS DEL CLIENTE (aprobado)
+        // ==================================================
+        // Se guarda en dbo.COMPROBANTE con la serie interna R001 (no es
+        // la serie B001 de una boleta electrónica SUNAT). Un recibo por
+        // pedido (UQ_COMPROBANTE_PEDIDO) y número único por serie.
+        private const string SerieRecibo = "R001";
+        // SUNAT exige DNI/CE y nombre en boletas electrónicas > S/ 700
+        // (R.S. 303-2018). Aquí solo se avisa: el recibo es interno.
+        private const decimal MontoIdentificacionSunat = 700m;
+        private const string NotaInterna = "Documento interno - no es comprobante electrónico SUNAT";
+
+        private string numeroRecibo;               // R001-00000001
+        private int? idClienteSeleccionado;        // cliente registrado (se vincula al pedido)
+        private string documentoClienteRegistrado;
+        private bool cargandoCliente;
+        private string formaPagoGuardada;          // reimpresión
+        private string cajeroRecibo;               // quien cobró
+        private Guna2CheckBox chkIncluirCliente;
+        private Guna2Button btnBuscarCliente;
+        private Label lblPrevCliente;
+        private Label lblPrevDocumento;
+        private Dictionary<Control, int> topsVistaPrevia;
+        private readonly ToolTip consejosBoleta = new ToolTip();
+
+        // true: abrir un pedido ya cobrado solo para reimprimir su recibo.
+        public bool ModoReimpresion { get; set; }
         private readonly string cadenaConexion =
             BaseDatos.CadenaConexion;
 
@@ -122,6 +152,297 @@ namespace PROYECTO_RESTAURANTE
             guna2HtmlLabel22.Click -= btnRegistrarCobro_Click;
             guna2HtmlLabel22.Click += btnRegistrarCobro_Click;
 
+            CrearDatosCliente();
+            FormClosed += (s, e) => consejosBoleta.Dispose();
+        }
+
+        // ==================================================
+        // DATOS DEL CLIENTE (opcionales)
+        // ==================================================
+        // Usa los campos del diseño (txtDNICliente, txtNombreCliente,
+        // txtCelularCliente) y agrega la casilla y el botón Buscar.
+        private void CrearDatosCliente()
+        {
+            Control panel = txtDNICliente.Parent;
+            guna2HtmlLabel9.Text = "Datos del cliente";
+
+            chkIncluirCliente = new Guna2CheckBox
+            {
+                Text = "Incluir en el recibo",
+                AutoSize = true,
+                BackColor = Color.Transparent,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Location = new Point(220, 196)
+            };
+            chkIncluirCliente.CheckedState.FillColor = Color.Goldenrod;
+            chkIncluirCliente.CheckedState.BorderColor = Color.Goldenrod;
+            chkIncluirCliente.UncheckedState.BorderColor = Color.Goldenrod;
+            chkIncluirCliente.UncheckedState.BorderThickness = 1;
+            panel.Controls.Add(chkIncluirCliente);
+            chkIncluirCliente.BringToFront();
+            consejosBoleta.SetToolTip(chkIncluirCliente,
+                "Incluir datos del cliente en la boleta (opcional). Sin marcar, el recibo sale sin nombre.");
+
+            int derecha = txtDNICliente.Right;
+            txtDNICliente.Width = 232;
+            btnBuscarCliente = new Guna2Button
+            {
+                Text = "Buscar",
+                BorderRadius = 10,
+                FillColor = Color.Gold,
+                ForeColor = Color.Black,
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            panel.Controls.Add(btnBuscarCliente);
+            btnBuscarCliente.Bounds = new Rectangle(txtDNICliente.Right + 8, txtDNICliente.Top,
+                derecha - txtDNICliente.Right - 8, txtDNICliente.Height);
+            consejosBoleta.SetToolTip(btnBuscarCliente, "Buscar un cliente registrado en Gestión de Clientes.");
+
+            txtDNICliente.PlaceholderText = "DNI o CE (opcional)";
+            txtDNICliente.MaxLength = 12;
+            txtNombreCliente.PlaceholderText = "Nombre completo del cliente";
+            txtNombreCliente.MaxLength = 120;
+            txtCelularCliente.MaxLength = 20;
+
+            txtDNICliente.KeyPress += (s, e) =>
+            {
+                if (!char.IsControl(e.KeyChar) && !char.IsLetterOrDigit(e.KeyChar))
+                    e.Handled = true;
+            };
+            txtDNICliente.TextChanged += (s, e) => { if (!cargandoCliente) BuscarClientePorDocumento(); };
+            txtNombreCliente.TextChanged += (s, e) =>
+            {
+                if (cargandoCliente) return;
+                if (txtNombreCliente.Text.Trim().Length > 0 && !chkIncluirCliente.Checked)
+                    chkIncluirCliente.Checked = true;      // escribir el nombre = incluirlo
+                MostrarClienteEnVistaPrevia();
+            };
+            chkIncluirCliente.CheckedChanged += (s, e) => MostrarClienteEnVistaPrevia();
+            btnBuscarCliente.Click += (s, e) => SeleccionarClienteRegistrado();
+        }
+
+        private bool IncluirCliente()
+        {
+            return chkIncluirCliente != null && chkIncluirCliente.Checked &&
+                   txtNombreCliente.Text.Trim().Length > 0;
+        }
+
+        // "DNI", "CE", "RUC" o "Doc." según el número (misma regla que Clientes).
+        private static string EtiquetaDocumento(string documento)
+        {
+            switch (ClienteDatos.TipoDocumento(documento))
+            {
+                case "DNI": return "DNI";
+                case "CE": return "CE";
+                case "RUC": return "RUC";
+                default: return "Doc.";
+            }
+        }
+
+        // Al escribir un documento de un cliente registrado, completa sus datos.
+        private void BuscarClientePorDocumento()
+        {
+            string doc = txtDNICliente.Text.Trim().ToUpperInvariant();
+
+            if (idClienteSeleccionado.HasValue && doc != documentoClienteRegistrado)
+            {
+                idClienteSeleccionado = null;      // cambió el documento: ya no es ese cliente
+                documentoClienteRegistrado = null;
+                consejosBoleta.SetToolTip(txtNombreCliente, "");
+            }
+
+            if (doc.Length >= 8 && !idClienteSeleccionado.HasValue)
+            {
+                try
+                {
+                    using (SqlConnection cx = new SqlConnection(cadenaConexion))
+                    using (SqlCommand cmd = new SqlCommand(@"
+                        SELECT TOP (1) id_cliente, nombre + ' ' + apellidos, ISNULL([teléfono], '')
+                        FROM dbo.CLIENTE WHERE documento = @Doc AND estado = 'activo';", cx))
+                    {
+                        cmd.CommandTimeout = 10;
+                        cmd.Parameters.Add("@Doc", SqlDbType.VarChar, 20).Value = doc;
+                        cx.Open();
+                        using (SqlDataReader r = cmd.ExecuteReader())
+                        {
+                            if (r.Read())
+                                AsignarCliente(r.GetInt32(0), doc, r.GetString(1), r.GetString(2));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Registro.Error("Boleta", ex);
+                }
+            }
+            MostrarClienteEnVistaPrevia();
+        }
+
+        private void AsignarCliente(int idCliente, string documento, string nombre, string telefono)
+        {
+            cargandoCliente = true;
+            try
+            {
+                idClienteSeleccionado = idCliente;
+                documentoClienteRegistrado = (documento ?? "").Trim().ToUpperInvariant();
+                txtDNICliente.Text = documentoClienteRegistrado;
+                txtNombreCliente.Text = nombre;
+                if (!string.IsNullOrEmpty(telefono)) txtCelularCliente.Text = telefono;
+                chkIncluirCliente.Checked = true;
+                consejosBoleta.SetToolTip(txtNombreCliente, "Cliente registrado (C" + idCliente.ToString("D4") + "): el pedido quedará asociado a su historial.");
+            }
+            finally
+            {
+                cargandoCliente = false;
+            }
+            MostrarClienteEnVistaPrevia();
+        }
+
+        // Ventana para elegir un cliente registrado (Gestión de Clientes).
+        private void SeleccionarClienteRegistrado()
+        {
+            List<ClienteInfo> clientes;
+            try
+            {
+                clientes = ClienteDatos.Listar().Where(c => c.Activo).ToList();
+            }
+            catch (Exception ex)
+            {
+                Registro.Error("Boleta", ex);
+                MessageBox.Show(this, "No se pudieron cargar los clientes:\n" + ex.Message, "Buscar cliente",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            using (Form f = new Form())
+            {
+                f.Text = "Buscar cliente registrado";
+                f.ClientSize = new Size(640, 470);
+                f.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+                f.StartPosition = FormStartPosition.CenterParent;
+                f.BackColor = Color.White;
+                f.ShowInTaskbar = false;
+
+                Guna2Panel cab = new Guna2Panel { Dock = DockStyle.Top, Height = 48, FillColor = Color.Gold };
+                cab.Controls.Add(new Label
+                {
+                    Text = "BUSCAR CLIENTE REGISTRADO", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter,
+                    Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold), BackColor = Color.Transparent
+                });
+
+                Guna2TextBox buscar = new Guna2TextBox
+                {
+                    PlaceholderText = "Nombre, documento o teléfono", BorderRadius = 8, BorderColor = Color.Goldenrod,
+                    Font = new Font("Segoe UI", 10F), ForeColor = Color.Black
+                };
+                Guna2DataGridView tabla = new Guna2DataGridView
+                {
+                    ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false, MultiSelect = false,
+                    RowHeadersVisible = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect
+                };
+                tabla.Columns.Add("doc", "DOCUMENTO");
+                tabla.Columns.Add("nombre", "CLIENTE");
+                tabla.Columns.Add("tel", "TELÉFONO");
+                Guna2Button elegir = new Guna2Button { Text = "Seleccionar", BorderRadius = 10, FillColor = Color.Gold, ForeColor = Color.Black, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
+                Guna2Button cancelar = new Guna2Button { Text = "Cancelar", BorderRadius = 10, FillColor = Color.Gainsboro, ForeColor = Color.Black, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
+
+                f.Controls.AddRange(new Control[] { buscar, tabla, elegir, cancelar, cab });
+                buscar.Bounds = new Rectangle(20, 62, 600, 38);
+                tabla.Bounds = new Rectangle(20, 110, 600, 290);
+                cancelar.Bounds = new Rectangle(276, 414, 160, 40);
+                elegir.Bounds = new Rectangle(460, 414, 160, 40);
+
+                EstiloTablas.Configurar(tabla, 34, 28);
+                tabla.ThemeStyle.HeaderStyle.BackColor = Color.Gold;
+                tabla.ThemeStyle.HeaderStyle.ForeColor = Color.Black;
+                EstiloTablas.ColumnaFija(tabla.Columns[0], 120, EstiloTablas.Centro);
+                EstiloTablas.Columna(tabla.Columns[1], 60, 200, EstiloTablas.Izquierda, true);
+                EstiloTablas.ColumnaFija(tabla.Columns[2], 110, EstiloTablas.Centro);
+
+                Action llenar = () =>
+                {
+                    string t = MenuDatos.Normalizar(buscar.Text);
+                    tabla.Rows.Clear();
+                    foreach (ClienteInfo c in clientes.Where(c => t.Length == 0 ||
+                        MenuDatos.Normalizar(c.NombreCompleto).Contains(t) || c.Documento.ToLowerInvariant().Contains(t) ||
+                        (c.Telefono ?? "").Contains(t)))
+                    {
+                        int r = tabla.Rows.Add(c.Documento, c.NombreCompleto, string.IsNullOrEmpty(c.Telefono) ? "-" : c.Telefono);
+                        tabla.Rows[r].Tag = c;
+                    }
+                };
+                ClienteInfo elegido = null;
+                Action aceptar = () =>
+                {
+                    if (tabla.CurrentRow == null) return;
+                    elegido = (ClienteInfo)tabla.CurrentRow.Tag;
+                    f.DialogResult = DialogResult.OK;
+                };
+                buscar.TextChanged += (s, e) => llenar();
+                tabla.CellDoubleClick += (s, e) => { if (e.RowIndex >= 0) aceptar(); };
+                elegir.Click += (s, e) => aceptar();
+                cancelar.Click += (s, e) => f.Close();
+                f.Shown += (s, e) => buscar.Focus();
+                llenar();
+
+                if (f.ShowDialog(this) == DialogResult.OK && elegido != null)
+                    AsignarCliente(elegido.IdCliente, elegido.Documento, elegido.NombreCompleto, elegido.Telefono);
+            }
+        }
+
+        // Renglones "Cliente" y documento en la vista previa: se insertan
+        // debajo de los datos del pedido y desplazan lo que sigue.
+        private void MostrarClienteEnVistaPrevia()
+        {
+            Control referencia = lblBoletaAtendidoPor;
+            Control padre = referencia.Parent;
+            if (padre == null) return;
+
+            if (lblPrevCliente == null)
+            {
+                Font f = lblBoletaFecha.Font;
+                lblPrevCliente = new Label { AutoSize = true, BackColor = Color.Transparent, Font = f, ForeColor = Color.Black };
+                lblPrevDocumento = new Label { AutoSize = true, BackColor = Color.Transparent, Font = f, ForeColor = Color.Black };
+                topsVistaPrevia = new Dictionary<Control, int>();
+                foreach (Control c in padre.Controls)
+                    topsVistaPrevia[c] = c.Top;
+                padre.Controls.Add(lblPrevCliente);
+                padre.Controls.Add(lblPrevDocumento);
+            }
+
+            int baseY = Math.Max(referencia.Bottom, guna2HtmlLabel33.Bottom) + 4;
+            int izquierda = guna2HtmlLabel33.Left;
+            int ancho = Math.Max(120, padre.ClientSize.Width - izquierda - 24);
+
+            bool mostrar = IncluirCliente();
+            string doc = txtDNICliente.Text.Trim();
+            int alto = 0;
+            padre.SuspendLayout();
+            if (mostrar)
+            {
+                lblPrevCliente.MaximumSize = new Size(ancho, 0);
+                lblPrevCliente.Text = "Cliente: " + txtNombreCliente.Text.Trim();
+                lblPrevCliente.Location = new Point(izquierda, baseY);
+                alto = lblPrevCliente.PreferredSize.Height + 2;
+                lblPrevDocumento.Visible = doc.Length > 0;
+                if (doc.Length > 0)
+                {
+                    lblPrevDocumento.Text = EtiquetaDocumento(doc) + ": " + doc;
+                    lblPrevDocumento.Location = new Point(izquierda, baseY + alto);
+                    alto += lblPrevDocumento.PreferredSize.Height + 2;
+                }
+                alto += 4;
+            }
+            lblPrevCliente.Visible = mostrar;
+            if (!mostrar) lblPrevDocumento.Visible = false;
+
+            foreach (KeyValuePair<Control, int> par in topsVistaPrevia)
+            {
+                if (par.Key.IsDisposed) continue;
+                par.Key.Top = par.Value >= baseY - 2 ? par.Value + alto : par.Value;
+            }
+            padre.ResumeLayout(true);
         }
 
 
@@ -426,6 +747,10 @@ namespace PROYECTO_RESTAURANTE
                 if (rbPagoEfectivo.Checked)
                     rbPagoEfectivo_CheckedChanged(rbPagoEfectivo, EventArgs.Empty);
 
+                if (ModoReimpresion)
+                    PrepararReimpresion();
+                MostrarClienteEnVistaPrevia();
+
                 MessageBox.Show(
                     "Pedido N.º " + idPedido +
                     " cargado correctamente.",
@@ -464,6 +789,23 @@ namespace PROYECTO_RESTAURANTE
                     "Solo pueden cobrar un Administrador o un Cajero.");
 
             int idCajero = SesionActual.IdEmpleado.Value;
+
+            // Comprador (opcional): distinto de quien cobra.
+            string nombreCliente = "";
+            string documentoCliente = "";
+            int? clienteVinculado = null;
+            if (IncluirCliente())
+            {
+                nombreCliente = txtNombreCliente.Text.Trim();
+                while (nombreCliente.Contains("  ")) nombreCliente = nombreCliente.Replace("  ", " ");
+                documentoCliente = txtDNICliente.Text.Trim().ToUpperInvariant();
+                if (nombreCliente.Length < 3)
+                    throw new Exception("Escriba el nombre completo del cliente o desmarque \"Incluir en el recibo\".");
+                if (documentoCliente.Length > 0 && ClienteDatos.TipoDocumento(documentoCliente) == "?")
+                    throw new Exception("El documento del cliente no es válido: DNI de 8 dígitos, CE de 9, RUC de 11 o pasaporte.");
+                if (idClienteSeleccionado.HasValue && documentoCliente == documentoClienteRegistrado)
+                    clienteVinculado = idClienteSeleccionado;
+            }
 
             decimal suma = 0;
 
@@ -607,11 +949,56 @@ namespace PROYECTO_RESTAURANTE
                                 idCajero, pago.Key, pago.Value);
                         }
 
-                        // 5. Marcar el pedido como cobrado.
+                        // 4b. Cliente registrado elegido: debe seguir activo.
+                        if (clienteVinculado.HasValue)
+                        {
+                            using (SqlCommand cmd = new SqlCommand(
+                                "SELECT COUNT(*) FROM dbo.CLIENTE WHERE id_cliente = @Cliente AND estado = 'activo';",
+                                conexion, transaccion))
+                            {
+                                cmd.Parameters.Add("@Cliente", SqlDbType.Int).Value = clienteVinculado.Value;
+                                if (Convert.ToInt32(cmd.ExecuteScalar()) != 1)
+                                    throw new Exception("El cliente seleccionado ya no está activo. Elija otro o quite el cliente.");
+                            }
+                        }
+
+                        // 4c. Recibo interno: serie R001 y correlativo único.
+                        string numero;
+                        using (SqlCommand cmd = new SqlCommand(@"
+                    SELECT ISNULL(MAX(CAST(numero AS INT)), 0) + 1
+                    FROM dbo.COMPROBANTE WITH (UPDLOCK, HOLDLOCK)
+                    WHERE serie = @Serie;", conexion, transaccion))
+                        {
+                            cmd.Parameters.Add("@Serie", SqlDbType.VarChar, 4).Value = SerieRecibo;
+                            int siguiente = Convert.ToInt32(cmd.ExecuteScalar());
+                            if (siguiente > 99999999)
+                                throw new Exception("Se agotó la numeración de recibos.");
+                            numero = siguiente.ToString("D8");
+                        }
+                        using (SqlCommand cmd = new SqlCommand(@"
+                    INSERT INTO dbo.COMPROBANTE
+                        (tipo, serie, numero, fecha_emision, identificacion_cliente, nombre_cliente, estado, id_pedido)
+                    VALUES
+                        ('B', @Serie, @Numero, CONVERT(DATE, SYSDATETIME()), @Documento, @Nombre, 'emitido', @Pedido);",
+                            conexion, transaccion))
+                        {
+                            cmd.Parameters.Add("@Serie", SqlDbType.VarChar, 4).Value = SerieRecibo;
+                            cmd.Parameters.Add("@Numero", SqlDbType.VarChar, 8).Value = numero;
+                            cmd.Parameters.Add("@Documento", SqlDbType.VarChar, 20).Value =
+                                documentoCliente.Length == 0 ? (object)DBNull.Value : documentoCliente;
+                            cmd.Parameters.Add("@Nombre", SqlDbType.VarChar, 255).Value =
+                                nombreCliente.Length == 0 ? (object)DBNull.Value : nombreCliente;
+                            cmd.Parameters.Add("@Pedido", SqlDbType.Int).Value = idPedido;
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        // 5. Marcar el pedido como cobrado (y vincular al
+                        // cliente registrado, si se eligió uno).
                         // El trigger verifica la suma de pagos.
                         using (SqlCommand cmd = new SqlCommand(@"
                     UPDATE dbo.PEDIDO
-                    SET estado = 'cobrado'
+                    SET estado = 'cobrado',
+                        id_cliente = COALESCE(@Cliente, id_cliente)
                     WHERE id_pedido = @Pedido
                       AND id_sucursal = 1
                       AND estado = 'entregado';",
@@ -620,12 +1007,15 @@ namespace PROYECTO_RESTAURANTE
                             cmd.Parameters.Add(
                                 "@Pedido", SqlDbType.Int).Value =
                                 idPedido;
-
+                            cmd.Parameters.Add("@Cliente", SqlDbType.Int).Value =
+                                clienteVinculado.HasValue ? (object)clienteVinculado.Value : DBNull.Value;
                             if (cmd.ExecuteNonQuery() != 1)
                             {
                                 throw new Exception(
                                     "No se pudo cerrar el pedido.");
                             }
+
+                            numeroRecibo = SerieRecibo + "-" + numero;
                         }
 
                         // 6. Salón: la mesa queda libre en la MISMA transacción
@@ -793,8 +1183,15 @@ namespace PROYECTO_RESTAURANTE
                     }
                 }
 
+                // Reimpresión: solo pedidos cobrados; se leen los datos guardados.
+                if (ModoReimpresion)
+                {
+                    if (estadoPedido != "cobrado")
+                        throw new Exception("Solo se pueden reimprimir recibos de pedidos cobrados.");
+                    CargarDatosGuardados(conexion);
+                }
                 // Impedir preparar una nueva boleta para un pedido ya cobrado.
-                using (SqlCommand cmd = new SqlCommand(@"
+                else using (SqlCommand cmd = new SqlCommand(@"
                     SELECT (SELECT COUNT(*) FROM dbo.COMPROBANTE
                             WHERE id_pedido = @Pedido)
                          + (SELECT COUNT(*) FROM dbo.PAGO
@@ -854,6 +1251,212 @@ namespace PROYECTO_RESTAURANTE
                 return "Descuento:";
             string nombre = promocionPedido.Length > 18 ? promocionPedido.Substring(0, 17) + "…" : promocionPedido;
             return "Desc. " + nombre + ":";
+        }
+
+        // Recibo guardado (número y comprador), pagos y cajero de un pedido cobrado.
+        private void CargarDatosGuardados(SqlConnection conexion)
+        {
+            numeroRecibo = null;
+            string nombre = null, documento = null;
+            using (SqlCommand cmd = new SqlCommand(@"
+                SELECT TOP (1) serie, numero, nombre_cliente, identificacion_cliente
+                FROM dbo.COMPROBANTE WHERE id_pedido = @Pedido;", conexion))
+            {
+                cmd.Parameters.Add("@Pedido", SqlDbType.Int).Value = idPedido;
+                using (SqlDataReader r = cmd.ExecuteReader())
+                {
+                    if (r.Read())
+                    {
+                        numeroRecibo = r.GetString(0).Trim() + "-" + r.GetString(1).Trim();
+                        nombre = r.IsDBNull(2) ? null : r.GetString(2);
+                        documento = r.IsDBNull(3) ? null : r.GetString(3);
+                    }
+                }
+            }
+
+            List<string> metodos = new List<string>();
+            using (SqlCommand cmd = new SqlCommand(@"
+                SELECT PG.[método], LTRIM(RTRIM(E.nombre + ' ' + E.apellidos))
+                FROM dbo.PAGO PG JOIN dbo.EMPLEADO E ON E.id_empleado = PG.id_cajero
+                WHERE PG.id_pedido = @Pedido ORDER BY PG.id_pago;", conexion))
+            {
+                cmd.Parameters.Add("@Pedido", SqlDbType.Int).Value = idPedido;
+                using (SqlDataReader r = cmd.ExecuteReader())
+                {
+                    while (r.Read())
+                    {
+                        string m = r.GetString(0).Trim();
+                        metodos.Add(m.Length == 0 ? m : char.ToUpperInvariant(m[0]) + m.Substring(1));
+                        cajeroRecibo = r.GetString(1);
+                    }
+                }
+            }
+            formaPagoGuardada = metodos.Count == 0 ? "-" : string.Join(" + ", metodos);
+
+            numeroBoletaDemo = numeroRecibo ?? ("PEDIDO-" + idPedido.ToString("D6"));
+
+            cargandoCliente = true;
+            try
+            {
+                txtNombreCliente.Text = nombre ?? "";
+                txtDNICliente.Text = documento ?? "";
+                chkIncluirCliente.Checked = !string.IsNullOrEmpty(nombre);
+            }
+            finally
+            {
+                cargandoCliente = false;
+            }
+        }
+
+        // Tras el cobro (o al reimprimir) los datos del recibo no cambian.
+        private void BloquearDatosCliente()
+        {
+            txtDNICliente.ReadOnly = true;
+            txtNombreCliente.ReadOnly = true;
+            txtCelularCliente.ReadOnly = true;
+            chkIncluirCliente.Enabled = false;
+            btnBuscarCliente.Enabled = false;
+        }
+
+        // Ventana en modo reimpresión: sin cobrar de nuevo.
+        private void PrepararReimpresion()
+        {
+            Text = "Reimprimir recibo";
+            BloquearDatosCliente();
+            btnRegistrarCobro.Enabled = false;
+            guna2HtmlLabel22.Enabled = false;
+            foreach (RadioButton rb in new RadioButton[] { rbPagoEfectivo, rbPagoYape, rbPagoTarjeta, rbPagoTransferencia, rbPagoPlin, rbPagoMixto })
+                rb.Enabled = false;
+            lblBoletaFormaPago.Text = formaPagoGuardada;
+            btnImprimirBoleta.Enabled = true;
+            ActualizarVistaPrevia();
+        }
+
+        // Elegir un pedido cobrado y abrir su recibo para reimprimirlo.
+        internal static void ReimprimirRecibo(IWin32Window dueno)
+        {
+            if (!SesionActual.Iniciada || !Permisos.PuedeCobrar(SesionActual.Cargo))
+            {
+                MessageBox.Show(dueno, "Solo un Administrador o Cajero puede reimprimir recibos.", "Reimprimir recibo",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            DataTable datos = new DataTable();
+            try
+            {
+                using (SqlConnection cx = new SqlConnection(BaseDatos.CadenaConexion))
+                using (SqlDataAdapter da = new SqlDataAdapter(@"
+                    SELECT TOP (200) P.id_pedido, P.fecha_hora, P.canal, V.total,
+                           ISNULL(C.serie + '-' + C.numero, '-') AS recibo,
+                           ISNULL(C.nombre_cliente, '') AS cliente
+                    FROM dbo.PEDIDO P
+                    JOIN dbo.V_PEDIDO_TOTAL V ON V.id_pedido = P.id_pedido
+                    LEFT JOIN dbo.COMPROBANTE C ON C.id_pedido = P.id_pedido
+                    WHERE P.estado = 'cobrado' AND P.id_sucursal = @Sucursal
+                    ORDER BY P.fecha_hora DESC;", cx))
+                {
+                    da.SelectCommand.Parameters.Add("@Sucursal", SqlDbType.Int).Value = BaseDatos.IdSucursalActual;
+                    da.Fill(datos);
+                }
+            }
+            catch (Exception ex)
+            {
+                Registro.Error("Boleta", ex);
+                MessageBox.Show(dueno, "No se pudieron cargar los pedidos cobrados:\n" + ex.Message, "Reimprimir recibo",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            int? elegido = null;
+            using (Form f = new Form())
+            {
+                f.Text = "Reimprimir recibo";
+                f.ClientSize = new Size(720, 480);
+                f.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+                f.StartPosition = FormStartPosition.CenterParent;
+                f.BackColor = Color.White;
+                f.ShowInTaskbar = false;
+
+                Guna2Panel cab = new Guna2Panel { Dock = DockStyle.Top, Height = 48, FillColor = Color.Gold };
+                cab.Controls.Add(new Label
+                {
+                    Text = "REIMPRIMIR RECIBO", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter,
+                    Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold), BackColor = Color.Transparent
+                });
+                Guna2TextBox buscar = new Guna2TextBox
+                {
+                    PlaceholderText = "N.º de pedido, recibo o cliente", BorderRadius = 8, BorderColor = Color.Goldenrod,
+                    Font = new Font("Segoe UI", 10F), ForeColor = Color.Black
+                };
+                Guna2DataGridView tabla = new Guna2DataGridView
+                {
+                    ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false, MultiSelect = false,
+                    RowHeadersVisible = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect
+                };
+                foreach (string[] c in new[] { new[] { "pedido", "PEDIDO" }, new[] { "fecha", "FECHA" }, new[] { "canal", "TIPO" },
+                         new[] { "total", "TOTAL S/" }, new[] { "recibo", "RECIBO" }, new[] { "cliente", "CLIENTE" } })
+                    tabla.Columns.Add(c[0], c[1]);
+                Guna2Button abrir = new Guna2Button { Text = "Abrir recibo", BorderRadius = 10, FillColor = Color.Gold, ForeColor = Color.Black, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
+                Guna2Button cerrar = new Guna2Button { Text = "Cerrar", BorderRadius = 10, FillColor = Color.Gainsboro, ForeColor = Color.Black, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
+                f.Controls.AddRange(new Control[] { buscar, tabla, abrir, cerrar, cab });
+                buscar.Bounds = new Rectangle(20, 62, 680, 38);
+                tabla.Bounds = new Rectangle(20, 110, 680, 300);
+                cerrar.Bounds = new Rectangle(356, 424, 160, 40);
+                abrir.Bounds = new Rectangle(540, 424, 160, 40);
+
+                EstiloTablas.Configurar(tabla, 34, 28);
+                tabla.ThemeStyle.HeaderStyle.BackColor = Color.Gold;
+                tabla.ThemeStyle.HeaderStyle.ForeColor = Color.Black;
+                EstiloTablas.ColumnaFija(tabla.Columns[0], 70, EstiloTablas.Centro);
+                EstiloTablas.ColumnaFija(tabla.Columns[1], 120, EstiloTablas.Centro);
+                EstiloTablas.ColumnaFija(tabla.Columns[2], 80, EstiloTablas.Izquierda);
+                EstiloTablas.ColumnaFija(tabla.Columns[3], 84, EstiloTablas.Derecha);
+                EstiloTablas.ColumnaFija(tabla.Columns[4], 120, EstiloTablas.Centro);
+                EstiloTablas.Columna(tabla.Columns[5], 40, 120, EstiloTablas.Izquierda, true);
+
+                Action llenar = () =>
+                {
+                    string t = MenuDatos.Normalizar(buscar.Text);
+                    tabla.Rows.Clear();
+                    foreach (DataRow d in datos.Rows)
+                    {
+                        string pedido = Convert.ToString(d["id_pedido"]);
+                        string recibo = Convert.ToString(d["recibo"]);
+                        string cliente = Convert.ToString(d["cliente"]);
+                        if (t.Length > 0 && !pedido.Contains(t) && !recibo.ToLowerInvariant().Contains(t) &&
+                            !MenuDatos.Normalizar(cliente).Contains(t))
+                            continue;
+                        int r = tabla.Rows.Add(pedido, Convert.ToDateTime(d["fecha_hora"]).ToString("dd/MM/yy HH:mm"),
+                            Convert.ToString(d["canal"]), Convert.ToDecimal(d["total"]).ToString("N2"), recibo,
+                            cliente.Length == 0 ? "-" : cliente);
+                        tabla.Rows[r].Tag = Convert.ToInt32(d["id_pedido"]);
+                    }
+                };
+                Action aceptar = () =>
+                {
+                    if (tabla.CurrentRow == null) return;
+                    elegido = (int)tabla.CurrentRow.Tag;
+                    f.DialogResult = DialogResult.OK;
+                };
+                buscar.TextChanged += (s, e) => llenar();
+                tabla.CellDoubleClick += (s, e) => { if (e.RowIndex >= 0) aceptar(); };
+                abrir.Click += (s, e) => aceptar();
+                cerrar.Click += (s, e) => f.Close();
+                f.Shown += (s, e) => buscar.Focus();
+                llenar();
+                f.ShowDialog(dueno);
+            }
+
+            if (elegido.HasValue)
+            {
+                using (Generar_Boleta ventana = new Generar_Boleta())
+                {
+                    ventana.ModoReimpresion = true;
+                    ventana.Tag = elegido.Value;
+                    ventana.ShowDialog(dueno);
+                }
+            }
         }
 
         private void MostrarPedido()
@@ -1197,9 +1800,11 @@ namespace PROYECTO_RESTAURANTE
             // ======================================
 
             guna2HtmlLabel20.Text =
-                "BOLETA DE VENTA";
+                ModoReimpresion ? "RECIBO DE VENTA (REIMPRESIÓN)" : "RECIBO DE VENTA";
+            consejosBoleta.SetToolTip(guna2HtmlLabel20, NotaInterna);
 
-            guna2HtmlLabel56.Text = "¡Gracias por su compra!";
+            guna2HtmlLabel56.Text = "¡Gracias por su compra!<br><span style='font-size:7pt;font-weight:normal'>" +
+                NotaInterna + "</span>";
 
             // ======================================
             // 5. CONFIGURAR TABLA
@@ -1330,12 +1935,11 @@ namespace PROYECTO_RESTAURANTE
 
         private void GenerarBoletaPrueba()
         {
+            // Sin números ficticios: antes del cobro se identifica por el
+            // pedido; el número real del recibo se asigna al cobrar.
             if (numeroBoletaDemo == "")
             {
-                int numero = aleatorio.Next(1, 99999999);
-
-                numeroBoletaDemo =
-                    "B001-" + numero.ToString("D8");
+                numeroBoletaDemo = numeroRecibo ?? ("PEDIDO-" + idPedido.ToString("D6"));
             }
         }
 
@@ -1793,8 +2397,20 @@ namespace PROYECTO_RESTAURANTE
                     Brushes.Black,
                     new RectangleF(x, y, ancho, 22),
                     centro);
+                y += 22;
 
-                y += 28;
+                if (ModoReimpresion)
+                {
+                    g.DrawString("REIMPRESIÓN", negrita, Brushes.Black,
+                        new RectangleF(x, y, ancho, 20), centro);
+                    y += 20;
+                }
+
+                // Aclaración: no es un comprobante electrónico SUNAT.
+                float altoNota = g.MeasureString(NotaInterna, pequeño, (int)ancho).Height;
+                g.DrawString(NotaInterna, pequeño, Brushes.Black,
+                    new RectangleF(x, y, ancho, altoNota + 2), centro);
+                y += altoNota + 10;
 
 
                 // ======================================
@@ -1878,11 +2494,11 @@ namespace PROYECTO_RESTAURANTE
                 // 6. DATOS DEL CLIENTE
                 // ======================================
 
-                if (!string.IsNullOrWhiteSpace(
-                    txtNombreCliente.Text))
+                // Solo si el cliente pidió incluir sus datos.
+                if (IncluirCliente())
                 {
                     string cliente =
-                        "Cliente: " + txtNombreCliente.Text;
+                        "Cliente: " + txtNombreCliente.Text.Trim();
 
                     float altoCliente = g.MeasureString(
                         cliente, pequeño, (int)ancho).Height;
@@ -1897,13 +2513,12 @@ namespace PROYECTO_RESTAURANTE
                     y += altoCliente + 4;
                 }
 
-                if (!string.IsNullOrWhiteSpace(
-                    txtDNICliente.Text))
+                if (IncluirCliente() &&
+                    !string.IsNullOrWhiteSpace(txtDNICliente.Text))
                 {
                     g.DrawString(
-                        "DNI: " + txtDNICliente.Text,
+                        EtiquetaDocumento(txtDNICliente.Text.Trim()) + ": " + txtDNICliente.Text.Trim(),
                         pequeño, Brushes.Black, x, y);
-
                     y += 18;
                 }
 
@@ -2106,8 +2721,14 @@ namespace PROYECTO_RESTAURANTE
                 g.DrawString(
                     "Pago: " + lblBoletaFormaPago.Text,
                     texto, Brushes.Black, x, y);
+                y += 18;
 
-                y += 26;
+                // Quién cobró (distinto del cliente comprador).
+                string cajero = "Caja: " + (cajeroRecibo ?? SesionActual.NombreCompleto ?? "");
+                float altoCajero = g.MeasureString(cajero, pequeño, (int)ancho).Height;
+                g.DrawString(cajero, pequeño, Brushes.Black,
+                    new RectangleF(x, y, ancho, altoCajero + 2));
+                y += altoCajero + 8;
 
                 // ======================================
                 // 12. CÓDIGO QR
@@ -3007,9 +3628,20 @@ namespace PROYECTO_RESTAURANTE
                 // ======================================
                 // 3. CONFIRMAR EL COBRO
                 // ======================================
+                bool conIdentificacion = IncluirCliente() && txtDNICliente.Text.Trim().Length > 0;
+                if (total > MontoIdentificacionSunat && !conIdentificacion &&
+                    MessageBox.Show(
+                        "El total supera S/ " + MontoIdentificacionSunat.ToString("N2") + ".\n\n" +
+                        "En una boleta electrónica SUNAT sería obligatorio registrar el DNI o CE y el nombre del cliente. " +
+                        "Este recibo es un documento interno.\n\n¿Desea cobrar sin los datos del cliente?",
+                        "Datos del cliente", MessageBoxButtons.YesNo, MessageBoxIcon.Warning,
+                        MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+                    return;
+
                 DialogResult respuesta = MessageBox.Show(
                     "Pedido N.º " + idPedido +
                     "\nTotal: S/ " + total.ToString("N2") +
+                    (IncluirCliente() ? "\nCliente: " + txtNombreCliente.Text.Trim() : "") +
                     "\n\n¿Desea confirmar el cobro?",
                     "Confirmar cobro",
                     MessageBoxButtons.YesNo,
@@ -3038,12 +3670,20 @@ namespace PROYECTO_RESTAURANTE
                     lblBoletaFormaPago.Text = pagos[0].Key;
                 }
 
+                // Número real del recibo en la vista previa, QR e impresión.
+                numeroBoletaDemo = numeroRecibo;
+                cajeroRecibo = SesionActual.NombreCompleto;
+                GenerarCodigos();
+                ActualizarVistaPrevia();
+                BloquearDatosCliente();
+
                 // El pedido ya se cobró.
                 // Permitir imprimir, sin volver a cobrar.
                 btnImprimirBoleta.Enabled = true;
 
                 MessageBox.Show(
                     "Cobro registrado correctamente.\n\n" +
+                    "Recibo " + numeroRecibo + "\n" +
                     "Pedido N.º " + idPedido +
                     "\nTotal: S/ " + total.ToString("N2") +
                     "\n\nYa puede imprimir el recibo.",
