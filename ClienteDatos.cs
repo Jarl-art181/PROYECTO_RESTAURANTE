@@ -28,11 +28,27 @@ namespace PROYECTO_RESTAURANTE
         public int PedidosRecientes;         // últimos 90 días, no cancelados
         public int SaldoPuntos;
         public DateTime? UltimoPedido;
+        public int ReservasTotales;
+
+        // Consentimiento explícito para promociones (distinto del registro
+        // para atender reservas y ventas). Opcional y revocable.
+        public bool AceptaPromociones;
+        public DateTime? FechaConsentimiento;
 
         public string NombreCompleto { get { return (Nombre + " " + Apellidos).Trim(); } }
         public bool Activo { get { return Estado == "activo"; } }
         public bool Frecuente { get { return PedidosRecientes >= ClienteDatos.PedidosParaFrecuente; } }
         public string TipoDocumento { get { return ClienteDatos.TipoDocumento(Documento); } }
+    }
+
+    internal sealed class ReservaClienteInfo
+    {
+        public int IdReserva;
+        public DateTime FechaHora;
+        public int Mesa;
+        public int Personas;
+        public string Estado;
+        public int? IdPedido;
     }
 
     internal sealed class PedidoClienteInfo
@@ -77,7 +93,10 @@ namespace PROYECTO_RESTAURANTE
                      WHERE P.id_cliente = C.id_cliente AND P.estado <> 'cancelado'
                        AND P.fecha_hora >= DATEADD(DAY, -" + DiasFrecuencia + @", SYSDATETIME())) AS pedidos_recientes,
                    (SELECT MAX(P.fecha_hora) FROM dbo.PEDIDO P
-                     WHERE P.id_cliente = C.id_cliente AND P.estado <> 'cancelado') AS ultimo_pedido
+                     WHERE P.id_cliente = C.id_cliente AND P.estado <> 'cancelado') AS ultimo_pedido,
+                   (SELECT COUNT(*) FROM dbo.RESERVA_MESA R
+                     WHERE R.id_cliente = C.id_cliente) AS reservas_totales,
+                   C.acepta_promociones, C.fecha_consentimiento
             FROM dbo.CLIENTE C
             LEFT JOIN dbo.V_CLIENTE_SALDO S ON S.id_cliente = C.id_cliente";
 
@@ -142,6 +161,78 @@ namespace PROYECTO_RESTAURANTE
             return lista;
         }
 
+        // Clientes ACTIVOS con ese teléfono exacto (identificador fiable de
+        // la reserva). Nunca se busca por nombres parecidos. Puede haber
+        // varios (teléfono compartido): quien registra decide.
+        public static List<ClienteInfo> BuscarPorTelefono(string telefono)
+        {
+            List<ClienteInfo> lista = new List<ClienteInfo>();
+            string digitos = SoloDigitos(telefono);
+            if (digitos.Length < 6)
+                return lista;
+
+            using (SqlConnection conexion = new SqlConnection(BaseDatos.CadenaConexion))
+            using (SqlCommand cmd = new SqlCommand(SqlListar + @"
+                WHERE C.estado = 'activo'
+                  AND REPLACE(REPLACE(REPLACE(ISNULL(C.[teléfono], ''), ' ', ''), '-', ''), '+51', '') = @Telefono
+                ORDER BY C.apellidos, C.nombre;", conexion))
+            {
+                cmd.CommandTimeout = 10;
+                cmd.Parameters.Add("@Telefono", SqlDbType.VarChar, 20).Value = digitos;
+                conexion.Open();
+                using (SqlDataReader r = cmd.ExecuteReader())
+                {
+                    while (r.Read())
+                        lista.Add(Leer(r));
+                }
+            }
+            return lista;
+        }
+
+        public static string SoloDigitos(string texto)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            foreach (char ch in texto ?? "")
+                if (ch >= '0' && ch <= '9') sb.Append(ch);
+            string d = sb.ToString();
+            return d.Length == 11 && d.StartsWith("51") ? d.Substring(2) : d;
+        }
+
+        // Historial de reservas del cliente (con el pedido que originó, si lo hubo).
+        public static List<ReservaClienteInfo> Reservas(int idCliente)
+        {
+            List<ReservaClienteInfo> lista = new List<ReservaClienteInfo>();
+            using (SqlConnection conexion = new SqlConnection(BaseDatos.CadenaConexion))
+            using (SqlCommand cmd = new SqlCommand(@"
+                SELECT R.id_reserva, R.fecha_hora, M.[número] AS mesa, R.personas, R.estado,
+                       (SELECT TOP (1) P.id_pedido FROM dbo.PEDIDO P WHERE P.id_reserva = R.id_reserva) AS id_pedido
+                FROM dbo.RESERVA_MESA R
+                INNER JOIN dbo.MESA M ON M.id_mesa = R.id_mesa
+                WHERE R.id_cliente = @Id
+                ORDER BY R.fecha_hora DESC, R.id_reserva DESC;", conexion))
+            {
+                cmd.CommandTimeout = 20;
+                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = idCliente;
+                conexion.Open();
+                using (SqlDataReader r = cmd.ExecuteReader())
+                {
+                    while (r.Read())
+                    {
+                        lista.Add(new ReservaClienteInfo
+                        {
+                            IdReserva = Convert.ToInt32(r["id_reserva"]),
+                            FechaHora = Convert.ToDateTime(r["fecha_hora"]),
+                            Mesa = Convert.ToInt32(r["mesa"]),
+                            Personas = Convert.ToInt32(r["personas"]),
+                            Estado = Convert.ToString(r["estado"]),
+                            IdPedido = r["id_pedido"] == DBNull.Value ? (int?)null : Convert.ToInt32(r["id_pedido"])
+                        });
+                    }
+                }
+            }
+            return lista;
+        }
+
         private static ClienteInfo Leer(SqlDataReader r)
         {
             Func<string, string> texto = c => r[c] == DBNull.Value ? "" : Convert.ToString(r[c]);
@@ -162,7 +253,10 @@ namespace PROYECTO_RESTAURANTE
                 SaldoPuntos = Convert.ToInt32(r["saldo_puntos"]),
                 PedidosTotales = Convert.ToInt32(r["pedidos_totales"]),
                 PedidosRecientes = Convert.ToInt32(r["pedidos_recientes"]),
-                UltimoPedido = r["ultimo_pedido"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["ultimo_pedido"])
+                UltimoPedido = r["ultimo_pedido"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["ultimo_pedido"]),
+                ReservasTotales = Convert.ToInt32(r["reservas_totales"]),
+                AceptaPromociones = Convert.ToBoolean(r["acepta_promociones"]),
+                FechaConsentimiento = r["fecha_consentimiento"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["fecha_consentimiento"])
             };
         }
 
@@ -317,10 +411,12 @@ namespace PROYECTO_RESTAURANTE
             using (SqlCommand cmd = new SqlCommand(@"
                 INSERT INTO dbo.CLIENTE
                     (documento, nombre, apellidos, [teléfono], [dirección], fecha_registro,
-                     correo, fecha_nacimiento, distrito, comentario, estado)
+                     correo, fecha_nacimiento, distrito, comentario, estado,
+                     acepta_promociones, fecha_consentimiento)
                 VALUES
                     (@Documento, @Nombre, @Apellidos, @Telefono, @Direccion, CAST(SYSDATETIME() AS DATE),
-                     @Correo, @FechaNac, @Distrito, @Comentario, 'activo');
+                     @Correo, @FechaNac, @Distrito, @Comentario, 'activo',
+                     @Acepta, CASE WHEN @Acepta = 1 THEN SYSDATETIME() END);
                 SELECT CAST(SCOPE_IDENTITY() AS INT);", conexion, tx))
             {
                 Parametros(cmd, c);
@@ -348,7 +444,11 @@ namespace PROYECTO_RESTAURANTE
                    SET documento = @Documento, nombre = @Nombre, apellidos = @Apellidos,
                        [teléfono] = @Telefono, [dirección] = @Direccion,
                        correo = @Correo, fecha_nacimiento = @FechaNac,
-                       distrito = @Distrito, comentario = @Comentario
+                       distrito = @Distrito, comentario = @Comentario,
+                       -- La fecha registra el último cambio del consentimiento.
+                       fecha_consentimiento = CASE WHEN acepta_promociones <> @Acepta
+                                                   THEN SYSDATETIME() ELSE fecha_consentimiento END,
+                       acepta_promociones = @Acepta
                  WHERE id_cliente = @Id;", conexion, tx))
             {
                 Parametros(cmd, c);
@@ -426,6 +526,7 @@ namespace PROYECTO_RESTAURANTE
                 c.FechaNacimiento.HasValue ? (object)c.FechaNacimiento.Value : DBNull.Value;
             cmd.Parameters.Add("@Distrito", SqlDbType.VarChar, 100).Value = v(c.Distrito);
             cmd.Parameters.Add("@Comentario", SqlDbType.VarChar, 255).Value = v(c.Comentario);
+            cmd.Parameters.Add("@Acepta", SqlDbType.Bit).Value = c.AceptaPromociones;
         }
     }
 }

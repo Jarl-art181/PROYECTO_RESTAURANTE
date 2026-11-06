@@ -39,6 +39,10 @@ namespace PROYECTO_RESTAURANTE
             // abrir mesa
             btnAbrirPedido.Click -= btnAbrirPedido_Click;
             btnAbrirPedido.Click += btnAbrirPedido_Click;
+            // El Designer no vinculaba «Reservar» del panel de la mesa.
+            btnReservar.Click -= btnReservar_Click;
+            btnReservar.Click += btnReservar_Click;
+            ReenviarClicDeIconos();
 
             // Configuración de la ventana.
             this.WindowState = FormWindowState.Maximized;
@@ -759,8 +763,14 @@ namespace PROYECTO_RESTAURANTE
         private void btnNuevaReserva_Click(
             object sender, EventArgs e)
         {
+            AbrirNuevaReserva(0);
+        }
+
+        // numeroMesa = 0: el usuario elige la mesa en la ventana.
+        private void AbrirNuevaReserva(int numeroMesa)
+        {
             using (RESERVAR_MESA ventana =
-                new RESERVAR_MESA())
+                new RESERVAR_MESA(numeroMesa))
             {
                 if (ventana.ShowDialog(this) ==
                     DialogResult.OK)
@@ -772,6 +782,8 @@ namespace PROYECTO_RESTAURANTE
                     CargarContadoresMesas();
                     CargarEstadosMesas();
                     FiltrarMesas();
+                    if (mesaSeleccionada > 0)
+                        CargarDetalleMesa();
                 }
             }
         }
@@ -1160,6 +1172,34 @@ namespace PROYECTO_RESTAURANTE
                 }
             }
         }
+        // Los íconos del panel «Detalle de la mesa» están encima de los
+        // botones y se quedaban con el clic: lo reenvían al botón de abajo.
+        private void ReenviarClicDeIconos()
+        {
+            Guna2Button[] botones = { btnAbrirPedido, btnReservar, btnLiberarMesa };
+            foreach (Control control in guna2Panel9.Controls)
+            {
+                PictureBox icono = control as PictureBox;
+                if (icono == null)
+                    continue;
+
+                foreach (Guna2Button boton in botones)
+                {
+                    if (!boton.Bounds.IntersectsWith(icono.Bounds))
+                        continue;
+
+                    Guna2Button destino = boton;
+                    icono.Cursor = Cursors.Hand;
+                    icono.Click += (s, e) =>
+                    {
+                        if (destino.Enabled && destino.Visible)
+                            destino.PerformClick();
+                    };
+                    break;
+                }
+            }
+        }
+
         private void ConfigurarBotonesIniciales()
         {
             // No hay ninguna mesa seleccionada.
@@ -1480,115 +1520,24 @@ namespace PROYECTO_RESTAURANTE
             Navegador.AbrirPedidosConMesa(this, mesaSeleccionada);
         }
 
+        // «Reservar» del panel de la mesa: abre la MISMA ventana que «Nueva
+        // reserva», con la mesa seleccionada ya elegida. La validación y el
+        // guardado son los de RESERVAR_MESA (no hay un segundo sistema).
         private void btnReservar_Click(object sender, EventArgs e)
         {
-
-            if (mesaSeleccionada == 0)
+            if (mesaSeleccionada <= 0)
             {
                 MessageBox.Show(
                     "Primero seleccione una mesa.",
                     "Gestión de Mesas",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
-
                 return;
             }
 
-            // Abrir el formulario de reservas.
-            btnNuevaReserva_Click(sender, e);
-            // 2. Confirmar la reserva.
-            DialogResult respuesta = MessageBox.Show(
-                "¿Desea reservar la Mesa " +
-                mesaSeleccionada + "?",
-                "Confirmar reserva",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
-
-            if (respuesta != DialogResult.Yes)
-            {
-                return;
-            }
-
-            // 3. Actualizar la mesa en SQL Server.
-            string sql = @"
-       UPDATE M
-SET estado = 'reservada'
-FROM dbo.MESA M
-        WHERE M.[número] = @NumeroMesa
-          AND M.id_sucursal = @Sucursal
-          AND LOWER(LTRIM(RTRIM(M.estado))) = 'libre'
-          AND NOT EXISTS
-          (
-              SELECT 1
-              FROM dbo.PEDIDO P
-              WHERE P.id_mesa = M.id_mesa
-                AND P.estado IN
-                (
-                    'pendiente',
-                    'en_preparacion',
-                    'listo',
-                    'entregado'
-                )
-          );";
-
-            try
-            {
-                using (SqlConnection conexion =
-                    new SqlConnection(cadenaConexion))
-                using (SqlCommand cmd =
-                    new SqlCommand(sql, conexion))
-                {
-                    cmd.Parameters.Add(
-                        "@NumeroMesa",
-                        SqlDbType.Int).Value =
-                        mesaSeleccionada;
-
-                    cmd.Parameters.Add(
-                        "@Sucursal",
-                        SqlDbType.Int).Value = 1;
-
-                    conexion.Open();
-
-                    int actualizados =
-                        cmd.ExecuteNonQuery();
-
-                    if (actualizados == 0)
-                    {
-                        MessageBox.Show(
-                            "No se pudo reservar la mesa.\n" +
-                            "Verifique que siga libre.",
-                            "Reserva",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Warning);
-                        return;
-                    }
-                }
-
-                // 4. Actualizar toda la información.
-                CargarContadoresMesas();
-                CargarEstadosMesas();
-                CargarDetalleMesa();
-                FiltrarMesas();
-
-                MessageBox.Show(
-                    "Mesa " + mesaSeleccionada +
-                    " reservada correctamente.",
-                    "Reserva exitosa",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "Error al reservar la mesa:\n" +
-                    ex.Message,
-                    "Gestión de Mesas",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-            }
-
-
+            AbrirNuevaReserva(mesaSeleccionada);
         }
+
         // true si el pedido quedó cobrado y su mesa ya está libre.
         private static bool MesaLiberadaPorCobro(
             SqlConnection conexion, SqlTransaction transaccion, int idPedido)

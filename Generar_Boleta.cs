@@ -38,6 +38,14 @@ namespace PROYECTO_RESTAURANTE
 
         private string numeroRecibo;               // R001-00000001
         private int? idClienteSeleccionado;        // cliente registrado (se vincula al pedido)
+
+        // Datos guardados en el pedido: quién reservó (reserva de origen) y
+        // el cliente registrado del pedido. Se ofrecen como comprador, pero
+        // el comprador del recibo puede ser otra persona.
+        private int? idReservaPedido;
+        private string contactoPedido, telefonoPedido;
+        private int? idClientePedido;
+        private string documentoClientePedido, nombreClientePedido, telefonoClientePedido;
         private string documentoClienteRegistrado;
         private bool cargandoCliente;
         private string formaPagoGuardada;          // reimpresión
@@ -222,6 +230,49 @@ namespace PROYECTO_RESTAURANTE
             btnBuscarCliente.Click += (s, e) => SeleccionarClienteRegistrado();
         }
 
+        // Recupera los datos ya conocidos del pedido (cliente registrado o
+        // quien reservó) para no volver a escribirlos. La casilla queda SIN
+        // marcar: solo se incluyen si el comprador acepta figurar en el
+        // recibo. Se pueden corregir o reemplazar por otro comprador.
+        private void PrecargarComprador()
+        {
+            string origen = idReservaPedido.HasValue ? "reserva N.º " + idReservaPedido.Value : "pedido";
+
+            if (idClientePedido.HasValue)
+            {
+                AsignarCliente(idClientePedido.Value, documentoClientePedido, nombreClientePedido,
+                    string.IsNullOrEmpty(telefonoClientePedido) ? telefonoPedido : telefonoClientePedido, false);
+            }
+            else if (!string.IsNullOrEmpty(contactoPedido))
+            {
+                cargandoCliente = true;
+                try
+                {
+                    txtNombreCliente.Text = contactoPedido;
+                    txtCelularCliente.Text = telefonoPedido ?? "";
+                    txtDNICliente.Text = "";
+                    chkIncluirCliente.Checked = false;
+                }
+                finally
+                {
+                    cargandoCliente = false;
+                }
+            }
+            else
+            {
+                return;
+            }
+
+            // El título no cambia (la casilla está en la misma fila); el origen
+            // de los datos se indica en la ayuda de la casilla y del nombre.
+            string ayuda = "Datos recuperados de" + (idReservaPedido.HasValue ? " la " : "l ") + origen +
+                ". Marque «Incluir en el recibo» si el comprador acepta figurar en él. " +
+                "Puede corregirlos, completar el documento o buscar otro comprador.";
+            consejosBoleta.SetToolTip(chkIncluirCliente, ayuda);
+            consejosBoleta.SetToolTip(txtNombreCliente, ayuda);
+            MostrarClienteEnVistaPrevia();
+        }
+
         private bool IncluirCliente()
         {
             return chkIncluirCliente != null && chkIncluirCliente.Checked &&
@@ -279,7 +330,7 @@ namespace PROYECTO_RESTAURANTE
             MostrarClienteEnVistaPrevia();
         }
 
-        private void AsignarCliente(int idCliente, string documento, string nombre, string telefono)
+        private void AsignarCliente(int idCliente, string documento, string nombre, string telefono, bool incluir = true)
         {
             cargandoCliente = true;
             try
@@ -289,7 +340,7 @@ namespace PROYECTO_RESTAURANTE
                 txtDNICliente.Text = documentoClienteRegistrado;
                 txtNombreCliente.Text = nombre;
                 if (!string.IsNullOrEmpty(telefono)) txtCelularCliente.Text = telefono;
-                chkIncluirCliente.Checked = true;
+                chkIncluirCliente.Checked = incluir;
                 consejosBoleta.SetToolTip(txtNombreCliente, "Cliente registrado (C" + idCliente.ToString("D4") + "): el pedido quedará asociado a su historial.");
             }
             finally
@@ -315,80 +366,9 @@ namespace PROYECTO_RESTAURANTE
                 return;
             }
 
-            using (Form f = new Form())
-            {
-                f.Text = "Buscar cliente registrado";
-                f.ClientSize = new Size(640, 470);
-                f.FormBorderStyle = FormBorderStyle.FixedToolWindow;
-                f.StartPosition = FormStartPosition.CenterParent;
-                f.BackColor = Color.White;
-                f.ShowInTaskbar = false;
-
-                Guna2Panel cab = new Guna2Panel { Dock = DockStyle.Top, Height = 48, FillColor = Color.Gold };
-                cab.Controls.Add(new Label
-                {
-                    Text = "BUSCAR CLIENTE REGISTRADO", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter,
-                    Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold), BackColor = Color.Transparent
-                });
-
-                Guna2TextBox buscar = new Guna2TextBox
-                {
-                    PlaceholderText = "Nombre, documento o teléfono", BorderRadius = 8, BorderColor = Color.Goldenrod,
-                    Font = new Font("Segoe UI", 10F), ForeColor = Color.Black
-                };
-                Guna2DataGridView tabla = new Guna2DataGridView
-                {
-                    ReadOnly = true, AllowUserToAddRows = false, AllowUserToDeleteRows = false, MultiSelect = false,
-                    RowHeadersVisible = false, SelectionMode = DataGridViewSelectionMode.FullRowSelect
-                };
-                tabla.Columns.Add("doc", "DOCUMENTO");
-                tabla.Columns.Add("nombre", "CLIENTE");
-                tabla.Columns.Add("tel", "TELÉFONO");
-                Guna2Button elegir = new Guna2Button { Text = "Seleccionar", BorderRadius = 10, FillColor = Color.Gold, ForeColor = Color.Black, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
-                Guna2Button cancelar = new Guna2Button { Text = "Cancelar", BorderRadius = 10, FillColor = Color.Gainsboro, ForeColor = Color.Black, Font = new Font("Segoe UI", 10F, FontStyle.Bold) };
-
-                f.Controls.AddRange(new Control[] { buscar, tabla, elegir, cancelar, cab });
-                buscar.Bounds = new Rectangle(20, 62, 600, 38);
-                tabla.Bounds = new Rectangle(20, 110, 600, 290);
-                cancelar.Bounds = new Rectangle(276, 414, 160, 40);
-                elegir.Bounds = new Rectangle(460, 414, 160, 40);
-
-                EstiloTablas.Configurar(tabla, 34, 28);
-                tabla.ThemeStyle.HeaderStyle.BackColor = Color.Gold;
-                tabla.ThemeStyle.HeaderStyle.ForeColor = Color.Black;
-                EstiloTablas.ColumnaFija(tabla.Columns[0], 120, EstiloTablas.Centro);
-                EstiloTablas.Columna(tabla.Columns[1], 60, 200, EstiloTablas.Izquierda, true);
-                EstiloTablas.ColumnaFija(tabla.Columns[2], 110, EstiloTablas.Centro);
-
-                Action llenar = () =>
-                {
-                    string t = MenuDatos.Normalizar(buscar.Text);
-                    tabla.Rows.Clear();
-                    foreach (ClienteInfo c in clientes.Where(c => t.Length == 0 ||
-                        MenuDatos.Normalizar(c.NombreCompleto).Contains(t) || c.Documento.ToLowerInvariant().Contains(t) ||
-                        (c.Telefono ?? "").Contains(t)))
-                    {
-                        int r = tabla.Rows.Add(c.Documento, c.NombreCompleto, string.IsNullOrEmpty(c.Telefono) ? "-" : c.Telefono);
-                        tabla.Rows[r].Tag = c;
-                    }
-                };
-                ClienteInfo elegido = null;
-                Action aceptar = () =>
-                {
-                    if (tabla.CurrentRow == null) return;
-                    elegido = (ClienteInfo)tabla.CurrentRow.Tag;
-                    f.DialogResult = DialogResult.OK;
-                };
-                buscar.TextChanged += (s, e) => llenar();
-                tabla.CellDoubleClick += (s, e) => { if (e.RowIndex >= 0) aceptar(); };
-                elegir.Click += (s, e) => aceptar();
-                cancelar.Click += (s, e) => f.Close();
-                f.Shown += (s, e) => buscar.Focus();
-                llenar();
-
-                if (f.ShowDialog(this) == DialogResult.OK && elegido != null)
-                    AsignarCliente(elegido.IdCliente, elegido.Documento, elegido.NombreCompleto, elegido.Telefono);
-            }
+            ClienteInfo elegido = SelectorClientes.Elegir(this, clientes, "Buscar cliente registrado", null, "Cancelar");
+            if (elegido != null)
+                AsignarCliente(elegido.IdCliente, elegido.Documento, elegido.NombreCompleto, elegido.Telefono);
         }
 
         // Renglones "Cliente" y documento en la vista previa: se insertan
@@ -731,6 +711,8 @@ namespace PROYECTO_RESTAURANTE
             {
 
                 CargarPedidoSQL();
+                if (!ModoReimpresion)
+                    PrecargarComprador();
 
                 // Crear numeración ficticia.
                 GenerarBoletaPrueba();
@@ -1132,8 +1114,13 @@ namespace PROYECTO_RESTAURANTE
                        PR.nombre AS Promocion,
                        M.[número] AS NumeroMesa,
                        LTRIM(RTRIM(ISNULL(E.nombre, '') + ' ' +
-                                    ISNULL(E.apellidos, ''))) AS NombreMesero
+                                    ISNULL(E.apellidos, ''))) AS NombreMesero,
+                       P.id_reserva, P.nombre_contacto, P.[teléfono_contacto] AS TelefonoContacto,
+                       CASE WHEN C.estado = 'activo' THEN C.id_cliente END AS IdClienteActivo,
+                       C.documento AS DocCliente, C.[teléfono] AS TelCliente,
+                       LTRIM(RTRIM(ISNULL(C.nombre, '') + ' ' + ISNULL(C.apellidos, ''))) AS NombreClienteReg
                 FROM dbo.PEDIDO P
+                LEFT JOIN dbo.CLIENTE C ON C.id_cliente = P.id_cliente
                 LEFT JOIN dbo.MESA M ON M.id_mesa = P.id_mesa
                 LEFT JOIN dbo.EMPLEADO E ON E.id_empleado = P.id_mesero
                 LEFT JOIN dbo.PROMOCION PR ON PR.id_promocion = P.id_promocion
@@ -1180,6 +1167,15 @@ namespace PROYECTO_RESTAURANTE
                         descuentoGeneral = Convert.ToDecimal(lector["DescuentoGeneral"]);
                         propina = Convert.ToDecimal(lector["Propina"]);
                         promocionPedido = lector["Promocion"] == DBNull.Value ? null : Convert.ToString(lector["Promocion"]);
+
+                        Func<string, string> texto = c => lector[c] == DBNull.Value ? null : Convert.ToString(lector[c]).Trim();
+                        idReservaPedido = lector["id_reserva"] == DBNull.Value ? (int?)null : Convert.ToInt32(lector["id_reserva"]);
+                        contactoPedido = texto("nombre_contacto");
+                        telefonoPedido = texto("TelefonoContacto");
+                        idClientePedido = lector["IdClienteActivo"] == DBNull.Value ? (int?)null : Convert.ToInt32(lector["IdClienteActivo"]);
+                        documentoClientePedido = texto("DocCliente");
+                        nombreClientePedido = texto("NombreClienteReg");
+                        telefonoClientePedido = texto("TelCliente");
                     }
                 }
 

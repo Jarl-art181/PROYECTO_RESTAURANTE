@@ -167,6 +167,8 @@
     <Compile Include="DialogosInventario.cs" />
     <Compile Include="InventarioDatos.cs" />
     <Compile Include="PromocionDatos.cs" />
+    <Compile Include="ReservaReglas.cs" />
+    <Compile Include="SelectorClientes.cs" />
     <Compile Include="TarjetasInventario.cs" />
     <Compile Include="MenuDatos.cs" />
     <Compile Include="TarjetasMenu.cs" />

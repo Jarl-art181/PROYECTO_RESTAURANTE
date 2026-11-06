@@ -1971,6 +1971,26 @@ namespace PROYECTO_RESTAURANTE
             id_pedido INT NOT NULL
         );
 
+        -- Pedido de salón de una reserva con llegada confirmada
+        -- ('finalizada') y aún sin pedido: se vincula a esa reserva y
+        -- conserva quién reservó (nombre, teléfono y cliente registrado).
+        DECLARE @Reserva INT = NULL, @Contacto NVARCHAR(100) = NULL,
+                @Telefono VARCHAR(20) = NULL, @Cliente INT = NULL;
+
+        IF @Canal = 'salon' AND @Mesa IS NOT NULL
+            SELECT TOP (1)
+                   @Reserva = R.id_reserva, @Contacto = R.nombre_cliente,
+                   @Telefono = R.telefono,
+                   @Cliente = CASE WHEN C.estado = 'activo' THEN R.id_cliente END
+            FROM dbo.RESERVA_MESA R WITH (UPDLOCK, HOLDLOCK)
+            LEFT JOIN dbo.CLIENTE C ON C.id_cliente = R.id_cliente
+            WHERE R.id_mesa = @Mesa
+              AND R.estado = 'finalizada'
+              AND R.fecha_hora >= DATEADD(MINUTE, -@Duracion, SYSDATETIME())
+              AND R.fecha_hora <= DATEADD(MINUTE, @Apartado, SYSDATETIME())
+              AND NOT EXISTS (SELECT 1 FROM dbo.PEDIDO P WHERE P.id_reserva = R.id_reserva)
+            ORDER BY R.fecha_hora DESC, R.id_reserva DESC;
+
         INSERT INTO dbo.PEDIDO
         (
             fecha_hora,
@@ -1980,7 +2000,11 @@ namespace PROYECTO_RESTAURANTE
             descuento_aplicado,
             id_sucursal,
             id_mesa,
-            id_mesero
+            id_mesero,
+            id_reserva,
+            id_cliente,
+            nombre_contacto,
+            [teléfono_contacto]
         )
         OUTPUT INSERTED.id_pedido
         INTO @NuevoPedido(id_pedido)
@@ -1993,7 +2017,11 @@ namespace PROYECTO_RESTAURANTE
             0,
             @Sucursal,
             @Mesa,
-            @Mesero
+            @Mesero,
+            @Reserva,
+            @Cliente,
+            LEFT(@Contacto, 100),
+            @Telefono
         );
 
         SELECT id_pedido
@@ -2021,6 +2049,11 @@ namespace PROYECTO_RESTAURANTE
                 ).Value = idMesero.HasValue
                     ? (object)idMesero.Value
                     : DBNull.Value;
+
+                cmd.Parameters.Add("@Duracion", SqlDbType.Int).Value =
+                    ReservaReglas.DuracionReservaMinutos;
+                cmd.Parameters.Add("@Apartado", SqlDbType.Int).Value =
+                    ReservaReglas.ApartadoMinutos;
 
                 object resultado = cmd.ExecuteScalar();
 

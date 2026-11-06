@@ -30,6 +30,10 @@ namespace PROYECTO_RESTAURANTE
         private List<ClienteInfo> clientes = new List<ClienteInfo>();
         private int? idEditando;
 
+        // Consentimiento para promociones: opcional, explícito y revocable.
+        // Es independiente del registro para reservas y ventas.
+        private Guna2CheckBox chkAceptaPromociones;
+
         public FRM_CLIENTES()
         {
             InitializeComponent();
@@ -118,6 +122,27 @@ namespace PROYECTO_RESTAURANTE
             guna2TextBox7.MaxLength = 255;
 
             txtBuscarProducto.PlaceholderText = "Buscar por nombre, documento o teléfono ...";
+
+            // El comentario cede espacio a la casilla de consentimiento.
+            guna2TextBox7.Height = 82;
+            chkAceptaPromociones = new Guna2CheckBox
+            {
+                Text = "Acepta recibir promociones",
+                AutoSize = true,
+                BackColor = Color.Transparent,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Location = new Point(guna2TextBox7.Left, guna2TextBox7.Bottom + 8)
+            };
+            chkAceptaPromociones.CheckedState.FillColor = Color.Goldenrod;
+            chkAceptaPromociones.CheckedState.BorderColor = Color.Goldenrod;
+            chkAceptaPromociones.UncheckedState.BorderColor = Color.Goldenrod;
+            chkAceptaPromociones.UncheckedState.BorderThickness = 1;
+            guna2TextBox7.Parent.Controls.Add(chkAceptaPromociones);
+            chkAceptaPromociones.BringToFront();
+            new ToolTip { AutoPopDelay = 12000 }.SetToolTip(chkAceptaPromociones,
+                "Opcional. Márquela solo si el cliente autoriza expresamente recibir promociones " +
+                "(cumpleaños, cliente frecuente). Puede retirarla cuando lo pida. " +
+                "No se envía nada automáticamente.");
         }
 
         private void ConfigurarBotones()
@@ -257,7 +282,11 @@ namespace PROYECTO_RESTAURANTE
             guna2HtmlLabel14.Text = "Detalle del Cliente<br><span style='font-size:8pt; font-weight:normal'>" +
                 (c.Activo ? (c.Frecuente ? "Cliente frecuente" : "Activo") : "Inactivo") +
                 " · " + c.PedidosTotales + (c.PedidosTotales == 1 ? " pedido" : " pedidos") +
-                " · " + c.SaldoPuntos + " pts</span>";
+                " · " + c.ReservasTotales + (c.ReservasTotales == 1 ? " reserva" : " reservas") +
+                " · " + c.SaldoPuntos + " pts" +
+                " · Promociones: " + (c.AceptaPromociones
+                    ? "sí" + (c.FechaConsentimiento.HasValue ? " (" + c.FechaConsentimiento.Value.ToString("dd/MM/yyyy") + ")" : "")
+                    : "no") + "</span>";
 
             guna2Button13.Text = c.Activo ? TextoEliminar : TextoReactivar;
         }
@@ -298,6 +327,8 @@ namespace PROYECTO_RESTAURANTE
             foreach (Guna2TextBox t in new[] { guna2TextBox2, guna2TextBox3, guna2TextBox5, guna2TextBox4,
                      guna2TextBox10, guna2TextBox9, guna2TextBox8, guna2TextBox7, guna2TextBox1 })
                 t.Text = "";
+            if (chkAceptaPromociones != null)
+                chkAceptaPromociones.Checked = false;
             guna2HtmlLabel6.Text = "Registro / Edición de cliente";
         }
 
@@ -329,6 +360,7 @@ namespace PROYECTO_RESTAURANTE
             guna2TextBox9.Text = c.Direccion;
             guna2TextBox8.Text = c.Distrito;
             guna2TextBox7.Text = c.Comentario;
+            chkAceptaPromociones.Checked = c.AceptaPromociones;
             guna2TextBox3.Focus();
         }
 
@@ -354,7 +386,8 @@ namespace PROYECTO_RESTAURANTE
                     FechaNacimiento = ClienteDatos.LeerFecha(guna2TextBox10.Text),
                     Direccion = guna2TextBox9.Text,
                     Distrito = guna2TextBox8.Text,
-                    Comentario = guna2TextBox7.Text
+                    Comentario = guna2TextBox7.Text,
+                    AceptaPromociones = chkAceptaPromociones.Checked
                 };
 
                 ClienteDatos.Validar(c);
@@ -476,9 +509,11 @@ namespace PROYECTO_RESTAURANTE
                 return;
 
             List<PedidoClienteInfo> pedidos;
+            List<ReservaClienteInfo> reservas;
             try
             {
                 pedidos = ClienteDatos.Pedidos(c.IdCliente);
+                reservas = ClienteDatos.Reservas(c.IdCliente);
             }
             catch (Exception ex)
             {
@@ -490,8 +525,8 @@ namespace PROYECTO_RESTAURANTE
 
             using (Form ventana = new Form())
             {
-                ventana.Text = "Historial de pedidos";
-                ventana.ClientSize = new Size(620, 420);
+                ventana.Text = "Historial del cliente";
+                ventana.ClientSize = new Size(620, 640);
                 ventana.FormBorderStyle = FormBorderStyle.FixedToolWindow;
                 ventana.StartPosition = FormStartPosition.CenterParent;
                 ventana.BackColor = Color.White;
@@ -500,7 +535,9 @@ namespace PROYECTO_RESTAURANTE
                 Guna2Panel encabezado = new Guna2Panel { Dock = DockStyle.Top, Height = 56, FillColor = Color.Gold };
                 encabezado.Controls.Add(new Label
                 {
-                    Text = c.NombreCompleto.ToUpperInvariant() + "\n" + pedidos.Count + " pedido(s) · " + c.SaldoPuntos + " puntos",
+                    Text = c.NombreCompleto.ToUpperInvariant() + "\n" + pedidos.Count + " pedido(s) · " +
+                           reservas.Count + " reserva(s) · " + c.PedidosRecientes + " visita(s) en " +
+                           ClienteDatos.DiasFrecuencia + " días · " + c.SaldoPuntos + " puntos",
                     Font = new Font("Microsoft Sans Serif", 11F, FontStyle.Bold),
                     Dock = DockStyle.Fill,
                     TextAlign = ContentAlignment.MiddleCenter,
@@ -509,8 +546,8 @@ namespace PROYECTO_RESTAURANTE
 
                 Guna2DataGridView tabla = new Guna2DataGridView
                 {
-                    Location = new Point(16, 70),
-                    Size = new Size(588, 330),
+                    Location = new Point(16, 92),
+                    Size = new Size(588, 300),
                     ReadOnly = true,
                     AllowUserToAddRows = false,
                     AllowUserToDeleteRows = false,
@@ -537,7 +574,47 @@ namespace PROYECTO_RESTAURANTE
                         p.Canal, p.Estado, "S/ " + p.Total.ToString("0.00"));
                 }
 
+                Guna2DataGridView tablaReservas = new Guna2DataGridView
+                {
+                    Location = new Point(16, 428),
+                    Size = new Size(588, 196),
+                    ReadOnly = true,
+                    AllowUserToAddRows = false,
+                    AllowUserToDeleteRows = false,
+                    RowHeadersVisible = false,
+                    SelectionMode = DataGridViewSelectionMode.FullRowSelect
+                };
+                tablaReservas.Columns.Add("reserva", "N.º");
+                tablaReservas.Columns.Add("fecha", "FECHA");
+                tablaReservas.Columns.Add("mesa", "MESA");
+                tablaReservas.Columns.Add("personas", "PERS.");
+                tablaReservas.Columns.Add("estado", "ESTADO");
+                tablaReservas.Columns.Add("pedido", "PEDIDO");
+                EstiloTablas.Configurar(tablaReservas, 30, 28);
+                tablaReservas.ThemeStyle.HeaderStyle.BackColor = Color.Gold;
+                tablaReservas.ThemeStyle.HeaderStyle.ForeColor = Color.Black;
+                EstiloTablas.ColumnaFija(tablaReservas.Columns[0], 60, EstiloTablas.Centro);
+                EstiloTablas.ColumnaFija(tablaReservas.Columns[1], 140, EstiloTablas.Centro);
+                EstiloTablas.ColumnaFija(tablaReservas.Columns[2], 70, EstiloTablas.Centro);
+                EstiloTablas.ColumnaFija(tablaReservas.Columns[3], 60, EstiloTablas.Centro);
+                EstiloTablas.Columna(tablaReservas.Columns[4], 50, 110, EstiloTablas.Izquierda);
+                EstiloTablas.ColumnaFija(tablaReservas.Columns[5], 80, EstiloTablas.Centro);
+                foreach (ReservaClienteInfo r in reservas)
+                {
+                    tablaReservas.Rows.Add(r.IdReserva, r.FechaHora.ToString("dd/MM/yyyy HH:mm"), r.Mesa,
+                        r.Personas, r.Estado, r.IdPedido.HasValue ? r.IdPedido.Value.ToString("D4") : "-");
+                }
+
+                Func<string, int, Label> titulo = (texto, y) => new Label
+                {
+                    Text = texto, Location = new Point(16, y), AutoSize = true, BackColor = Color.Transparent,
+                    Font = new Font("Segoe UI", 10F, FontStyle.Bold)
+                };
+
+                ventana.Controls.Add(titulo("Pedidos y compras", 66));
                 ventana.Controls.Add(tabla);
+                ventana.Controls.Add(titulo("Reservas", 402));
+                ventana.Controls.Add(tablaReservas);
                 ventana.Controls.Add(encabezado);
                 ventana.ShowDialog(this);
             }
