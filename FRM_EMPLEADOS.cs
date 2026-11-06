@@ -60,7 +60,13 @@ namespace PROYECTO_RESTAURANTE
             ConfigurarTabla();
             ConfigurarFiltros();
             ConfigurarMenuAcciones();
+            OrganizarPaneles();
             LimpiarDetalle();
+
+            // Diseño común: se adapta a la pantalla y el encabezado muestra
+            // la hora, la fecha y el usuario de la sesión.
+            DisenoVentanas.Adaptar(this);
+            DisenoVentanas.Encabezado(this, true);
 
             guna2Button10.Click += btnNuevoEmpleado_Click;
             FormClosed += (s, e) => menuAcciones.Dispose();
@@ -101,20 +107,81 @@ namespace PROYECTO_RESTAURANTE
 
             // Columnas cortas con ancho exacto (medido con la letra real);
             // el nombre ocupa el resto y pasa a dos líneas si es largo.
-            EstiloTablas.ColumnaFija(Column_codi, 66, EstiloTablas.Centro);
-            EstiloTablas.Columna(Column_nombres, 100, 110, EstiloTablas.Izquierda, true);
+            EstiloTablas.ColumnaFija(Column_codi, 62, EstiloTablas.Centro);
+            EstiloTablas.Columna(Column_nombres, 100, 156, EstiloTablas.Izquierda, true);
             EstiloTablas.ColumnaFija(Column1_DNI, 80, EstiloTablas.Centro);
-            EstiloTablas.ColumnaFija(Column_cargo, 104, EstiloTablas.Izquierda);
-            EstiloTablas.ColumnaFija(Column_telefono, 86, EstiloTablas.Centro);
-            EstiloTablas.ColumnaFija(Column_turno, 86, EstiloTablas.Izquierda);
-            EstiloTablas.ColumnaFija(Column_Estado, 70, EstiloTablas.Izquierda);
-            EstiloTablas.ColumnaFija(ColumnAccion, 84, EstiloTablas.Centro);
+            EstiloTablas.ColumnaFija(Column_cargo, 108, EstiloTablas.Izquierda);
+            EstiloTablas.ColumnaFija(Column_telefono, 88, EstiloTablas.Centro);
+            EstiloTablas.ColumnaFija(Column_turno, 82, EstiloTablas.Izquierda);
+            EstiloTablas.ColumnaFija(Column_Estado, 68, EstiloTablas.Izquierda);
+            EstiloTablas.ColumnaFija(ColumnAccion, 86, EstiloTablas.Centro);
 
             tabla.SelectionChanged += (s, e) => MostrarDetalle(EmpleadoSeleccionado());
             tabla.CellContentClick += Tabla_CellContentClick;
             tabla.CellDoubleClick += (s, e) =>
             {
                 if (e.RowIndex >= 0) EditarEmpleado(EmpleadoDeFila(e.RowIndex));
+            };
+        }
+
+        // ------------------------------------------------------
+        // DISTRIBUCIÓN (complementa al diseñador)
+        // ------------------------------------------------------
+        // Quinta fila de la leyenda (Repartidores): el diseño traía 4.
+        private Guna2CircleButton puntoRepartidores;
+        private Guna2HtmlLabel lblRepartidores, lblCantidadRepartidores, lblPorcentajeRepartidores;
+
+        private void OrganizarPaneles()
+        {
+            // Leyenda: los puntos de color son marcas, sin texto.
+            Guna2CircleButton[] puntos = { guna2CircleButton4, guna2CircleButton5, guna2CircleButton6, guna2CircleButton1 };
+            Color[] colores = { Color.CornflowerBlue, Color.LightCoral, Color.MediumSpringGreen, Color.Khaki };
+            for (int i = 0; i < puntos.Length; i++)
+            {
+                puntos[i].Text = "";
+                puntos[i].FillColor = colores[i];
+                puntos[i].TabStop = false;
+            }
+
+            puntoRepartidores = new Guna2CircleButton
+            {
+                Size = guna2CircleButton1.Size,
+                Location = new Point(guna2CircleButton1.Left, guna2CircleButton1.Top + 27),
+                FillColor = Color.Plum,
+                BackColor = Color.White,
+                BorderColor = Color.White,
+                TabStop = false,
+                Text = ""
+            };
+            puntoRepartidores.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
+            lblRepartidores = CopiarEtiqueta(guna2HtmlLabel34, "Repartidores");
+            lblCantidadRepartidores = CopiarEtiqueta(lblCantidadTotal, "00");
+            lblPorcentajeRepartidores = CopiarEtiqueta(lblPorcentajeTotal, "0%");
+            guna2Panel10.Controls.AddRange(new Control[] { puntoRepartidores, lblRepartidores, lblCantidadRepartidores, lblPorcentajeRepartidores });
+
+            // Información del empleado: valores sin salirse del panel
+            // (texto completo al pasar el mouse).
+            ToolTip ayuda = new ToolTip { AutoPopDelay = 10000 };
+            foreach (Guna2HtmlLabel valor in new[] { guna2HtmlLabel57, guna2HtmlLabel56, guna2HtmlLabel26,
+                     guna2HtmlLabel25, guna2HtmlLabel30, guna2HtmlLabel29 })
+            {
+                valor.AutoSize = false;
+                valor.Size = new Size(guna2Panel8.Width - valor.Left - 10, 22);
+                Guna2HtmlLabel v = valor;
+                v.TextChanged += (s, e) => ayuda.SetToolTip(v, v.Text.Length > 22 ? v.Text : "");
+            }
+            Disposed += (s, e) => ayuda.Dispose();
+        }
+
+        private static Guna2HtmlLabel CopiarEtiqueta(Guna2HtmlLabel modelo, string texto)
+        {
+            return new Guna2HtmlLabel
+            {
+                BackColor = Color.Transparent,
+                Font = modelo.Font,
+                ForeColor = modelo.ForeColor,
+                Location = new Point(modelo.Left, modelo.Top + 27),
+                Text = texto
             };
         }
 
@@ -250,7 +317,7 @@ namespace PROYECTO_RESTAURANTE
             guna2HtmlLabel8.Text = cocineros.ToString("D2");
             guna2HtmlLabel10.Text = meseros.ToString("D2");
 
-            // Leyenda existente de "Distribución por cargo" (4 filas).
+            // Leyenda de "Distribución por cargo": los cinco cargos.
             guna2HtmlLabel50.Text = "Distribución por cargo (activos)";
             guna2HtmlLabel51.Text = "Administradores";
             guna2HtmlLabel54.Text = "Cocineros";
@@ -261,6 +328,7 @@ namespace PROYECTO_RESTAURANTE
             MostrarFilaLeyenda(lblCantidadDelivery, lblPorcentajeDelivery, cocineros, total);
             MostrarFilaLeyenda(lblCantidadRecojo, lblPorcentajeRecojo, meseros, total);
             MostrarFilaLeyenda(lblCantidadTotal, lblPorcentajeTotal, cajeros, total);
+            MostrarFilaLeyenda(lblCantidadRepartidores, lblPorcentajeRepartidores, repartidores, total);
 
             // Gráfico con los cinco cargos (colores de la leyenda).
             GunaDona.Datasets.Clear();

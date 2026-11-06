@@ -61,6 +61,20 @@ namespace PROYECTO_RESTAURANTE
             foreach (SucursalInfo s in sucursales)
                 cmbSucursal.Items.Add(s);
 
+            // Tipo de documento: se elige de la lista (no se escribe).
+            // EMPLEADO.dni es CHAR(8) con índice único: hoy solo admite DNI.
+            // Otros tipos requieren cambiar el esquema (propuesta pendiente).
+            cmbTipoDocumento.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbTipoDocumento.Items.Clear();
+            cmbTipoDocumento.Items.Add("DNI");
+            cmbTipoDocumento.SelectedIndex = 0;
+            lblDni.Text = "N° de DNI *";
+            txtDni.MaxLength = 8;
+            txtDni.PlaceholderText = "8 dígitos";
+            ToolTip ayuda = new ToolTip();
+            ayuda.SetToolTip(cmbTipoDocumento, "La base de datos registra el DNI (8 dígitos) de los empleados.");
+            Disposed += (s, e) => ayuda.Dispose();
+
             // Solo dígitos en DNI y teléfono.
             txtDni.KeyPress += SoloDigitos;
             txtTelefono.KeyPress += SoloDigitos;

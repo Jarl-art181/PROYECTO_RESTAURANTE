@@ -34,6 +34,8 @@ namespace PROYECTO_RESTAURANTE
             this.txtNombres = new Guna.UI2.WinForms.Guna2TextBox();
             this.lblNombres = new System.Windows.Forms.Label();
             this.txtDni = new Guna.UI2.WinForms.Guna2TextBox();
+            this.lblTipoDocumento = new System.Windows.Forms.Label();
+            this.cmbTipoDocumento = new Guna.UI2.WinForms.Guna2ComboBox();
             this.lblDni = new System.Windows.Forms.Label();
             this.grpInformacionLaboral = new Guna.UI2.WinForms.Guna2GroupBox();
             this.lblSinDatosCargo = new System.Windows.Forms.Label();
@@ -106,6 +108,8 @@ namespace PROYECTO_RESTAURANTE
             this.grpDatosPersonales.Controls.Add(this.txtNombres);
             this.grpDatosPersonales.Controls.Add(this.lblNombres);
             this.grpDatosPersonales.Controls.Add(this.txtDni);
+            this.grpDatosPersonales.Controls.Add(this.lblTipoDocumento);
+            this.grpDatosPersonales.Controls.Add(this.cmbTipoDocumento);
             this.grpDatosPersonales.Controls.Add(this.lblDni);
             this.grpDatosPersonales.CustomBorderColor = System.Drawing.Color.Gold;
             this.grpDatosPersonales.Font = new System.Drawing.Font("Arial", 11F, System.Drawing.FontStyle.Bold);
@@ -116,12 +120,37 @@ namespace PROYECTO_RESTAURANTE
             this.grpDatosPersonales.TabIndex = 1;
             this.grpDatosPersonales.Text = "1. DATOS PERSONALES";
             //
+            // lblTipoDocumento
+            //
+            this.lblTipoDocumento.AutoSize = true;
+            this.lblTipoDocumento.BackColor = System.Drawing.Color.Transparent;
+            this.lblTipoDocumento.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
+            this.lblTipoDocumento.Location = new System.Drawing.Point(18, 50);
+            this.lblTipoDocumento.Name = "lblTipoDocumento";
+            this.lblTipoDocumento.TabIndex = 0;
+            this.lblTipoDocumento.Text = "Tipo de doc. *";
+            //
+            // cmbTipoDocumento
+            //
+            this.cmbTipoDocumento.BackColor = System.Drawing.Color.Transparent;
+            this.cmbTipoDocumento.BorderColor = System.Drawing.Color.Goldenrod;
+            this.cmbTipoDocumento.BorderRadius = 8;
+            this.cmbTipoDocumento.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbTipoDocumento.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbTipoDocumento.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.cmbTipoDocumento.ForeColor = System.Drawing.Color.Black;
+            this.cmbTipoDocumento.ItemHeight = 30;
+            this.cmbTipoDocumento.Location = new System.Drawing.Point(18, 72);
+            this.cmbTipoDocumento.Name = "cmbTipoDocumento";
+            this.cmbTipoDocumento.Size = new System.Drawing.Size(110, 36);
+            this.cmbTipoDocumento.TabIndex = 0;
+            //
             // lblDni
             //
             this.lblDni.AutoSize = true;
             this.lblDni.BackColor = System.Drawing.Color.Transparent;
             this.lblDni.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
-            this.lblDni.Location = new System.Drawing.Point(18, 50);
+            this.lblDni.Location = new System.Drawing.Point(139, 50);
             this.lblDni.Name = "lblDni";
             this.lblDni.TabIndex = 0;
             this.lblDni.Text = "DNI *";
@@ -132,11 +161,11 @@ namespace PROYECTO_RESTAURANTE
             this.txtDni.BorderRadius = 8;
             this.txtDni.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtDni.ForeColor = System.Drawing.Color.Black;
-            this.txtDni.Location = new System.Drawing.Point(18, 72);
+            this.txtDni.Location = new System.Drawing.Point(139, 72);
             this.txtDni.MaxLength = 8;
             this.txtDni.Name = "txtDni";
             this.txtDni.PlaceholderText = "8 dígitos";
-            this.txtDni.Size = new System.Drawing.Size(150, 36);
+            this.txtDni.Size = new System.Drawing.Size(120, 36);
             this.txtDni.TabIndex = 1;
             //
             // lblNombres
@@ -144,7 +173,7 @@ namespace PROYECTO_RESTAURANTE
             this.lblNombres.AutoSize = true;
             this.lblNombres.BackColor = System.Drawing.Color.Transparent;
             this.lblNombres.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
-            this.lblNombres.Location = new System.Drawing.Point(184, 50);
+            this.lblNombres.Location = new System.Drawing.Point(270, 50);
             this.lblNombres.Name = "lblNombres";
             this.lblNombres.TabIndex = 2;
             this.lblNombres.Text = "Nombres *";
@@ -155,10 +184,10 @@ namespace PROYECTO_RESTAURANTE
             this.txtNombres.BorderRadius = 8;
             this.txtNombres.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtNombres.ForeColor = System.Drawing.Color.Black;
-            this.txtNombres.Location = new System.Drawing.Point(184, 72);
+            this.txtNombres.Location = new System.Drawing.Point(270, 72);
             this.txtNombres.MaxLength = 100;
             this.txtNombres.Name = "txtNombres";
-            this.txtNombres.Size = new System.Drawing.Size(194, 36);
+            this.txtNombres.Size = new System.Drawing.Size(160, 36);
             this.txtNombres.TabIndex = 3;
             //
             // lblApellidos
@@ -166,7 +195,7 @@ namespace PROYECTO_RESTAURANTE
             this.lblApellidos.AutoSize = true;
             this.lblApellidos.BackColor = System.Drawing.Color.Transparent;
             this.lblApellidos.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
-            this.lblApellidos.Location = new System.Drawing.Point(392, 50);
+            this.lblApellidos.Location = new System.Drawing.Point(441, 50);
             this.lblApellidos.Name = "lblApellidos";
             this.lblApellidos.TabIndex = 4;
             this.lblApellidos.Text = "Apellidos *";
@@ -177,10 +206,10 @@ namespace PROYECTO_RESTAURANTE
             this.txtApellidos.BorderRadius = 8;
             this.txtApellidos.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtApellidos.ForeColor = System.Drawing.Color.Black;
-            this.txtApellidos.Location = new System.Drawing.Point(392, 72);
+            this.txtApellidos.Location = new System.Drawing.Point(441, 72);
             this.txtApellidos.MaxLength = 100;
             this.txtApellidos.Name = "txtApellidos";
-            this.txtApellidos.Size = new System.Drawing.Size(194, 36);
+            this.txtApellidos.Size = new System.Drawing.Size(160, 36);
             this.txtApellidos.TabIndex = 5;
             //
             // lblTelefono
@@ -188,7 +217,7 @@ namespace PROYECTO_RESTAURANTE
             this.lblTelefono.AutoSize = true;
             this.lblTelefono.BackColor = System.Drawing.Color.Transparent;
             this.lblTelefono.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
-            this.lblTelefono.Location = new System.Drawing.Point(600, 50);
+            this.lblTelefono.Location = new System.Drawing.Point(612, 50);
             this.lblTelefono.Name = "lblTelefono";
             this.lblTelefono.TabIndex = 6;
             this.lblTelefono.Text = "Teléfono";
@@ -199,11 +228,11 @@ namespace PROYECTO_RESTAURANTE
             this.txtTelefono.BorderRadius = 8;
             this.txtTelefono.Font = new System.Drawing.Font("Segoe UI", 10F);
             this.txtTelefono.ForeColor = System.Drawing.Color.Black;
-            this.txtTelefono.Location = new System.Drawing.Point(600, 72);
+            this.txtTelefono.Location = new System.Drawing.Point(612, 72);
             this.txtTelefono.MaxLength = 9;
             this.txtTelefono.Name = "txtTelefono";
             this.txtTelefono.PlaceholderText = "9 dígitos";
-            this.txtTelefono.Size = new System.Drawing.Size(122, 36);
+            this.txtTelefono.Size = new System.Drawing.Size(110, 36);
             this.txtTelefono.TabIndex = 7;
             //
             // grpInformacionLaboral
@@ -543,6 +572,8 @@ namespace PROYECTO_RESTAURANTE
         private Guna.UI2.WinForms.Guna2GroupBox grpDatosPersonales;
         private System.Windows.Forms.Label lblDni;
         private Guna.UI2.WinForms.Guna2TextBox txtDni;
+        private System.Windows.Forms.Label lblTipoDocumento;
+        private Guna.UI2.WinForms.Guna2ComboBox cmbTipoDocumento;
         private System.Windows.Forms.Label lblNombres;
         private Guna.UI2.WinForms.Guna2TextBox txtNombres;
         private System.Windows.Forms.Label lblApellidos;

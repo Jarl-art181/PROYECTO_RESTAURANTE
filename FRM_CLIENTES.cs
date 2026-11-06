@@ -15,7 +15,7 @@ namespace PROYECTO_RESTAURANTE
     //   guna2Button10 Nuevo · guna2Button11 Editar · guna2Button13 Eliminar
     //   guna2Button12 Limpiar · guna2Button14 Buscar · txtBuscarProducto
     //   guna2Button16 Guardar · guna2Button15 Cancelar
-    //   guna2TextBox1 tipo doc. (automático) · 2 documento · 3 nombre completo
+    //   cmbTipoDocumento tipo doc. (lista, no editable) · guna2TextBox2 documento · 3 nombre completo
     //   guna2TextBox5 teléfono · 4 correo · 10 fecha nac. · 9 dirección
     //   guna2TextBox8 distrito · 7 comentario
     //   guna2DataGridView1 lista · guna2HtmlLabel30/35/41/38 tarjetas
@@ -49,8 +49,14 @@ namespace PROYECTO_RESTAURANTE
 
             ConfigurarFormulario();
             ConfigurarBotones();
+            OrganizarPaneles();
             LimpiarFormulario();
             LimpiarDetalle();
+
+            // Diseño común: se adapta a la pantalla y el encabezado muestra
+            // la hora, la fecha y el usuario de la sesión.
+            DisenoVentanas.Adaptar(this);
+            DisenoVentanas.Encabezado(this, true);
 
             Shown += (s, e) => CargarClientes(null);
         }
@@ -78,30 +84,38 @@ namespace PROYECTO_RESTAURANTE
 
             EstiloTablas.Configurar(tabla, 38, 30);
             // Columnas cortas con ancho exacto; nombre y correo se reparten el resto.
-            EstiloTablas.ColumnaFija(Column_N, 50, EstiloTablas.Centro);
-            EstiloTablas.ColumnaFija(Column_tipo, 66, EstiloTablas.Izquierda);
-            EstiloTablas.ColumnaFija(Column_Documento, 100, EstiloTablas.Centro);
-            EstiloTablas.Columna(Column_nombre, 55, 110, EstiloTablas.Izquierda, true);
-            EstiloTablas.ColumnaFija(Columntelefono, 88, EstiloTablas.Centro);
-            EstiloTablas.Columna(Columncorreo, 45, 90, EstiloTablas.Izquierda);
+            EstiloTablas.ColumnaFija(Column_N, 40, EstiloTablas.Centro);
+            EstiloTablas.ColumnaFija(Column_tipo, 52, EstiloTablas.Centro);
+            EstiloTablas.ColumnaFija(Column_Documento, 104, EstiloTablas.Centro);
+            EstiloTablas.Columna(Column_nombre, 65, 170, EstiloTablas.Izquierda, true);
+            EstiloTablas.ColumnaFija(Columntelefono, 100, EstiloTablas.Centro);
+            EstiloTablas.Columna(Columncorreo, 35, 80, EstiloTablas.Izquierda);
+            Columncorreo.DefaultCellStyle.WrapMode = DataGridViewTriState.False;
         }
 
         private void ConfigurarFormulario()
         {
             guna2HtmlLabel5.Text = "Lista de clientes";
 
-            // Tipo de documento: se deduce del número.
-            guna2TextBox1.ReadOnly = true;
-            guna2TextBox1.TabStop = false;
-            guna2TextBox1.Text = "";
+            // Tipo de documento: se ELIGE de la lista (no se escribe). Son los
+            // tipos que admite el modelo actual, que reconoce el tipo por el
+            // número (CLIENTE no tiene columna de tipo; ver ClienteDatos).
+            cmbTipoDocumento.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbTipoDocumento.Items.Clear();
+            foreach (TipoDoc t in TiposDocumento)
+                cmbTipoDocumento.Items.Add(t);
+            cmbTipoDocumento.SelectedIndex = 0;
+            cmbTipoDocumento.SelectedIndexChanged += (s, e) => AjustarCampoDocumento();
 
             guna2TextBox2.MaxLength = 12;
-            guna2TextBox2.TextChanged += (s, e) => guna2TextBox1.Text = ClienteDatos.TipoDocumento(guna2TextBox2.Text);
             guna2TextBox2.KeyPress += (s, e) =>
             {
-                if (!char.IsControl(e.KeyChar) && !char.IsLetterOrDigit(e.KeyChar))
+                if (char.IsControl(e.KeyChar)) return;
+                bool soloNumeros = TipoElegido().Codigo != "PAS";
+                if (soloNumeros ? !char.IsDigit(e.KeyChar) : !char.IsLetterOrDigit(e.KeyChar))
                     e.Handled = true;
             };
+            AjustarCampoDocumento();
 
             guna2TextBox3.MaxLength = 201;
             guna2TextBox3.PlaceholderText = "Nombres y apellidos";
@@ -123,8 +137,7 @@ namespace PROYECTO_RESTAURANTE
 
             txtBuscarProducto.PlaceholderText = "Buscar por nombre, documento o teléfono ...";
 
-            // El comentario cede espacio a la casilla de consentimiento.
-            guna2TextBox7.Height = 82;
+            // Casilla de consentimiento debajo del comentario.
             chkAceptaPromociones = new Guna2CheckBox
             {
                 Text = "Acepta recibir promociones",
@@ -143,6 +156,82 @@ namespace PROYECTO_RESTAURANTE
                 "Opcional. Márquela solo si el cliente autoriza expresamente recibir promociones " +
                 "(cumpleaños, cliente frecuente). Puede retirarla cuando lo pida. " +
                 "No se envía nada automáticamente.");
+        }
+
+        // ------------------------------------------------------
+        // TIPO DE DOCUMENTO
+        // ------------------------------------------------------
+        private sealed class TipoDoc
+        {
+            public string Codigo, Nombre, Ayuda;
+            public int Maximo;
+            public override string ToString() { return Nombre; }
+        }
+
+        private static readonly TipoDoc[] TiposDocumento =
+        {
+            new TipoDoc { Codigo = "DNI", Nombre = "DNI", Maximo = 8, Ayuda = "8 dígitos" },
+            new TipoDoc { Codigo = "CE", Nombre = "Carné de extranjería", Maximo = 9, Ayuda = "9 dígitos" },
+            new TipoDoc { Codigo = "PAS", Nombre = "Pasaporte", Maximo = 12, Ayuda = "6 a 12 letras y números (con al menos una letra)" },
+            new TipoDoc { Codigo = "RUC", Nombre = "RUC", Maximo = 11, Ayuda = "11 dígitos (10, 15, 17 o 20...)" }
+        };
+
+        private TipoDoc TipoElegido()
+        {
+            return cmbTipoDocumento.SelectedItem as TipoDoc ?? TiposDocumento[0];
+        }
+
+        private void SeleccionarTipo(string codigo)
+        {
+            for (int i = 0; i < TiposDocumento.Length; i++)
+                if (TiposDocumento[i].Codigo == codigo) { cmbTipoDocumento.SelectedIndex = i; return; }
+            cmbTipoDocumento.SelectedIndex = 0;
+        }
+
+        private void AjustarCampoDocumento()
+        {
+            TipoDoc t = TipoElegido();
+            guna2TextBox2.MaxLength = t.Maximo;
+            guna2TextBox2.PlaceholderText = t.Ayuda;
+            if (guna2TextBox2.Text.Length > t.Maximo)
+                guna2TextBox2.Text = guna2TextBox2.Text.Substring(0, t.Maximo);
+        }
+
+        // El número debe corresponder al tipo elegido.
+        private void ValidarTipoDocumento(string documento)
+        {
+            TipoDoc t = TipoElegido();
+            if (documento.Length == 0)
+                throw new ReglaNegocioException("Ingrese el número de " + t.Nombre + ".");
+            string deducido = ClienteDatos.TipoDocumento(documento);
+            if (deducido == t.Codigo)
+                return;
+            if (t.Codigo == "PAS" && documento.Length > 0 && documento.All(char.IsDigit))
+                throw new ReglaNegocioException("El pasaporte debe tener de 6 a 12 letras y números, con al menos una letra.");
+            throw new ReglaNegocioException("El número no corresponde a " + t.Nombre + ": debe tener " + t.Ayuda + ".");
+        }
+
+        // ------------------------------------------------------
+        // DISTRIBUCIÓN (complementa al diseñador)
+        // ------------------------------------------------------
+        private void OrganizarPaneles()
+        {
+            // Tarjetas de estadísticas: ícono, número y texto centrados.
+            foreach (Control tarjeta in new Control[] { guna2Panel8, guna2Panel9, guna2Panel11, guna2Panel10 })
+                DisenoVentanas.CentrarEnTarjeta(tarjeta);
+
+            // Detalle: los valores largos no se salen del panel; el texto
+            // completo aparece al pasar el mouse.
+            ToolTip ayuda = new ToolTip { AutoPopDelay = 10000 };
+            foreach (Guna2HtmlLabel valor in new[] { guna2HtmlLabel57, guna2HtmlLabel56, guna2HtmlLabel55, guna2HtmlLabel54,
+                     guna2HtmlLabel53, guna2HtmlLabel52, guna2HtmlLabel51, guna2HtmlLabel50 })
+            {
+                valor.AutoSize = false;
+                valor.Size = new Size(guna2Panel7.Width - valor.Left - 14, 22);
+                Guna2HtmlLabel v = valor;
+                v.TextChanged += (s, e) => ayuda.SetToolTip(v, v.Text.Length > 30 ? v.Text : "");
+            }
+            Disposed += (s, e) => ayuda.Dispose();
         }
 
         private void ConfigurarBotones()
@@ -325,8 +414,10 @@ namespace PROYECTO_RESTAURANTE
         {
             idEditando = null;
             foreach (Guna2TextBox t in new[] { guna2TextBox2, guna2TextBox3, guna2TextBox5, guna2TextBox4,
-                     guna2TextBox10, guna2TextBox9, guna2TextBox8, guna2TextBox7, guna2TextBox1 })
+                     guna2TextBox10, guna2TextBox9, guna2TextBox8, guna2TextBox7 })
                 t.Text = "";
+            if (cmbTipoDocumento.Items.Count > 0)
+                cmbTipoDocumento.SelectedIndex = 0;
             if (chkAceptaPromociones != null)
                 chkAceptaPromociones.Checked = false;
             guna2HtmlLabel6.Text = "Registro / Edición de cliente";
@@ -352,6 +443,7 @@ namespace PROYECTO_RESTAURANTE
             idEditando = c.IdCliente;
             guna2HtmlLabel6.Text = "Editando: " + c.NombreCompleto;
 
+            SeleccionarTipo(c.TipoDocumento);
             guna2TextBox2.Text = c.Documento;
             guna2TextBox3.Text = c.NombreCompleto;
             guna2TextBox5.Text = c.Telefono;
@@ -390,6 +482,7 @@ namespace PROYECTO_RESTAURANTE
                     AceptaPromociones = chkAceptaPromociones.Checked
                 };
 
+                ValidarTipoDocumento((c.Documento ?? "").Trim().ToUpperInvariant());
                 ClienteDatos.Validar(c);
 
                 guna2Button16.Enabled = false;
