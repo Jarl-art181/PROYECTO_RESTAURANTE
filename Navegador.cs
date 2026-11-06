@@ -90,6 +90,7 @@ namespace PROYECTO_RESTAURANTE
         public static void IniciarAplicacion(Form login)
         {
             ventanaLogin = login;
+            ultimaVerificacion = DateTime.UtcNow;   // recién autenticado
 
             FRM_INICIO inicio = new FRM_INICIO();
             EstablecerPrincipal(inicio);
@@ -140,6 +141,7 @@ namespace PROYECTO_RESTAURANTE
             instancias.Clear();
             Registro.Info("Sesion", "Cierre de sesión del empleado " + SesionActual.IdEmpleado + ".");
             SesionActual.CerrarSesion();
+            ultimaVerificacion = DateTime.MinValue;
 
             if (ventanaLogin != null && !ventanaLogin.IsDisposed)
             {
@@ -177,6 +179,9 @@ namespace PROYECTO_RESTAURANTE
         // ------------------------------------------------------
         public static void Ir<T>(Form actual) where T : Form, new()
         {
+            if (!Autorizado(typeof(T), actual))
+                return;
+
             Form existente = Buscar(typeof(T));
 
             // Pedidos abierto para una mesa concreta no se
@@ -215,6 +220,9 @@ namespace PROYECTO_RESTAURANTE
             if (actual == null)
                 actual = FormularioVisible();
 
+            if (!Autorizado(typeof(FRMS_PEDIDOS), actual))
+                return;
+
             Form existente = Buscar(typeof(FRMS_PEDIDOS));
 
             if (existente != null)
@@ -231,6 +239,68 @@ namespace PROYECTO_RESTAURANTE
             FRMS_PEDIDOS nuevo = new FRMS_PEDIDOS(numeroMesa);
             Registrar(nuevo);
             Cambiar(actual, nuevo, false);
+        }
+
+        // ======================================================
+        // PERMISOS (reglas en la clase Permisos)
+        // ======================================================
+
+        // Última comprobación correcta de la sesión en SQL Server.
+        // Se repite como máximo cada 30 s para no consultar en cada clic.
+        private static DateTime ultimaVerificacion = DateTime.MinValue;
+        private const int SegundosEntreVerificaciones = 30;
+
+        private static bool Autorizado(Type modulo, Form actual)
+        {
+            if (!SesionActual.Iniciada)
+                return false;
+
+            if (!Permisos.PuedeAbrir(modulo, SesionActual.Cargo))
+            {
+                Registro.Info("Permisos", "Acceso denegado a " + modulo.Name +
+                    " para el empleado " + SesionActual.IdEmpleado + " (" + SesionActual.Cargo + ").");
+                MessageBox.Show(
+                    actual,
+                    "Su perfil (" + SesionActual.Cargo + ") no tiene acceso al módulo " +
+                    Permisos.NombreModulo(modulo) + ".",
+                    "Acceso restringido",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return false;
+            }
+
+            if ((DateTime.UtcNow - ultimaVerificacion).TotalSeconds < SegundosEntreVerificaciones)
+                return true;
+
+            string motivo;
+            try
+            {
+                motivo = Permisos.VerificarSesionVigente();
+            }
+            catch (Exception ex)
+            {
+                // Sin conexión no se expulsa al usuario: cada módulo
+                // y cada operación sensible validan de nuevo en SQL.
+                Registro.Error("Permisos", ex);
+                return true;
+            }
+
+            if (motivo == null)
+            {
+                ultimaVerificacion = DateTime.UtcNow;
+                return true;
+            }
+
+            Registro.Info("Permisos", "Sesión del empleado " + SesionActual.IdEmpleado +
+                " cerrada: " + motivo);
+            MessageBox.Show(
+                actual,
+                motivo + "\n\nLa sesión se cerrará. Consulte con el Administrador.",
+                "Sesión no válida",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            CerrarSesion();
+            return false;
         }
 
         // ======================================================

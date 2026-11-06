@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -25,8 +27,66 @@ namespace PROYECTO_RESTAURANTE
         public bool DebeCambiarContrasena;
     }
 
+    // ==========================================================
+    // PERMISOS POR PERFIL (única fuente de reglas de acceso)
+    // ----------------------------------------------------------
+    //  Administrador: todos los módulos y operaciones.
+    //  Cajero:        Inicio, Pedidos y Mesas (cobros y comprobantes).
+    //  Mesero:        Inicio, Pedidos y Mesas (incluye reservas).
+    //  Cocinero:      Inicio y Cocina.
+    //  Repartidor:    Inicio y Pedidos (entregas).
+    // Las operaciones sensibles se vuelven a validar en SQL Server.
+    // ==========================================================
     internal static class Permisos
     {
+        private static readonly Dictionary<Type, string> nombresModulo = new Dictionary<Type, string>
+        {
+            { typeof(FRM_INICIO), "Inicio" },
+            { typeof(FRMS_PEDIDOS), "Pedidos" },
+            { typeof(FRM_MESAS), "Mesas y reservas" },
+            { typeof(FRM_COCINA), "Cocina" },
+            { typeof(FRM_EMPLEADOS), "Empleados y cuentas" },
+            { typeof(FRM_MENU), "Menú" },
+            { typeof(FRM_INVENTARIO), "Inventario" },
+            { typeof(FRM_CLIENTES), "Clientes" },
+            { typeof(FRM_PROMOCIONES), "Promociones" },
+            { typeof(FRM_REPORTES), "Reportes" }
+        };
+
+        private static readonly Dictionary<string, HashSet<Type>> modulosPorCargo =
+            new Dictionary<string, HashSet<Type>>
+            {
+                { Cargos.Administrador, new HashSet<Type>(nombresModulo.Keys) },
+                { Cargos.Cajero, new HashSet<Type> { typeof(FRM_INICIO), typeof(FRMS_PEDIDOS), typeof(FRM_MESAS) } },
+                { Cargos.Mesero, new HashSet<Type> { typeof(FRM_INICIO), typeof(FRMS_PEDIDOS), typeof(FRM_MESAS) } },
+                { Cargos.Cocinero, new HashSet<Type> { typeof(FRM_INICIO), typeof(FRM_COCINA) } },
+                { Cargos.Repartidor, new HashSet<Type> { typeof(FRM_INICIO), typeof(FRMS_PEDIDOS) } }
+            };
+
+        public static bool PuedeAbrir(Type modulo, string cargo)
+        {
+            HashSet<Type> permitidos;
+            return cargo != null && modulosPorCargo.TryGetValue(cargo, out permitidos) &&
+                   permitidos.Contains(modulo);
+        }
+
+        public static string NombreModulo(Type modulo)
+        {
+            string nombre;
+            return nombresModulo.TryGetValue(modulo, out nombre) ? nombre : modulo.Name;
+        }
+
+        // Texto para mostrar los módulos de un cargo (cuentas de acceso).
+        public static string DescribirModulos(string cargo)
+        {
+            HashSet<Type> permitidos;
+            if (cargo == null || !modulosPorCargo.TryGetValue(cargo, out permitidos))
+                return "Ninguno (sin cargo)";
+
+            return string.Join(", ", nombresModulo.Where(m => permitidos.Contains(m.Key)).Select(m => m.Value)) +
+                   (PuedeCobrar(cargo) ? ". Puede cobrar." : ". No puede cobrar.");
+        }
+
         // Perfiles autorizados a registrar cobros (decisión aprobada).
         // Coincide con el trigger TR_PAGO_RN_E (CAJERO o ADMINISTRADOR).
         public static bool PuedeCobrar(string cargo)
@@ -39,10 +99,61 @@ namespace PROYECTO_RESTAURANTE
             return cargo == Cargos.Administrador;
         }
 
+        // Crear cuentas, habilitarlas, bloquearlas y restablecer contraseñas.
+        public static bool PuedeGestionarCuentas(string cargo)
+        {
+            return cargo == Cargos.Administrador;
+        }
+
         // Perfiles que atienden la llegada de comensales con reserva.
         public static bool AtiendeReservas(string cargo)
         {
             return cargo == Cargos.Administrador || cargo == Cargos.Cajero || cargo == Cargos.Mesero;
+        }
+
+        // ------------------------------------------------------
+        // Comprueba en SQL Server que la sesión sigue siendo válida:
+        // mismo empleado, activo, cuenta habilitada, sin bloqueo,
+        // misma sucursal y mismo cargo que al iniciar sesión.
+        // Devuelve null si es válida o el motivo si no lo es.
+        // Si SQL Server no responde lanza la excepción (quien llama
+        // decide; la navegación no se bloquea por un corte de red).
+        // ------------------------------------------------------
+        public static string VerificarSesionVigente()
+        {
+            if (!SesionActual.Iniciada || !SesionActual.IdEmpleado.HasValue)
+                return "No hay una sesión iniciada.";
+
+            using (SqlConnection conexion = new SqlConnection(BaseDatos.CadenaConexion))
+            using (SqlCommand cmd = new SqlCommand(@"
+                SELECT E.estado, E.acceso_habilitado, E.id_sucursal,
+                       CASE WHEN E.bloqueo_hasta > SYSDATETIME() THEN 1 ELSE 0 END AS bloqueado,
+                       " + Autenticacion.SqlCargo + @" AS cargo
+                FROM dbo.EMPLEADO E
+                WHERE E.id_empleado = @Id;", conexion))
+            {
+                cmd.CommandTimeout = 10;
+                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = SesionActual.IdEmpleado.Value;
+                conexion.Open();
+
+                using (SqlDataReader r = cmd.ExecuteReader())
+                {
+                    if (!r.Read())
+                        return "Su empleado ya no existe en el sistema.";
+                    if (Convert.ToString(r["estado"]).Trim() != "activo")
+                        return "Su empleado fue desactivado.";
+                    if (!Convert.ToBoolean(r["acceso_habilitado"]))
+                        return "Su cuenta de acceso fue deshabilitada.";
+                    if (Convert.ToInt32(r["bloqueado"]) == 1)
+                        return "Su cuenta fue bloqueada.";
+                    if (Convert.ToInt32(r["id_sucursal"]) != SesionActual.IdSucursal)
+                        return "Su sucursal asignada cambió.";
+                    if (Convert.ToString(r["cargo"]) != SesionActual.Cargo)
+                        return "Su cargo cambió.";
+                }
+            }
+
+            return null;
         }
     }
 
@@ -51,7 +162,17 @@ namespace PROYECTO_RESTAURANTE
         public const int IntentosMaximos = 5;
         public const int MinutosBloqueo = 15;
 
-        private const string SqlCargo = @"
+        // Bloqueo manual del Administrador: se guarda en la columna
+        // existente bloqueo_hasta con esta fecha (no caduca sola).
+        // Los bloqueos por intentos fallidos usan +15 minutos.
+        public static readonly DateTime BloqueoManual = new DateTime(9999, 12, 31);
+
+        public static bool EsBloqueoManual(DateTime bloqueoHasta)
+        {
+            return bloqueoHasta.Year >= 9999;
+        }
+
+        internal const string SqlCargo = @"
             CASE
                 WHEN EXISTS (SELECT 1 FROM dbo.ADMINISTRADOR A WHERE A.id_empleado = E.id_empleado) THEN 'Administrador'
                 WHEN EXISTS (SELECT 1 FROM dbo.CAJERO C        WHERE C.id_empleado = E.id_empleado) THEN 'Cajero'
@@ -124,6 +245,8 @@ namespace PROYECTO_RESTAURANTE
                         if (bloqueo.HasValue && bloqueo.Value > ahora)
                         {
                             tx.Commit();
+                            if (EsBloqueoManual(bloqueo.Value))
+                                return Fallo("La cuenta está bloqueada por el Administrador. Consulte con el Administrador.");
                             return Fallo("La cuenta está bloqueada temporalmente por intentos fallidos.\n" +
                                          "Inténtelo de nuevo después de las " + bloqueo.Value.ToString("HH:mm") + ".");
                         }

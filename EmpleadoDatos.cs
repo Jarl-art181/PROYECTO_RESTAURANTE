@@ -80,6 +80,11 @@ namespace PROYECTO_RESTAURANTE
         public string Sucursal;
         public bool AccesoHabilitado;
         public bool TieneUsuario;
+        public string Usuario;
+        public bool DebeCambiarContrasena;
+        public DateTime? BloqueoHasta;   // solo si sigue vigente
+
+        public bool Bloqueada { get { return BloqueoHasta.HasValue; } }
 
         public string NombreCompleto
         {
@@ -110,6 +115,8 @@ namespace PROYECTO_RESTAURANTE
                 E.[teléfono] AS telefono, E.estado, E.turno,
                 E.id_sucursal, S.nombre AS sucursal,
                 E.acceso_habilitado,
+                E.usuario, E.debe_cambiar_contrasena,
+                CASE WHEN E.bloqueo_hasta > SYSDATETIME() THEN E.bloqueo_hasta END AS bloqueo_vigente,
                 CAST(CASE WHEN E.usuario IS NULL THEN 0 ELSE 1 END AS BIT) AS tiene_usuario,
                 CASE
                     WHEN A.id_empleado IS NOT NULL THEN 'Administrador'
@@ -151,6 +158,19 @@ namespace PROYECTO_RESTAURANTE
             }
 
             return lista;
+        }
+
+        public static EmpleadoInfo Obtener(int idEmpleado)
+        {
+            using (SqlConnection conexion = new SqlConnection(BaseDatos.CadenaConexion))
+            using (SqlCommand cmd = new SqlCommand(
+                SqlListar + " WHERE E.id_empleado = @Id;", conexion))
+            {
+                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = idEmpleado;
+                conexion.Open();
+                using (SqlDataReader lector = cmd.ExecuteReader())
+                    return lector.Read() ? Leer(lector) : null;
+            }
         }
 
         public static List<SucursalInfo> ListarSucursales(int? incluirId)
@@ -199,6 +219,9 @@ namespace PROYECTO_RESTAURANTE
                 Sucursal = Convert.ToString(r["sucursal"]),
                 AccesoHabilitado = Convert.ToBoolean(r["acceso_habilitado"]),
                 TieneUsuario = Convert.ToBoolean(r["tiene_usuario"]),
+                Usuario = r["usuario"] == DBNull.Value ? null : Convert.ToString(r["usuario"]),
+                DebeCambiarContrasena = Convert.ToBoolean(r["debe_cambiar_contrasena"]),
+                BloqueoHasta = r["bloqueo_vigente"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(r["bloqueo_vigente"]),
                 Cargo = Convert.ToString(r["cargo"]),
                 AreaAsignada = r["area_asignada"] == DBNull.Value ? "" : Convert.ToString(r["area_asignada"]),
                 Certificacion = r["certificacion"] == DBNull.Value ? "" : Convert.ToString(r["certificacion"]),
@@ -442,7 +465,8 @@ namespace PROYECTO_RESTAURANTE
                 INNER JOIN dbo.ADMINISTRADOR A ON A.id_empleado = E.id_empleado
                 WHERE E.id_empleado = @Id
                   AND E.estado = 'activo'
-                  AND E.acceso_habilitado = 1;", conexion, tx))
+                  AND E.acceso_habilitado = 1
+                  AND (E.bloqueo_hasta IS NULL OR E.bloqueo_hasta < '99990101');", conexion, tx))
             {
                 cmd.Parameters.Add("@Id", SqlDbType.Int).Value = idAdministrador;
 
@@ -455,7 +479,7 @@ namespace PROYECTO_RESTAURANTE
             }
         }
 
-        private static void VerificarOtroAdministrador(
+        internal static void VerificarOtroAdministrador(
             SqlConnection conexion, SqlTransaction tx, int idExcluido)
         {
             using (SqlCommand cmd = new SqlCommand(@"
@@ -464,7 +488,8 @@ namespace PROYECTO_RESTAURANTE
                 INNER JOIN dbo.ADMINISTRADOR A ON A.id_empleado = E.id_empleado
                 WHERE E.id_empleado <> @Id
                   AND E.estado = 'activo'
-                  AND E.acceso_habilitado = 1;", conexion, tx))
+                  AND E.acceso_habilitado = 1
+                  AND (E.bloqueo_hasta IS NULL OR E.bloqueo_hasta < '99990101');", conexion, tx))
             {
                 cmd.Parameters.Add("@Id", SqlDbType.Int).Value = idExcluido;
 
@@ -479,7 +504,7 @@ namespace PROYECTO_RESTAURANTE
         // ------------------------------------------------------
         // AUXILIARES
         // ------------------------------------------------------
-        private static EmpleadoInfo ObtenerBloqueado(
+        internal static EmpleadoInfo ObtenerBloqueado(
             SqlConnection conexion, SqlTransaction tx, int idEmpleado)
         {
             // Bloquear la fila para evitar cambios simultáneos.
@@ -665,7 +690,7 @@ namespace PROYECTO_RESTAURANTE
 
         // Ejecuta una operación en una transacción Serializable y
         // traduce los errores de SQL Server a mensajes claros.
-        private static T Ejecutar<T>(Func<SqlConnection, SqlTransaction, T> operacion)
+        internal static T Ejecutar<T>(Func<SqlConnection, SqlTransaction, T> operacion)
         {
             using (SqlConnection conexion = new SqlConnection(BaseDatos.CadenaConexion))
             {

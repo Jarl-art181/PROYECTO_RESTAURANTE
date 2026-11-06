@@ -74,15 +74,24 @@ namespace PROYECTO_RESTAURANTE
                 Close();
             };
 
-            // Acceso al sistema: las cuentas se administran en la
-            // siguiente etapa (FASE 2B). El empleado se registra
-            // siempre SIN acceso; nunca se muestran contraseñas.
+            // Acceso al sistema (FASE B). Al registrar se puede crear la
+            // cuenta en la misma operación; al editar, la cuenta se
+            // administra en Opciones › Cuenta de acceso.
+            // Nunca se muestran contraseñas guardadas ni hashes.
             chkHabilitarAcceso.Checked = false;
-            chkHabilitarAcceso.Enabled = false;
+            chkHabilitarAcceso.Enabled = original == null;
             txtUsuario.Enabled = false;
-            lblNotaAcceso.Text =
-                "El empleado se registra sin acceso al sistema. La creación de su " +
-                "cuenta (usuario y contraseña temporal) se habilitará en la próxima etapa.";
+            txtUsuario.MaxLength = CuentaDatos.UsuarioMaximo;
+            chkHabilitarAcceso.CheckedChanged += (s, e) => PrepararAcceso();
+            cmbEstado.SelectedIndexChanged += (s, e) =>
+            {
+                if (original == null && cmbEstado.SelectedIndex == 1)
+                    chkHabilitarAcceso.Checked = false;
+            };
+            lblNotaAcceso.Text = original == null
+                ? "Marque la casilla para crear su cuenta: se generará una contraseña " +
+                  "temporal que deberá cambiar en su primer ingreso."
+                : "La cuenta se administra desde Gestión de Empleados › Opciones › Cuenta de acceso.";
         }
 
         private void PrepararNuevo()
@@ -131,9 +140,29 @@ namespace PROYECTO_RESTAURANTE
             }
 
             chkHabilitarAcceso.Checked = e.AccesoHabilitado;
-            txtUsuario.Text = e.TieneUsuario ? "(cuenta registrada)" : "";
+            txtUsuario.Text = e.TieneUsuario ? e.Usuario : "(sin cuenta)";
 
             MostrarDatosDelCargo();
+        }
+
+        // Al marcar "Habilitar cuenta de acceso" se sugiere un usuario.
+        private void PrepararAcceso()
+        {
+            if (original != null)
+                return;
+
+            bool habilitar = chkHabilitarAcceso.Checked;
+            txtUsuario.Enabled = habilitar;
+
+            if (habilitar && txtUsuario.Text.Trim().Length == 0 &&
+                txtNombres.Text.Trim().Length > 0 && txtApellidos.Text.Trim().Length > 0)
+            {
+                try { txtUsuario.Text = CuentaDatos.SugerirUsuario(txtNombres.Text, txtApellidos.Text); }
+                catch (Exception ex) { Registro.Error("Cuentas", ex); }
+            }
+
+            if (habilitar)
+                txtUsuario.Focus();
         }
 
         private void SeleccionarSucursal(int idSucursal)
@@ -256,17 +285,35 @@ namespace PROYECTO_RESTAURANTE
 
                 if (original == null)
                 {
-                    IdEmpleadoGuardado = EmpleadoDatos.Registrar(datos, idAdministrador);
+                    string temporal = null;
+                    string usuario = null;
+
+                    if (chkHabilitarAcceso.Checked)
+                    {
+                        usuario = CuentaDatos.NormalizarUsuario(txtUsuario.Text);
+                        IdEmpleadoGuardado = CuentaDatos.RegistrarConCuenta(
+                            datos, usuario, idAdministrador, out temporal);
+                    }
+                    else
+                    {
+                        IdEmpleadoGuardado = EmpleadoDatos.Registrar(datos, idAdministrador);
+                    }
 
                     MessageBox.Show(
                         "Empleado registrado correctamente.\n\n" +
                         "Código: E" + IdEmpleadoGuardado.ToString("D4") + "\n" +
                         "Nombre: " + datos.NombreCompleto + "\n" +
                         "Cargo: " + datos.Cargo + "\n" +
-                        "Acceso al sistema: sin cuenta",
+                        "Acceso al sistema: " + (usuario == null ? "sin cuenta" : "usuario " + usuario),
                         "Gestión de empleados",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Information);
+
+                    if (temporal != null)
+                    {
+                        VentanaCuentaAcceso.MostrarContrasenaTemporal(
+                            this, datos.NombreCompleto, usuario, temporal, "Cuenta creada");
+                    }
                 }
                 else
                 {

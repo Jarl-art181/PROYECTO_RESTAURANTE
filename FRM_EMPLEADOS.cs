@@ -142,8 +142,7 @@ namespace PROYECTO_RESTAURANTE
             menuAcciones.Items.Add("Editar datos y cargo...", null, (s, e) => EditarEmpleado(empleadoMenu));
             menuAcciones.Items.Add("Desactivar empleado", null, (s, e) => CambiarEstado(empleadoMenu));
             menuAcciones.Items.Add(new ToolStripSeparator());
-            ToolStripItem cuenta = menuAcciones.Items.Add("Cuenta de acceso (próxima etapa)");
-            cuenta.Enabled = false;
+            menuAcciones.Items.Add("Cuenta de acceso...", null, (s, e) => AbrirCuenta(empleadoMenu));
         }
 
         // ======================================================
@@ -311,7 +310,7 @@ namespace PROYECTO_RESTAURANTE
             guna2HtmlLabel25.Text = string.IsNullOrEmpty(e.Telefono) ? "-" : e.Telefono;
             guna2HtmlLabel30.Text = Turnos.Mostrar(e.Turno);
             guna2HtmlLabel29.Text = (e.Estado == "activo" ? "Activo" : "Inactivo") +
-                                    (e.AccesoHabilitado ? " · con acceso" : " · sin acceso");
+                                    " · " + VentanaCuentaAcceso.Resumen(e);
             guna2HtmlLabel29.ForeColor = e.Estado == "activo" ? Color.ForestGreen : Color.Firebrick;
         }
 
@@ -397,6 +396,38 @@ namespace PROYECTO_RESTAURANTE
             {
                 MessageBox.Show(
                     "No se pudo abrir el registro de empleados:\n" + ex.Message,
+                    "Gestión de empleados",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Opciones › Cuenta de acceso (crear, habilitar, bloquear, restablecer).
+        private void AbrirCuenta(EmpleadoInfo empleado)
+        {
+            if (empleado == null)
+                return;
+
+            int? admin = ObtenerAutorizacion();
+            if (!admin.HasValue)
+                return;
+
+            try
+            {
+                // Datos frescos: otro Administrador pudo cambiar la cuenta.
+                EmpleadoInfo actual = EmpleadoDatos.Obtener(empleado.IdEmpleado) ?? empleado;
+
+                using (VentanaCuentaAcceso ventana = new VentanaCuentaAcceso(actual, admin.Value))
+                {
+                    ventana.ShowDialog(this);
+                    if (ventana.HuboCambios)
+                        CargarEmpleados(empleado.IdEmpleado);
+                }
+            }
+            catch (Exception ex)
+            {
+                Registro.Error("Cuentas", ex);
+                MessageBox.Show(
+                    "No se pudo abrir la cuenta de acceso:\n" + ex.Message,
                     "Gestión de empleados",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
