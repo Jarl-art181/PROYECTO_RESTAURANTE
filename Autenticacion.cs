@@ -111,6 +111,12 @@ namespace PROYECTO_RESTAURANTE
             return cargo == Cargos.Administrador;
         }
 
+        // Insumos, compras, mermas y proveedores (módulo Inventario).
+        public static bool PuedeGestionarInventario(string cargo)
+        {
+            return cargo == Cargos.Administrador;
+        }
+
         // Registrar, editar y desactivar clientes (módulo Clientes).
         public static bool PuedeGestionarClientes(string cargo)
         {

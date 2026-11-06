@@ -52,6 +52,7 @@ namespace PROYECTO_RESTAURANTE
         private string fotoPendiente;      // archivo copiado aún no guardado en SQL
         private Image vistaPendiente;
         private string grupoActual = "todos";
+        private Dictionary<int, List<string>> advertencias = new Dictionary<int, List<string>>();
 
         public FRM_MENU()
         {
@@ -169,6 +170,12 @@ namespace PROYECTO_RESTAURANTE
                 Cursor = Cursors.WaitCursor;
                 productos = MenuDatos.Listar();
                 CargarCategorias();
+                // Platos cuyos insumos están en o bajo su stock mínimo.
+                // Es solo un aviso: si falla (p. ej. base sin la migración
+                // de la Fase E), el menú se muestra igual.
+                try { advertencias = InventarioDatos.PlatosConInsumoBajo(); }
+                catch (Exception ex) { Registro.Error("Menu", ex); advertencias = new Dictionary<int, List<string>>(); }
+                catalogo.Advertencias = advertencias;
                 catalogo.Cargar(productos);
 
                 guna2HtmlLabel28.Text = MenuDatos.PromocionesVigentes().ToString("D2");
@@ -295,7 +302,11 @@ namespace PROYECTO_RESTAURANTE
             guna2TextBox2.Text = p == null ? "" : (p.Activo ? "Activo" : "Inactivo");
             guna2TextBox2.ForeColor = p != null && !p.Activo ? Color.Firebrick : Color.ForestGreen;
             SeleccionarCategoria(p == null ? 0 : p.IdCategoria);
-            guna2HtmlLabel7.Text = p == null ? "Seleccione un producto" : "Código " + p.IdPlato;
+            List<string> bajos;
+            guna2HtmlLabel7.Text = p == null ? "Seleccione un producto"
+                : (advertencias.TryGetValue(p.IdPlato, out bajos)
+                    ? "Bajo stock: " + string.Join(", ", bajos) : "Código " + p.IdPlato);
+            guna2HtmlLabel7.ForeColor = p != null && advertencias.ContainsKey(p.IdPlato) ? Color.DarkOrange : SystemColors.ControlDarkDark;
 
             MostrarImagen(p);
             ActualizarModo();

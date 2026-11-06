@@ -52,6 +52,9 @@ namespace PROYECTO_RESTAURANTE
 
         public FlowLayoutPanel Contenedor { get { return flow; } }
 
+        // id_plato -> insumos en o bajo su mínimo (lo asigna Menú).
+        public Dictionary<int, List<string>> Advertencias = new Dictionary<int, List<string>>();
+
         public TarjetasMenu(FlowLayoutPanel flow, IDictionary<string, int> botonesDiseno, bool mostrarInactivos)
         {
             this.flow = flow;
@@ -207,14 +210,18 @@ namespace PROYECTO_RESTAURANTE
             {
                 // Sin descripción en SQL se conserva el texto del diseño.
                 string descripcion = string.IsNullOrEmpty(p.Descripcion) ? (t.DescripcionDiseno ?? "") : p.Descripcion;
-                t.Descripcion.Text = (activo ? "" : "INACTIVO · ") + descripcion;
+                List<string> bajos;
+                string aviso = activo && Advertencias.TryGetValue(p.IdPlato, out bajos)
+                    ? "Stock bajo: " + string.Join(", ", bajos) + " · " : "";
+                t.Descripcion.Text = (activo ? "" : "INACTIVO · ") + aviso + descripcion;
             }
 
             Color texto = activo ? SystemColors.ControlText : Color.Gray;
             t.Nombre.ForeColor = texto;
             t.Precio.ForeColor = texto;
             if (t.Descripcion != null)
-                t.Descripcion.ForeColor = activo ? SystemColors.ControlText : Color.Firebrick;
+                t.Descripcion.ForeColor = !activo ? Color.Firebrick
+                    : Advertencias.ContainsKey(p.IdPlato) ? Color.DarkOrange : SystemColors.ControlText;
 
             Guna2Panel panel = t.Panel as Guna2Panel;
             if (panel != null)
