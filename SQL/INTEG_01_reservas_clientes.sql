@@ -15,6 +15,7 @@
    * No modifica filas existentes: reservas y pedidos actuales quedan
      sin vínculo; los clientes actuales quedan SIN consentimiento.
    * COMPROBANTE no cambia.
+   * Una sola transacción: si algo falla no queda ningún cambio a medias.
    * Idempotente. Reversión: INTEG_99_revertir.sql
 
    Ejecutar (primero en AL_ESTILO_PIURA_PRUEBAS):
@@ -37,9 +38,10 @@ IF COL_LENGTH('dbo.CLIENTE', 'acepta_promociones') IS NULL
 
 IF COL_LENGTH('dbo.CLIENTE', 'fecha_consentimiento') IS NULL
     ALTER TABLE dbo.CLIENTE ADD fecha_consentimiento DATETIME2(0) NULL;
-
-COMMIT TRANSACTION;
 GO
+
+-- (sigue la misma transacción: las columnas nuevas se usan en otro lote)
+SET XACT_ABORT ON;
 
 IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_RESERVA_CLIENTE')
     ALTER TABLE dbo.RESERVA_MESA ADD CONSTRAINT FK_RESERVA_CLIENTE
@@ -59,6 +61,9 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UX_PEDIDO_RESERVA')
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints WHERE name = 'CK_CLIENTE_CONSENTIMIENTO')
     ALTER TABLE dbo.CLIENTE ADD CONSTRAINT CK_CLIENTE_CONSENTIMIENTO
         CHECK (acepta_promociones = 0 OR fecha_consentimiento IS NOT NULL);
+
+IF @@TRANCOUNT > 0
+    COMMIT TRANSACTION;
 GO
 
 -- Verificación
