@@ -64,6 +64,16 @@ namespace PROYECTO_RESTAURANTE
         private decimal descuentoGeneral = 0;
         private decimal propinaActual = 0;
 
+        // FASE F: una sola promoción por pedido.
+        //  idPromocionGuardada = la que tiene el pedido en SQL.
+        //  idPromocionElegida  = la seleccionada en pantalla (aún sin guardar).
+        private List<PromocionInfo> promocionesDisponibles = new List<PromocionInfo>();
+        private int? idPromocionGuardada;
+        private int? idPromocionElegida;
+        private Guna2ComboBox cmbPromocion;
+        private Label lblDescuentoPromo;
+        private bool cargandoPromocion;
+
 
         // ==========================================
         // 3. CLASE DEL CARRITO
@@ -91,7 +101,8 @@ namespace PROYECTO_RESTAURANTE
             {
                 get
                 {
-                    return Cantidad * Precio - Descuento;
+                    // Descuento POR UNIDAD (igual que V_PEDIDO_TOTAL y RN-G).
+                    return Cantidad * (Precio - Descuento);
                 }
             }
         }
@@ -126,6 +137,7 @@ namespace PROYECTO_RESTAURANTE
 
             ConfigurarColumnaEliminar();
             AjustarTablasPedidos();
+            CrearSelectorPromocion();
             // Activar el botón X de la tabla derecha.
             dgvDetallePedido.CellContentClick -= dgvDetallePedido_CellContentClick;
             dgvDetallePedido.CellContentClick += dgvDetallePedido_CellContentClick;
@@ -165,6 +177,7 @@ namespace PROYECTO_RESTAURANTE
         public void ActualizarAlMostrar()
         {
             CargarCatalogo();
+            CargarPromociones();
             CargarTablaPedidos();
 
             if (idPedidoSeleccionado.HasValue && !CambiosPendientes())
@@ -1241,26 +1254,7 @@ namespace PROYECTO_RESTAURANTE
             // CALCULAR SUBTOTAL, IGV Y TOTAL
             // ======================================
 
-            decimal subtotal =
-                carrito.Sum(p => p.Subtotal);
-
-            decimal importeConIgv =
-                Math.Max(
-                    0, subtotal - descuentoGeneral);
-
-            // IGV incluido en los precios.
-            decimal igv =
-                Math.Round(
-                    importeConIgv * 18m / 118m,
-                    2);
-
-            decimal total =
-                importeConIgv + propinaActual;
-
-            MostrarMonto("lblSubtotal", subtotal);
-            MostrarMonto("lblDescuento", descuentoGeneral);
-            MostrarMonto("lblIGV", igv);
-            MostrarMonto("lblTotalPagar", total);
+            ActualizarPagos();
         }
 
         // ==========================================
@@ -1287,7 +1281,8 @@ namespace PROYECTO_RESTAURANTE
         private bool CambiosPendientes()
         {
             return carrito.Any(p =>
-                p.Cantidad > p.CantidadGuardada);
+                p.Cantidad > p.CantidadGuardada) ||
+                idPromocionElegida != idPromocionGuardada;
         }
 
         private void LimpiarSeleccion()
@@ -1300,6 +1295,9 @@ namespace PROYECTO_RESTAURANTE
 
             descuentoGeneral = 0;
             propinaActual = 0;
+            idPromocionGuardada = null;
+            idPromocionElegida = null;
+            LlenarComboPromociones();
 
             carrito.Clear();
 
@@ -1846,7 +1844,8 @@ namespace PROYECTO_RESTAURANTE
                 SELECT
                     ISNULL(descuento_aplicado, 0)
                         AS Descuento,
-                    propina
+                    propina,
+                    id_promocion
                 FROM dbo.PEDIDO
                 WHERE id_pedido = @Pedido;";
 
@@ -1869,10 +1868,14 @@ namespace PROYECTO_RESTAURANTE
                         propinaActual =
                             Convert.ToDecimal(
                                 lector["propina"]);
+                        idPromocionGuardada = lector["id_promocion"] == DBNull.Value
+                            ? (int?)null : Convert.ToInt32(lector["id_promocion"]);
+                        idPromocionElegida = idPromocionGuardada;
                     }
                 }
             }
 
+            LlenarComboPromociones();
             MostrarCarrito();
         }
 
@@ -2106,6 +2109,18 @@ namespace PROYECTO_RESTAURANTE
                 if (!idMeseroSeleccionado.HasValue)
                     return;
             }
+
+            // Permiso para elegir promoción (también se valida en SQL).
+            bool cambiaPromocion = idPromocionElegida != idPromocionGuardada;
+            if (cambiaPromocion &&
+                !(SesionActual.Iniciada && Permisos.PuedeAplicarPromociones(SesionActual.Cargo)))
+            {
+                MessageBox.Show("Su perfil no puede elegir promociones.", "Gestión de pedidos",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            string avisoPromocion = null;
 
             try
             {
@@ -2453,6 +2468,16 @@ namespace PROYECTO_RESTAURANTE
                                 }
                             }
 
+                            // ==========================
+                            // PROMOCIÓN (una por pedido)
+                            // ==========================
+                            // Se aplica o recalcula desde los precios
+                            // base, dentro de esta misma transacción.
+                            avisoPromocion = PromocionDatos.AplicarEnPedido(
+                                conexion, transaccion, idPedido,
+                                cambiaPromocion, idPromocionElegida,
+                                SesionActual.IdEmpleado ?? 0, DateTime.Today);
+
                             // CONFIRMAR GUARDADO.
                             transaccion.Commit();
                         }
@@ -2479,7 +2504,8 @@ namespace PROYECTO_RESTAURANTE
 
                 MessageBox.Show(
                     "Pedido N.º " + idPedido +
-                    " guardado correctamente.",
+                    " guardado correctamente." +
+                    (avisoPromocion == null ? "" : "\n\n" + avisoPromocion),
                     "Gestión de pedidos",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
@@ -2543,8 +2569,8 @@ namespace PROYECTO_RESTAURANTE
                 (
                     SELECT
                         SUM(
-                            cantidad * precio_unitario
-                            - descuento
+                            cantidad * (precio_unitario
+                            - descuento)
                         ) AS TotalPlatos
                     FROM dbo.DETALLE_PEDIDO_PLATO
                     WHERE id_pedido = P.id_pedido
@@ -2554,8 +2580,8 @@ namespace PROYECTO_RESTAURANTE
                 (
                     SELECT
                         SUM(
-                            cantidad * precio_unitario
-                            - descuento
+                            cantidad * (precio_unitario
+                            - descuento)
                         ) AS TotalCombos
                     FROM dbo.DETALLE_PEDIDO_COMBO
                     WHERE id_pedido = P.id_pedido
@@ -3834,54 +3860,177 @@ AND NOT EXISTS
 
 
 
+        // Importes del pedido, igual que Generar Boleta y V_PEDIDO_TOTAL:
+        //   subtotal (bruto) = suma de cantidad x precio base
+        //   descuento        = promoción (vista previa con el motor) o, si no
+        //                      hay promoción, los descuentos guardados en SQL
+        //                      (por unidad en cada línea + descuento del pedido)
+        //   IGV incluido     = (subtotal - descuento) x 18 / 118
+        //   total            = subtotal - descuento + propina
         private void ActualizarPagos()
         {
-            // ==========================================
-            // 1. CALCULAR SUBTOTAL DE LOS PRODUCTOS
-            // ==========================================
+            decimal subtotal = carrito.Sum(p => p.Cantidad * p.Precio);
+            string nota = null;
+            decimal descuento;
 
-            decimal subtotal = 0;
+            PromocionInfo promo = idPromocionElegida.HasValue
+                ? promocionesDisponibles.FirstOrDefault(x => x.IdPromocion == idPromocionElegida.Value)
+                : null;
 
-            foreach (var producto in carrito)
+            if (promo != null)
             {
-                subtotal += producto.Subtotal;
+                List<LineaDescuento> lineas = carrito
+                    .Select(p => new LineaDescuento(p.Tipo, p.IdProducto, p.Cantidad, p.Precio))
+                    .ToList();
+                // La promoción ya guardada se conserva aunque haya vencido.
+                ResultadoPromocion r = PromocionDatos.Calcular(
+                    promo, lineas, DateTime.Today, idPromocionElegida != idPromocionGuardada);
+                descuento = r.Aplicable ? r.DescuentoTotal : 0;
+                if (!r.Aplicable) nota = r.Motivo;
+            }
+            else
+            {
+                descuento = carrito.Sum(p => p.Cantidad * p.Descuento) + descuentoGeneral;
             }
 
-            // ==========================================
-            // 2. APLICAR DESCUENTO
-            // ==========================================
-
-            decimal descuento = descuentoGeneral;
-
-            decimal totalProductos =
-                Math.Max(0, subtotal - descuento);
-
-            // ==========================================
-            // 3. CALCULAR IGV INCLUIDO (18 %)
-            // ==========================================
-
-            decimal igv = Math.Round(
-                totalProductos * 18m / 118m,
-                2);
-
-            // ==========================================
-            // 4. CALCULAR TOTAL A PAGAR
-            // ==========================================
-
-            decimal total =
-                totalProductos + propinaActual;
-
-            // ==========================================
-            // 5. MOSTRAR RESULTADOS EN EL FORMULARIO
-            // ==========================================
+            descuento = Math.Min(Math.Max(descuento, 0), subtotal);
+            decimal importe = subtotal - descuento;
+            decimal igv = Math.Round(importe * 18m / 118m, 2, MidpointRounding.AwayFromZero);
+            decimal total = importe + propinaActual;
 
             MostrarMonto("lblSubtotal", subtotal);
-
-            MostrarMonto("lblDescuento", descuento);
-
             MostrarMonto("lblIGV", igv);
-
             MostrarMonto("lblTotalPagar", total);
+
+            if (lblDescuentoPromo != null)
+            {
+                lblDescuentoPromo.Text = descuento > 0
+                    ? "Descuento  - S/ " + descuento.ToString("N2")
+                    : (nota != null ? "No aplica" : "Descuento  S/ 0,00");
+                lblDescuentoPromo.ForeColor = descuento > 0 ? Color.ForestGreen
+                    : (nota != null ? Color.Firebrick : Color.DimGray);
+                consejoPromocion.SetToolTip(lblDescuentoPromo, nota ?? "");
+            }
+        }
+
+        // ==========================================
+        // PROMOCIÓN DEL PEDIDO (FASE F)
+        // ==========================================
+        private readonly ToolTip consejoPromocion = new ToolTip();
+
+        // Franja "Promoción" debajo del detalle (la tabla cede 44 px).
+        private void CrearSelectorPromocion()
+        {
+            Control tabla = BuscarControl("dgvDetallePedido");
+            if (tabla == null || tabla.Parent == null)
+                return;
+
+            Control panel = tabla.Parent;
+            tabla.Height -= 44;
+            int y = tabla.Bottom;
+
+            Label titulo = new Label
+            {
+                Text = "Promoción",
+                Location = new Point(tabla.Left, y + 14),
+                AutoSize = true,
+                BackColor = Color.Transparent,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold)
+            };
+            cmbPromocion = new Guna2ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("Segoe UI", 9.5F),
+                ForeColor = Color.Black,
+                BorderRadius = 8,
+                BorderColor = Color.Goldenrod
+            };
+            lblDescuentoPromo = new Label
+            {
+                Location = new Point(tabla.Left + 304, y + 6),
+                Size = new Size(tabla.Width - 304, 32),
+                TextAlign = ContentAlignment.MiddleRight,
+                BackColor = Color.Transparent,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold)
+            };
+
+            panel.Controls.Add(titulo);
+            panel.Controls.Add(cmbPromocion);
+            panel.Controls.Add(lblDescuentoPromo);
+            cmbPromocion.Bounds = new Rectangle(tabla.Left + 84, y + 5, 216, 34);
+
+            cmbPromocion.SelectedIndexChanged += (s, e) =>
+            {
+                if (cargandoPromocion) return;
+                ItemPromocion item = cmbPromocion.SelectedItem as ItemPromocion;
+                idPromocionElegida = item == null || item.Promocion == null ? (int?)null : item.Promocion.IdPromocion;
+                ActualizarPagos();
+            };
+
+            FormClosed += (s, e) => consejoPromocion.Dispose();
+            CargarPromociones();
+        }
+
+        private sealed class ItemPromocion
+        {
+            public readonly PromocionInfo Promocion;
+            public ItemPromocion(PromocionInfo p) { Promocion = p; }
+            public override string ToString()
+            {
+                if (Promocion == null) return "Sin promoción";
+                return Promocion.Nombre + " · " + Promocion.DescuentoTexto +
+                       (Promocion.Situacion(DateTime.Today) == "Vigente hoy" ? "" : " (aplicada)");
+            }
+        }
+
+        // Promociones de SQL. Sin la migración de la Fase F o sin conexión
+        // el selector queda deshabilitado y Pedidos funciona igual.
+        private void CargarPromociones()
+        {
+            try
+            {
+                promocionesDisponibles = PromocionDatos.Listar();
+            }
+            catch (Exception ex)
+            {
+                if (!(ex is ReglaNegocioException)) Registro.Error("Pedidos", ex);
+                promocionesDisponibles = new List<PromocionInfo>();
+            }
+            LlenarComboPromociones();
+            ActualizarPagos();
+        }
+
+        // Opciones: sin promoción, las vigentes hoy y la que ya tiene el pedido.
+        private void LlenarComboPromociones()
+        {
+            if (cmbPromocion == null)
+                return;
+
+            cargandoPromocion = true;
+            try
+            {
+                cmbPromocion.Items.Clear();
+                cmbPromocion.Items.Add(new ItemPromocion(null));
+                foreach (PromocionInfo p in promocionesDisponibles
+                    .Where(x => x.Situacion(DateTime.Today) == "Vigente hoy" ||
+                                x.IdPromocion == idPromocionGuardada || x.IdPromocion == idPromocionElegida)
+                    .OrderBy(x => x.Nombre))
+                    cmbPromocion.Items.Add(new ItemPromocion(p));
+
+                int indice = 0;
+                for (int i = 1; i < cmbPromocion.Items.Count; i++)
+                    if (((ItemPromocion)cmbPromocion.Items[i]).Promocion.IdPromocion == idPromocionElegida)
+                        indice = i;
+                cmbPromocion.SelectedIndex = indice;
+
+                bool puede = SesionActual.Iniciada && Permisos.PuedeAplicarPromociones(SesionActual.Cargo);
+                cmbPromocion.Enabled = puede && cmbPromocion.Items.Count > 1;
+                consejoPromocion.SetToolTip(cmbPromocion, puede ? "" : "Su perfil no puede elegir promociones.");
+            }
+            finally
+            {
+                cargandoPromocion = false;
+            }
         }
 
         private void but_nuevopedido_Click(object sender, EventArgs e)
@@ -4309,6 +4458,12 @@ AND NOT EXISTS
                         // ======================================
                         // 4. CONFIRMAR CAMBIOS
                         // ======================================
+
+                        // La promoción del pedido se recalcula (sin
+                        // cambiarla) para el nuevo contenido.
+                        PromocionDatos.AplicarEnPedido(
+                            conexion, transaccion, idPedido, false, null,
+                            SesionActual.IdEmpleado ?? 0, DateTime.Today);
 
                         transaccion.Commit();
                     }

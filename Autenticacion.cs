@@ -111,6 +111,12 @@ namespace PROYECTO_RESTAURANTE
             return cargo == Cargos.Administrador;
         }
 
+        // Elegir una promoción vigente al registrar un pedido.
+        public static bool PuedeAplicarPromociones(string cargo)
+        {
+            return cargo == Cargos.Administrador || cargo == Cargos.Cajero || cargo == Cargos.Mesero;
+        }
+
         // Registrar, editar, activar y desactivar promociones.
         public static bool PuedeGestionarPromociones(string cargo)
         {

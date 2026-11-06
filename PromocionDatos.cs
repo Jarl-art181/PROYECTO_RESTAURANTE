@@ -380,9 +380,217 @@ namespace PROYECTO_RESTAURANTE
         }
 
         // ------------------------------------------------------
+        // APLICAR / RECALCULAR EN UN PEDIDO (misma transacción)
+        // ------------------------------------------------------
+        // cambiar = true : el usuario eligió otra promoción (o quitarla).
+        //                  Se exige vigencia completa y permiso.
+        // cambiar = false: se conserva la promoción guardada y se
+        //                  recalculan los importes desde los precios base
+        //                  (productos o cantidades cambiaron).
+        // Devuelve un aviso para el usuario o null.
+        // Nunca toca pedidos cobrados o cancelados, ni pedidos con pago o
+        // comprobante. Solo actualiza las líneas cuyo descuento cambia.
+        public static string AplicarEnPedido(SqlConnection cx, SqlTransaction tx, int idPedido,
+                                             bool cambiar, int? idPromocionNueva, int idEmpleado, DateTime fecha)
+        {
+            string estado;
+            int? actual;
+            using (SqlCommand cmd = new SqlCommand(@"
+                SELECT P.estado, P.id_promocion,
+                       (SELECT COUNT(*) FROM dbo.PAGO WHERE id_pedido = P.id_pedido)
+                     + (SELECT COUNT(*) FROM dbo.COMPROBANTE WHERE id_pedido = P.id_pedido) AS cierres
+                FROM dbo.PEDIDO P WITH (UPDLOCK, HOLDLOCK)
+                WHERE P.id_pedido = @Id;", cx, tx))
+            {
+                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = idPedido;
+                using (SqlDataReader r = cmd.ExecuteReader())
+                {
+                    if (!r.Read())
+                        throw new ReglaNegocioException("El pedido ya no existe.");
+                    estado = r.GetString(0).Trim().ToLowerInvariant();
+                    actual = r.IsDBNull(1) ? (int?)null : r.GetInt32(1);
+                    if (r.GetInt32(2) > 0)
+                    {
+                        if (cambiar || actual.HasValue)
+                            throw new ReglaNegocioException("El pedido ya tiene pago o comprobante: sus importes no se modifican.");
+                        return null;
+                    }
+                }
+            }
+            if (estado == "cobrado" || estado == "cancelado")
+            {
+                if (cambiar || actual.HasValue)
+                    throw new ReglaNegocioException("El pedido está " + estado + ": sus importes no se modifican.");
+                return null;
+            }
+
+            if (cambiar && idPromocionNueva == actual)
+                cambiar = false;                 // misma promoción: se conserva
+            int? objetivo = cambiar ? idPromocionNueva : actual;
+            if (!cambiar && !actual.HasValue)
+                return null;                     // sin promoción: no se tocan importes
+
+            if (cambiar)
+                VerificarPuedeAplicar(cx, tx, idEmpleado);
+
+            // Líneas actuales con su precio BASE y el estado del producto.
+            List<LineaDescuento> lineas = new List<LineaDescuento>();
+            List<decimal> descuentoActual = new List<decimal>();
+            List<string> estadoProducto = new List<string>();
+            List<string> nombres = new List<string>();
+            using (SqlCommand cmd = new SqlCommand(@"
+                SELECT 'plato', D.id_plato, D.cantidad, D.precio_unitario, D.descuento, P.estado, P.nombre
+                FROM dbo.DETALLE_PEDIDO_PLATO D JOIN dbo.PLATO P ON P.id_plato = D.id_plato
+                WHERE D.id_pedido = @Id
+                UNION ALL
+                SELECT 'combo', D.id_combo, D.cantidad, D.precio_unitario, D.descuento, C.estado, C.nombre
+                FROM dbo.DETALLE_PEDIDO_COMBO D JOIN dbo.COMBO C ON C.id_combo = D.id_combo
+                WHERE D.id_pedido = @Id;", cx, tx))
+            {
+                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = idPedido;
+                using (SqlDataReader r = cmd.ExecuteReader())
+                {
+                    while (r.Read())
+                    {
+                        lineas.Add(new LineaDescuento(r.GetString(0), r.GetInt32(1), r.GetInt32(2), r.GetDecimal(3)));
+                        descuentoActual.Add(r.GetDecimal(4));
+                        estadoProducto.Add(r.GetString(5).Trim().ToLowerInvariant());
+                        nombres.Add(r.GetString(6));
+                    }
+                }
+            }
+
+            PromocionInfo promo = objetivo.HasValue ? Obtener(cx, tx, objetivo.Value) : null;
+            if (objetivo.HasValue && promo == null)
+                throw new ReglaNegocioException("La promoción ya no existe.");
+
+            string aviso = null;
+            decimal descuentoPedido = 0;
+            if (promo != null)
+            {
+                ResultadoPromocion res = Calcular(promo, lineas, fecha, cambiar);
+                if (res.Aplicable)
+                {
+                    descuentoPedido = res.DescuentoPedido;
+                    aviso = "Promoción \"" + promo.Nombre + "\": descuento S/ " +
+                        res.DescuentoTotal.ToString("0.00", CultureInfo.InvariantCulture) + ".";
+                }
+                else if (cambiar)
+                {
+                    throw new ReglaNegocioException("No se puede aplicar \"" + promo.Nombre + "\": " + res.Motivo);
+                }
+                else
+                {
+                    // Ya no cumple por el contenido (mínimo o platos): se retira.
+                    foreach (LineaDescuento l in lineas) l.DescuentoUnitario = 0;
+                    aviso = "Se retiró la promoción \"" + promo.Nombre + "\": " + res.Motivo;
+                    objetivo = null;
+                }
+            }
+
+            // Solo se actualizan las líneas cuyo descuento cambia.
+            for (int i = 0; i < lineas.Count; i++)
+            {
+                LineaDescuento l = lineas[i];
+                if (l.DescuentoUnitario == descuentoActual[i])
+                    continue;
+                if (estadoProducto[i] != "activo")
+                    throw new ReglaNegocioException("\"" + nombres[i] + "\" está inactivo y no se puede recalcular su descuento. " +
+                        "Quítelo del pedido o elija otra promoción.");
+
+                string tabla = l.Tipo == "plato" ? "dbo.DETALLE_PEDIDO_PLATO" : "dbo.DETALLE_PEDIDO_COMBO";
+                string campo = l.Tipo == "plato" ? "id_plato" : "id_combo";
+                using (SqlCommand cmd = new SqlCommand(
+                    "UPDATE " + tabla + " SET descuento = @Descuento WHERE id_pedido = @Pedido AND " + campo + " = @Producto;", cx, tx))
+                {
+                    SqlParameter d = cmd.Parameters.Add("@Descuento", SqlDbType.Decimal); d.Precision = 10; d.Scale = 2; d.Value = l.DescuentoUnitario;
+                    cmd.Parameters.Add("@Pedido", SqlDbType.Int).Value = idPedido;
+                    cmd.Parameters.Add("@Producto", SqlDbType.Int).Value = l.IdProducto;
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            using (SqlCommand cmd = new SqlCommand(@"
+                UPDATE dbo.PEDIDO SET descuento_aplicado = @Descuento, id_promocion = @Promo
+                WHERE id_pedido = @Pedido;", cx, tx))
+            {
+                SqlParameter d = cmd.Parameters.Add("@Descuento", SqlDbType.Decimal); d.Precision = 10; d.Scale = 2; d.Value = descuentoPedido;
+                cmd.Parameters.Add("@Promo", SqlDbType.Int).Value = objetivo.HasValue ? (object)objetivo.Value : DBNull.Value;
+                cmd.Parameters.Add("@Pedido", SqlDbType.Int).Value = idPedido;
+                cmd.ExecuteNonQuery();
+            }
+
+            Registro.Info("Promociones", "Pedido " + idPedido + ": promoción " + (objetivo.HasValue ? objetivo.Value.ToString() : "ninguna") +
+                (cambiar ? " (elegida por el empleado " + idEmpleado + ")" : " (recalculada)") + ".");
+            return aviso;
+        }
+
+        // Administrador, Cajero o Mesero activos y con acceso (validado en SQL).
+        internal static void VerificarPuedeAplicar(SqlConnection cx, SqlTransaction tx, int idEmpleado)
+        {
+            using (SqlCommand cmd = new SqlCommand(@"
+                SELECT COUNT(*) FROM dbo.EMPLEADO E
+                WHERE E.id_empleado = @Id AND E.estado = 'activo' AND E.acceso_habilitado = 1
+                  AND (E.bloqueo_hasta IS NULL OR E.bloqueo_hasta < '99990101')
+                  AND (EXISTS (SELECT 1 FROM dbo.ADMINISTRADOR WHERE id_empleado = E.id_empleado)
+                    OR EXISTS (SELECT 1 FROM dbo.CAJERO WHERE id_empleado = E.id_empleado)
+                    OR EXISTS (SELECT 1 FROM dbo.MESERO WHERE id_empleado = E.id_empleado));", cx, tx))
+            {
+                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = idEmpleado;
+                if (Convert.ToInt32(cmd.ExecuteScalar()) != 1)
+                    throw new ReglaNegocioException("Operación no autorizada: solo un Administrador, Cajero o Mesero " +
+                        "activo puede elegir promociones.");
+            }
+        }
+
+        private static PromocionInfo Obtener(SqlConnection cx, SqlTransaction tx, int idPromocion)
+        {
+            PromocionInfo p = null;
+            using (SqlCommand cmd = new SqlCommand(@"
+                SELECT nombre, tipo_descuento, valor, alcance, fecha_inicio, fecha_fin, estado, dias_semana, monto_minimo
+                FROM dbo.PROMOCION WHERE id_promocion = @Id;", cx, tx))
+            {
+                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = idPromocion;
+                using (SqlDataReader r = cmd.ExecuteReader())
+                {
+                    if (!r.Read()) return null;
+                    p = new PromocionInfo
+                    {
+                        IdPromocion = idPromocion,
+                        Nombre = r.GetString(0),
+                        TipoDescuento = r.GetString(1).Trim().ToLowerInvariant(),
+                        Valor = r.GetDecimal(2),
+                        Alcance = r.GetString(3).Trim().ToLowerInvariant(),
+                        FechaInicio = r.GetDateTime(4),
+                        FechaFin = r.GetDateTime(5),
+                        Estado = r.GetString(6).Trim().ToLowerInvariant(),
+                        DiasSemana = r.IsDBNull(7) ? null : r.GetString(7),
+                        MontoMinimo = r.IsDBNull(8) ? (decimal?)null : r.GetDecimal(8)
+                    };
+                }
+            }
+            using (SqlCommand cmd = new SqlCommand("SELECT id_plato FROM dbo.PROMOCION_PLATO WHERE id_promocion = @Id;", cx, tx))
+            {
+                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = idPromocion;
+                using (SqlDataReader r = cmd.ExecuteReader())
+                    while (r.Read()) p.Platos.Add(r.GetInt32(0));
+            }
+            return p;
+        }
+
+        // ------------------------------------------------------
         // MOTOR DE DESCUENTOS (sin acceso a SQL; listo para Pedidos)
         // ------------------------------------------------------
         public static ResultadoPromocion Calcular(PromocionInfo p, IList<LineaDescuento> lineas, DateTime fecha)
+        {
+            return Calcular(p, lineas, fecha, true);
+        }
+
+        // exigirVigencia = false: la promoción ya fue aplicada correctamente al
+        // pedido; se conserva hasta el cobro aunque venza, cambie de día o se
+        // desactive. Igual se revisan compra mínima y platos participantes,
+        // porque dependen del contenido actual del pedido.
+        public static ResultadoPromocion Calcular(PromocionInfo p, IList<LineaDescuento> lineas, DateTime fecha, bool exigirVigencia)
         {
             ResultadoPromocion r = new ResultadoPromocion();
             foreach (LineaDescuento l in lineas)
@@ -391,7 +599,7 @@ namespace PROYECTO_RESTAURANTE
             r.Subtotal = lineas.Sum(l => decimal.Round(l.Cantidad * l.PrecioUnitario, 2));
 
             string situacion = p.Situacion(fecha);
-            if (situacion != "Vigente hoy")
+            if (exigirVigencia && situacion != "Vigente hoy")
             {
                 r.Motivo = situacion == "Vigente (otro día)"
                     ? "La promoción solo aplica: " + p.DiasTexto + "."

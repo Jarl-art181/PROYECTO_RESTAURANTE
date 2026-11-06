@@ -639,8 +639,8 @@ namespace PROYECTO_RESTAURANTE
         (
             SELECT
                 SUM(
-                    cantidad * precio_unitario
-                    - ISNULL(descuento, 0)
+                    cantidad * (precio_unitario
+                    - ISNULL(descuento, 0))
                 ) AS TotalPlatos
 
             FROM dbo.DETALLE_PEDIDO_PLATO
@@ -652,8 +652,8 @@ namespace PROYECTO_RESTAURANTE
         (
             SELECT
                 SUM(
-                    cantidad * precio_unitario
-                    - ISNULL(descuento, 0)
+                    cantidad * (precio_unitario
+                    - ISNULL(descuento, 0))
                 ) AS TotalCombos
 
             FROM dbo.DETALLE_PEDIDO_COMBO

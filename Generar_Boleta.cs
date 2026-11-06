@@ -36,6 +36,9 @@ namespace PROYECTO_RESTAURANTE
         private decimal subtotal = 0m;
         private decimal descuentoGeneral = 0m;
         private decimal descuentoTotal = 0m;
+        // Nombre de la promoción del pedido (solo para mostrar; el importe
+        // del descuento ya está guardado en el pedido).
+        private string promocionPedido;
         private decimal propina = 0m;
         private decimal igvIncluido = 0m;
         private decimal total = 0m;
@@ -50,7 +53,8 @@ namespace PROYECTO_RESTAURANTE
             public decimal DescuentoLinea { get; set; }
             public decimal Importe
             {
-                get { return Cantidad * PrecioUnitario - DescuentoLinea; }
+                // Descuento POR UNIDAD (igual que V_PEDIDO_TOTAL y RN-G).
+                get { return Cantidad * (PrecioUnitario - DescuentoLinea); }
             }
         }
 
@@ -521,16 +525,16 @@ namespace PROYECTO_RESTAURANTE
                         CAST(
                             ISNULL((
                                 SELECT SUM(
-                                    cantidad * precio_unitario
-                                    - ISNULL(descuento, 0))
+                                    cantidad * (precio_unitario
+                                    - ISNULL(descuento, 0)))
                                 FROM dbo.DETALLE_PEDIDO_PLATO
                                 WHERE id_pedido = P.id_pedido
                             ), 0)
                             +
                             ISNULL((
                                 SELECT SUM(
-                                    cantidad * precio_unitario
-                                    - ISNULL(descuento, 0))
+                                    cantidad * (precio_unitario
+                                    - ISNULL(descuento, 0)))
                                 FROM dbo.DETALLE_PEDIDO_COMBO
                                 WHERE id_pedido = P.id_pedido
                             ), 0)
@@ -735,12 +739,14 @@ namespace PROYECTO_RESTAURANTE
                 SELECT P.id_pedido, P.fecha_hora, P.canal, P.estado,
                        ISNULL(P.descuento_aplicado, 0) AS DescuentoGeneral,
                        ISNULL(P.propina, 0) AS Propina,
+                       PR.nombre AS Promocion,
                        M.[número] AS NumeroMesa,
                        LTRIM(RTRIM(ISNULL(E.nombre, '') + ' ' +
                                     ISNULL(E.apellidos, ''))) AS NombreMesero
                 FROM dbo.PEDIDO P
                 LEFT JOIN dbo.MESA M ON M.id_mesa = P.id_mesa
                 LEFT JOIN dbo.EMPLEADO E ON E.id_empleado = P.id_mesero
+                LEFT JOIN dbo.PROMOCION PR ON PR.id_promocion = P.id_promocion
                 WHERE P.id_pedido = @Pedido;";
 
             const string sqlDetalle = @"
@@ -783,6 +789,7 @@ namespace PROYECTO_RESTAURANTE
                             atendidoPor = "No asignado";
                         descuentoGeneral = Convert.ToDecimal(lector["DescuentoGeneral"]);
                         propina = Convert.ToDecimal(lector["Propina"]);
+                        promocionPedido = lector["Promocion"] == DBNull.Value ? null : Convert.ToString(lector["Promocion"]);
                     }
                 }
 
@@ -828,7 +835,7 @@ namespace PROYECTO_RESTAURANTE
                 if (linea.Cantidad <= 0 || linea.Importe < 0)
                     throw new Exception("Hay una línea con cantidad o descuento inválido.");
                 subtotal += linea.Cantidad * linea.PrecioUnitario;
-                descuentoTotal += linea.DescuentoLinea;
+                descuentoTotal += linea.Cantidad * linea.DescuentoLinea;
             }
             decimal importeConIGV = subtotal - descuentoTotal;
             if (importeConIGV < 0)
@@ -839,6 +846,15 @@ namespace PROYECTO_RESTAURANTE
             total = importeConIGV + propina;
         }
 
+
+        // "Descuento:" o "Desc. <promoción>:" (recortado para no salirse).
+        private string TextoDescuento()
+        {
+            if (string.IsNullOrEmpty(promocionPedido))
+                return "Descuento:";
+            string nombre = promocionPedido.Length > 18 ? promocionPedido.Substring(0, 17) + "…" : promocionPedido;
+            return "Desc. " + nombre + ":";
+        }
 
         private void MostrarPedido()
         {
@@ -895,6 +911,7 @@ namespace PROYECTO_RESTAURANTE
 
             lblDescuentoBoleta.Text =
                 FormatoSoles(descuentoTotal);
+            guna2HtmlLabel83.Text = TextoDescuento();
 
             lblIGVBoleta.Text =
                 FormatoSoles(igvIncluido);
@@ -2010,7 +2027,7 @@ namespace PROYECTO_RESTAURANTE
 
                 // 2. Descuentos aplicados.
                 g.DrawString(
-                    "Descuento:",
+                    TextoDescuento(),
                     texto, Brushes.Black, x, y);
 
                 g.DrawString(
@@ -2483,16 +2500,16 @@ namespace PROYECTO_RESTAURANTE
                     SELECT
                         ISNULL((
                             SELECT SUM(
-                                cantidad * precio_unitario
-                                - ISNULL(descuento, 0))
+                                cantidad * (precio_unitario
+                                - ISNULL(descuento, 0)))
                             FROM dbo.DETALLE_PEDIDO_PLATO
                             WHERE id_pedido = P.id_pedido
                         ), 0)
                         +
                         ISNULL((
                             SELECT SUM(
-                                cantidad * precio_unitario
-                                - ISNULL(descuento, 0))
+                                cantidad * (precio_unitario
+                                - ISNULL(descuento, 0)))
                             FROM dbo.DETALLE_PEDIDO_COMBO
                             WHERE id_pedido = P.id_pedido
                         ), 0)
