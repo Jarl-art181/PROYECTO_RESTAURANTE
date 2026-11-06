@@ -30,7 +30,7 @@ namespace PROYECTO_RESTAURANTE
     //   GunaDona + guna2Panel10 -> distribución por cargo
     //   guna2Panel8          -> información del empleado
     // ==========================================================
-    public partial class FRM_EMPLEADOS : Form
+    public partial class FRM_EMPLEADOS : Form, IActualizableAlMostrar
     {
         private const string TodosLosCargos = "Todos los cargos";
         private const string TodosLosEstados = "Todos los estados";
@@ -66,6 +66,12 @@ namespace PROYECTO_RESTAURANTE
             FormClosed += (s, e) => menuAcciones.Dispose();
 
             Shown += (s, e) => CargarEmpleados(null);
+        }
+
+        // El Navegador reutiliza esta ventana: al volver, datos frescos de SQL.
+        public void ActualizarAlMostrar()
+        {
+            CargarEmpleados(null);
         }
 
         // ======================================================

@@ -162,6 +162,7 @@
     <Compile Include="AutorizacionAdministrador.cs" />
     <Compile Include="BaseDatos.cs" />
     <Compile Include="Contrasenas.cs" />
+    <Compile Include="CorreccionesGuna.cs" />
     <Compile Include="EmpleadoDatos.cs" />
     <Compile Include="EstiloTablas.cs" />
     <Compile Include="FRM_REGISTRO_EMPLEADO.cs">

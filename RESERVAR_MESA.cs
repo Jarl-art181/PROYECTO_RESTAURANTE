@@ -19,6 +19,10 @@ namespace PROYECTO_RESTAURANTE
         public RESERVAR_MESA()
         {
             InitializeComponent();
+
+            // Evita la fuga de GDI/USER del calendario interno de Guna2DateTimePicker.
+            CorreccionesGuna.Aplicar(this);
+
             Text = "Nueva reserva";
             StartPosition = FormStartPosition.CenterParent;
 

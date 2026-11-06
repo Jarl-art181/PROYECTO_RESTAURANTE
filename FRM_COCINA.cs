@@ -218,20 +218,40 @@ namespace PROYECTO_RESTAURANTE
         private int fallosSeguidos = 0;
         private Label lblEstadoConexion;
 
-        private async void CargarPedidosSQL()
+        private void CargarPedidosSQL()
         {
-            if (cargando || IsDisposed || !Visible)
+            if (cargando || IsDisposed || !Visible || !IsHandleCreated)
                 return;
 
             cargando = true;
+            string cadena = cadenaConexion;
 
+            // La consulta va a un hilo de fondo; el resultado vuelve SIEMPRE
+            // al hilo de la interfaz con BeginInvoke (no depende de que exista
+            // un SynchronizationContext al momento del tic del temporizador).
+            Task.Run(() => ConsultarPedidos(cadena)).ContinueWith(tarea =>
+            {
+                try
+                {
+                    if (IsDisposed || !IsHandleCreated) { cargando = false; return; }
+                    BeginInvoke((Action)(() => AplicarResultado(tarea)));
+                }
+                catch (InvalidOperationException) { cargando = false; }   // ventana cerrada o cerrándose
+            }, TaskScheduler.Default);
+        }
+
+        // Se ejecuta en el hilo de la interfaz.
+        private void AplicarResultado(Task<DataTable> tarea)
+        {
             try
             {
-                string cadena = cadenaConexion;
-                DataTable datos = await Task.Run(() => ConsultarPedidos(cadena));
-
                 if (IsDisposed)
                     return;
+
+                if (tarea.IsFaulted)
+                    throw tarea.Exception.GetBaseException();
+
+                DataTable datos = tarea.Result;
 
                 List<PedidoCocina> nuevos = new List<PedidoCocina>();
                 Dictionary<int, PedidoCocina> indice = new Dictionary<int, PedidoCocina>();
