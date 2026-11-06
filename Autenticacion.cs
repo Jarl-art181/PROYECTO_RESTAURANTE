@@ -111,6 +111,12 @@ namespace PROYECTO_RESTAURANTE
             return cargo == Cargos.Administrador;
         }
 
+        // Registrar, editar, activar y desactivar promociones.
+        public static bool PuedeGestionarPromociones(string cargo)
+        {
+            return cargo == Cargos.Administrador;
+        }
+
         // Insumos, compras, mermas y proveedores (módulo Inventario).
         public static bool PuedeGestionarInventario(string cargo)
         {

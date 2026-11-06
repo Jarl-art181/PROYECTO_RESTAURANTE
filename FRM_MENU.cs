@@ -176,6 +176,7 @@ namespace PROYECTO_RESTAURANTE
                 try { advertencias = InventarioDatos.PlatosConInsumoBajo(); }
                 catch (Exception ex) { Registro.Error("Menu", ex); advertencias = new Dictionary<int, List<string>>(); }
                 catalogo.Advertencias = advertencias;
+                catalogo.Promociones = EtiquetasPromocion();
                 catalogo.Cargar(productos);
 
                 guna2HtmlLabel28.Text = MenuDatos.PromocionesVigentes().ToString("D2");
@@ -201,6 +202,14 @@ namespace PROYECTO_RESTAURANTE
                 ? productos.FirstOrDefault(p => p.IdPlato == seleccionar.Value)
                 : null;
             MostrarProducto(elegido);
+        }
+
+        // Promociones por plato vigentes hoy (solo etiqueta). Si falla o la
+        // base no tiene la migración de la Fase F, el menú se muestra igual.
+        internal static Dictionary<int, string> EtiquetasPromocion()
+        {
+            try { return PromocionDatos.EtiquetasVigentes(DateTime.Today); }
+            catch (Exception ex) { Registro.Error("Promociones", ex); return new Dictionary<int, string>(); }
         }
 
         private void CargarCategorias()

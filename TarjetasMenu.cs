@@ -35,6 +35,7 @@ namespace PROYECTO_RESTAURANTE
             public ProductoMenu Producto;
             public string FotoMostrada;
             public Image FotoCargada;
+            public Label Promo;
             public bool TieneFoto = true;
         }
 
@@ -54,6 +55,9 @@ namespace PROYECTO_RESTAURANTE
 
         // id_plato -> insumos en o bajo su mínimo (lo asigna Menú).
         public Dictionary<int, List<string>> Advertencias = new Dictionary<int, List<string>>();
+
+        // id_plato -> etiqueta de promoción vigente hoy (solo informativa).
+        public Dictionary<int, string> Promociones = new Dictionary<int, string>();
 
         public TarjetasMenu(FlowLayoutPanel flow, IDictionary<string, int> botonesDiseno, bool mostrarInactivos)
         {
@@ -226,6 +230,29 @@ namespace PROYECTO_RESTAURANTE
             Guna2Panel panel = t.Panel as Guna2Panel;
             if (panel != null)
                 panel.BorderColor = activo ? Color.Gold : Color.Silver;
+
+            // Etiqueta "PROMO" sobre la imagen (no aplica descuentos).
+            string promo;
+            bool hayPromo = activo && Promociones.TryGetValue(p.IdPlato, out promo);
+            if (hayPromo && t.Promo == null)
+            {
+                t.Promo = new Label
+                {
+                    AutoSize = true,
+                    BackColor = Color.Black,
+                    ForeColor = Color.Gold,
+                    Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                    Padding = new Padding(6, 3, 6, 3),
+                    Location = t.Imagen != null ? new Point(t.Imagen.Left + 6, t.Imagen.Top + 6) : new Point(8, 8)
+                };
+                t.Panel.Controls.Add(t.Promo);
+                t.Promo.BringToFront();
+            }
+            if (t.Promo != null)
+            {
+                t.Promo.Visible = hayPromo;
+                if (hayPromo) t.Promo.Text = Promociones[p.IdPlato];
+            }
 
             // Imagen, en este orden: foto subida desde Menú (PLATO.foto),
             // imagen del diseño, foto incluida en el programa

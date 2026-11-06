@@ -166,6 +166,7 @@
     <Compile Include="ClienteDatos.cs" />
     <Compile Include="DialogosInventario.cs" />
     <Compile Include="InventarioDatos.cs" />
+    <Compile Include="PromocionDatos.cs" />
     <Compile Include="TarjetasInventario.cs" />
     <Compile Include="MenuDatos.cs" />
     <Compile Include="TarjetasMenu.cs" />

@@ -997,6 +997,8 @@ namespace PROYECTO_RESTAURANTE
 
             try
             {
+                // Etiqueta "PROMO" informativa: no aplica descuentos.
+                catalogo.Promociones = FRM_MENU.EtiquetasPromocion();
                 catalogo.Cargar(MenuDatos.Listar());
             }
             catch (Exception ex)
