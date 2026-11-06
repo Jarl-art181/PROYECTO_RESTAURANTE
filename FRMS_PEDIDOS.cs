@@ -23,6 +23,10 @@ namespace PROYECTO_RESTAURANTE
 
         private Action reiniciarFiltroProductos;
 
+        // FASE D: tarjetas de productos ligadas al catálogo real (dbo.PLATO).
+        private TarjetasMenu catalogo;
+        private Action aplicarFiltroProductos;
+
         private const int IdSucursal = 1;
 
         // ==========================================
@@ -160,6 +164,7 @@ namespace PROYECTO_RESTAURANTE
         // descarta si ya no está activo (cobrado, cancelado...).
         public void ActualizarAlMostrar()
         {
+            CargarCatalogo();
             CargarTablaPedidos();
 
             if (idPedidoSeleccionado.HasValue && !CambiosPendientes())
@@ -960,49 +965,56 @@ namespace PROYECTO_RESTAURANTE
                 };
 
             // ==========================================
-            // CONECTAR LOS 19 BOTONES +
+            // CONECTAR LAS TARJETAS AL CATÁLOGO (FASE D)
             // ==========================================
+            // Las 19 tarjetas del diseño se asocian a su producto;
+            // nombre, precio, foto y estado se leen de dbo.PLATO y
+            // los productos nuevos del Menú reciben su tarjeta.
 
-            foreach (KeyValuePair<string, int> producto
-                in productos)
+            FlowLayoutPanel flow =
+                BuscarControl("flowProductos") as FlowLayoutPanel;
+
+            if (flow == null)
             {
-                // Encontrar el botón en las tarjetas.
-                Control boton =
-                    BuscarControl(producto.Key);
-
-                if (boton == null)
-                {
-                    // Continuar sin detener el formulario.
-                    System.Diagnostics.Debug.WriteLine(
-                        "Botón no encontrado: " + producto.Key);
-
-                    continue;
-                }
-
-                // Asignar el ID real de SQL Server.
-                boton.Tag = "plato:" + producto.Value;
-
-                // Evitar conexiones duplicadas.
-                boton.Click -= AgregarProducto_Click;
-
-                // Conectar el evento del botón +.
-                boton.Click += AgregarProducto_Click;
+                Registro.Info("Pedidos", "No se encontró flowProductos: tarjetas sin conectar.");
+                return;
             }
+
+            catalogo = new TarjetasMenu(flow, productos, false);
+            catalogo.Pulsado += p => AgregarDesdeTarjeta(p.IdPlato);
+            FormClosed += (s, e) => catalogo.Dispose();
+
+            CargarCatalogo();
+        }
+
+        // Lee el catálogo actual de SQL Server y actualiza las tarjetas.
+        // Sin conexión, las tarjetas del diseño siguen funcionando:
+        // AgregarProducto vuelve a validar precio y estado en SQL.
+        private void CargarCatalogo()
+        {
+            if (catalogo == null)
+                return;
+
+            try
+            {
+                catalogo.Cargar(MenuDatos.Listar());
+            }
+            catch (Exception ex)
+            {
+                Registro.Error("Pedidos", ex);
+            }
+
+            if (aplicarFiltroProductos != null)
+                aplicarFiltroProductos();
         }
 
 
         // ==========================================
-        // 10. ÚNICO EVENTO DE LOS 19 BOTONES +
+        // 10. BOTÓN + DE CUALQUIER TARJETA
         // ==========================================
 
-        private void AgregarProducto_Click(
-            object sender, EventArgs e)
+        private void AgregarDesdeTarjeta(int idProducto)
         {
-            Control boton = sender as Control;
-
-            if (boton == null || boton.Tag == null)
-                return;
-
             // Primero seleccionar modalidad.
             if (string.IsNullOrEmpty(tipoPedidoSeleccionado))
             {
@@ -1021,106 +1033,7 @@ namespace PROYECTO_RESTAURANTE
                 return;
             }
 
-            string[] partes =
-                boton.Tag.ToString().Split(':');
-
-            if (partes.Length != 2)
-                return;
-
-            try
-            {
-                string tipo =
-                    partes[0].Trim().ToLowerInvariant();
-
-                int idProducto;
-
-                // Gaseosas sin ID conocido.
-                if (tipo == "buscar")
-                {
-                    idProducto =
-                        BuscarGaseosaPorNombre(partes[1]);
-
-                    // Conservar el ID descubierto.
-                    boton.Tag = "plato:" + idProducto;
-
-                    tipo = "plato";
-                }
-                else
-                {
-                    if (!int.TryParse(
-                        partes[1], out idProducto))
-                        return;
-                }
-
-                // Agregar al cuadro derecho.
-                AgregarProducto(tipo, idProducto);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    ex.Message,
-                    "Agregar producto",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-            }
-        }
-
-        // ==========================================
-        // 11. BUSCAR GASEOSA EN SQL SERVER
-        // ==========================================
-
-        private int BuscarGaseosaPorNombre(string palabra)
-        {
-            const string sql = @"
-                SELECT TOP (2)
-                    id_plato,
-                    nombre
-                FROM dbo.PLATO
-                WHERE estado = 'activo'
-                  AND LOWER(nombre)
-                    LIKE '%' + LOWER(@Palabra) + '%'
-                ORDER BY id_plato;";
-
-            using (SqlConnection conexion =
-                new SqlConnection(cadenaConexion))
-            using (SqlCommand cmd =
-                new SqlCommand(sql, conexion))
-            {
-                cmd.Parameters.Add(
-                    "@Palabra", SqlDbType.VarChar, 100
-                ).Value = palabra;
-
-                conexion.Open();
-
-                using (SqlDataReader lector =
-                    cmd.ExecuteReader())
-                {
-                    if (!lector.Read())
-                    {
-                        throw new Exception(
-                            "No se encontró la gaseosa: " +
-                            palabra + "\n\n" +
-                            "Primero debe existir como " +
-                            "producto activo en dbo.PLATO.");
-                    }
-
-                    int id =
-                        Convert.ToInt32(
-                            lector["id_plato"]);
-
-                    // No elegir un producto ambiguo.
-                    if (lector.Read())
-                    {
-                        throw new Exception(
-                            "Existen varias bebidas que " +
-                            "coinciden con: " + palabra +
-                            "\n\nConfigure su ID exacto " +
-                            "en la propiedad Tag.");
-                    }
-
-                    return id;
-                }
-            }
+            AgregarProducto("plato", idProducto);
         }
 
         // ==========================================
@@ -3787,228 +3700,8 @@ AND NOT EXISTS
             Control btnAgregados = agregados[0];
             Control btnBebidas = bebidas[0];
 
-            // ==========================================
-            // 3. IDENTIFICAR LOS 19 PRODUCTOS
-            // ==========================================
-
-            // Formato:
-            // Nombre del botón +, nombre, categoría.
-
-            string[,] productos =
-            {
-        // ==============================
-        // PLATOS
-        // ==============================
-
-        {
-            "btnAgregarBBQ5",
-            "Alitas BBQ 5 alitas",
-            "platos"
-        },
-
-        {
-            "btnAgregarAcevichadas5",
-            "Alitas Acevichadas 5 alitas",
-            "platos"
-        },
-
-        {
-            "btnAgregarBBQ4",
-            "Alitas BBQ 4 alitas",
-            "platos"
-        },
-
-        {
-            "btnAgregarAcevichadas4",
-            "Alitas Acevichadas 4 alitas",
-            "platos"
-        },
-
-        {
-            "btnAgregarSalchialitas",
-            "Salchialitas",
-            "platos"
-        },
-
-        {
-            "btnAgregarLomoCarne",
-            "Lomo de carne",
-            "platos"
-        },
-
-        {
-            "btnAgregarLomoPollo",
-            "Lomo de pollo",
-            "platos"
-        },
-
-        {
-            "btnAgregarMostrito",
-            "Mostrito",
-            "platos"
-        },
-
-        {
-            "btnAgregarMilanesaPollo",
-            "Milanesa de pollo",
-            "platos"
-        },
-
-        {
-            "btnAgregarTallarinVerde",
-            "Tallarín verde",
-            "platos"
-        },
-
-        {
-            "btnAgregarTallarinSaltado",
-            "Tallarín saltado",
-            "platos"
-        },
-
-        // ==============================
-        // AGREGADOS
-        // ==============================
-
-        {
-            "btnAgregarHuevo",
-            "Huevo",
-            "agregados"
-        },
-
-        {
-            "btnAgregarPlatano",
-            "Plátano",
-            "agregados"
-        },
-
-        // ==============================
-        // BEBIDAS
-        // ==============================
-
-        {
-            "btnAgregarMaracuya1L",
-            "Jarra de maracuyá 1 litro",
-            "bebidas"
-        },
-
-        {
-            "btnAgregarMaracuyaMedioL",
-            "Jarra de maracuyá medio litro",
-            "bebidas"
-        },
-
-        {
-            "btnAgregarCocaCola",
-            "Coca-Cola personal",
-            "bebidas"
-        },
-
-        {
-            "btnAgregarIncaKola",
-            "Inca Kola personal",
-            "bebidas"
-        },
-
-        {
-            "btnAgregarSprite",
-            "Sprite personal",
-            "bebidas"
-        },
-
-        {
-            "btnAgregarFanta",
-            "Fanta personal",
-            "bebidas"
-        }
-    };
-
-            // ==========================================
-            // 4. GUARDAR LAS TARJETAS EXISTENTES
-            // ==========================================
-
-            List<Control> tarjetas =
-                new List<Control>();
-
-            Dictionary<Control, string> nombres =
-                new Dictionary<Control, string>();
-
-            Dictionary<Control, string> categorias =
-                new Dictionary<Control, string>();
-
-            Dictionary<Control, Point> posiciones =
-                new Dictionary<Control, Point>();
-
-            int cantidadProductos = productos.GetLength(0);
-
-            for (int i = 0; i < cantidadProductos; i++)
-            {
-                string nombreBoton = productos[i, 0];
-
-                Control[] encontrado =
-                    this.Controls.Find(nombreBoton, true);
-
-                if (encontrado.Length == 0)
-                    continue;
-
-                Control botonAgregar = encontrado[0];
-
-                // Identificar el panel de la tarjeta.
-                // En tu diseño actual el botón +
-                // está dentro de su tarjeta.
-                Control tarjeta = botonAgregar.Parent;
-
-                if (tarjeta == null)
-                    continue;
-
-                // Evitar tarjetas repetidas.
-                if (tarjetas.Contains(tarjeta))
-                    continue;
-
-                tarjetas.Add(tarjeta);
-
-                // Guardar información del producto.
-                nombres[tarjeta] = productos[i, 1];
-
-                categorias[tarjeta] = productos[i, 2];
-
-                // Guardar posición inicial de la tarjeta.
-                posiciones[tarjeta] = tarjeta.Location;
-            }
-
-            // ==========================================
-            // 5. VALIDAR LAS TARJETAS
-            // ==========================================
-
-            if (tarjetas.Count == 0)
-            {
-                MessageBox.Show(
-                    "No se encontraron las tarjetas.\n" +
-                    "Revise los nombres de los botones +.",
-                    "Filtro de productos",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
-
+            if (catalogo == null)
                 return;
-            }
-
-            // ==========================================
-            // 6. NORMALIZAR TEXTO DE BÚSQUEDA
-            // ==========================================
-
-            // Permite buscar con o sin tildes.
-            Func<string, string> normalizar = texto =>
-            {
-                return (texto ?? "")
-                    .Trim()
-                    .ToLowerInvariant()
-                    .Replace("á", "a")
-                    .Replace("é", "e")
-                    .Replace("í", "i")
-                    .Replace("ó", "o")
-                    .Replace("ú", "u")
-                    .Replace("ü", "u");
-            };
 
             // ==========================================
             // 7. CATEGORÍA SELECCIONADA
@@ -4029,101 +3722,13 @@ AND NOT EXISTS
 
             aplicarFiltro = () =>
             {
-                string textoBusqueda =
-                    normalizar(txtBuscar.Text);
-
                 // ======================================
-                // 8.1. MOSTRAR U OCULTAR TARJETAS
+                // 8.1. MOSTRAR SOLO LO QUE COINCIDE
                 // ======================================
+                // Activos de dbo.PLATO; nombre o categoría
+                // con o sin tildes; FlowLayoutPanel reubica.
 
-                foreach (Control tarjeta in tarjetas)
-                {
-                    string nombre =
-                        normalizar(nombres[tarjeta]);
-
-                    string categoria =
-                        categorias[tarjeta];
-
-                    // Buscar por nombre del producto.
-                    bool coincideNombre =
-                        string.IsNullOrEmpty(textoBusqueda) ||
-                        nombre.Contains(textoBusqueda);
-
-                    // Buscar por categoría.
-                    bool coincideCategoria =
-                        categoriaActual == "todos" ||
-                        categoriaActual == categoria;
-
-                    // Mostrar la tarjeta completa.
-                    tarjeta.Visible =
-                        coincideNombre && coincideCategoria;
-                }
-
-                // ======================================
-                // 8.2. REORGANIZAR TARJETAS VISIBLES
-                // ======================================
-
-                var grupos =
-                    tarjetas.GroupBy(t => t.Parent);
-
-                foreach (var grupo in grupos)
-                {
-                    Control contenedor = grupo.Key;
-
-                    if (contenedor == null)
-                        continue;
-
-                    // FlowLayoutPanel reorganiza
-                    // automáticamente sus controles.
-                    if (contenedor is FlowLayoutPanel)
-                        continue;
-
-                    List<Control> ordenadas =
-                        grupo.OrderBy(
-                            t => posiciones[t].X).ToList();
-
-                    if (ordenadas.Count == 0)
-                        continue;
-
-                    // Recuperar la posición inicial.
-                    int inicioX =
-                        ordenadas.Min(t => posiciones[t].X);
-
-                    int siguienteX = inicioX;
-
-                    ScrollableControl panel =
-                        contenedor as ScrollableControl;
-
-                    // Reiniciar desplazamiento horizontal.
-                    if (panel != null && panel.AutoScroll)
-                    {
-                        panel.AutoScrollPosition = Point.Empty;
-                    }
-
-                    // Colocar las tarjetas visibles
-                    // una al lado de la otra.
-                    foreach (Control tarjeta in ordenadas)
-                    {
-                        if (!tarjeta.Visible)
-                            continue;
-
-                        tarjeta.Location = new Point(
-                            siguienteX,
-                            posiciones[tarjeta].Y);
-
-                        siguienteX += tarjeta.Width + 6;
-                    }
-
-                    // Actualizar desplazamiento del panel.
-                    if (panel != null && panel.AutoScroll)
-                    {
-                        panel.AutoScrollMinSize = new Size(
-                            siguienteX + 10,
-                            0);
-
-                        panel.AutoScrollPosition = Point.Empty;
-                    }
-                }
+                catalogo.Filtrar(txtBuscar.Text, categoriaActual);
 
                 // ======================================
                 // 8.3. RESALTAR CATEGORÍA SELECCIONADA
@@ -4142,6 +3747,8 @@ AND NOT EXISTS
                 EstiloCategoria(botonAgregados, categoriaActual == "agregados");
                 EstiloCategoria(botonBebidas, categoriaActual == "bebidas");
             };
+
+            aplicarFiltroProductos = aplicarFiltro;
 
             // ==========================================
             // 9. REINICIAR EL FILTRO DESDE NUEVO PEDIDO

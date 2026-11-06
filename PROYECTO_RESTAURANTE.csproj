@@ -164,6 +164,8 @@
     <Compile Include="Contrasenas.cs" />
     <Compile Include="CorreccionesGuna.cs" />
     <Compile Include="ClienteDatos.cs" />
+    <Compile Include="MenuDatos.cs" />
+    <Compile Include="TarjetasMenu.cs" />
     <Compile Include="CuentaDatos.cs" />
     <Compile Include="VentanaCuentaAcceso.cs">
       <SubType>Form</SubType>
