@@ -4023,9 +4023,12 @@ AND NOT EXISTS
                         indice = i;
                 cmbPromocion.SelectedIndex = indice;
 
+                // Habilitado según el cargo (aunque hoy no haya promociones vigentes).
                 bool puede = SesionActual.Iniciada && Permisos.PuedeAplicarPromociones(SesionActual.Cargo);
-                cmbPromocion.Enabled = puede && cmbPromocion.Items.Count > 1;
-                consejoPromocion.SetToolTip(cmbPromocion, puede ? "" : "Su perfil no puede elegir promociones.");
+                cmbPromocion.Enabled = puede;
+                consejoPromocion.SetToolTip(cmbPromocion,
+                    !puede ? "Su perfil no puede elegir promociones."
+                    : cmbPromocion.Items.Count == 1 ? "No hay promociones vigentes hoy." : "");
             }
             finally
             {
