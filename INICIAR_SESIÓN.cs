@@ -1,15 +1,21 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using Guna.UI2.WinForms;
+using System;
+using System.Drawing;
 using System.Globalization;
-
-using System.Data;
-using System.Data.SqlClient;
-using System.Security.Cryptography;
-using System.Text;
-
+using System.Windows.Forms;
 
 namespace PROYECTO_RESTAURANTE
 {
+    // ==========================================================
+    // INICIO DE SESIÓN (formulario principal de la aplicación)
+    // ----------------------------------------------------------
+    // Program.cs ejecuta esta ventana. Tras autenticar:
+    //   1. Se identifica al empleado real (Autenticacion).
+    //   2. Se exige empleado activo, cuenta habilitada y cargo.
+    //   3. Si la clave es temporal, se obliga a cambiarla.
+    //   4. Se registra SesionActual y se abre Inicio (Navegador).
+    // Al cerrar sesión, el Navegador cierra los módulos y vuelve aquí.
+    // ==========================================================
     public partial class INICIAR_SESIÓN : Form
     {
         public INICIAR_SESIÓN()
@@ -22,7 +28,36 @@ namespace PROYECTO_RESTAURANTE
             txtContrasena.UseSystemPasswordChar = true;
             chkMostrarContrasena.Checked = false;
 
+            // Enter en usuario pasa a contraseña; Enter en contraseña inicia sesión.
+            txtUsuario.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; txtContrasena.Focus(); }
+            };
+            txtContrasena.KeyDown += (s, e) =>
+            {
+                if (e.KeyCode == Keys.Enter) { e.SuppressKeyPress = true; But_iniciar_Click(But_iniciar, EventArgs.Empty); }
+            };
 
+            Shown += (s, e) => PrepararParaIngreso();
+            VisibleChanged += (s, e) =>
+            {
+                timer1.Enabled = Visible;
+                if (Visible) PrepararParaIngreso();
+            };
+        }
+
+        // Deja la ventana limpia (al iniciar y al volver tras cerrar sesión).
+        internal void PrepararParaIngreso()
+        {
+            txtContrasena.Text = "";
+            chkMostrarContrasena.Checked = false;
+            txtContrasena.UseSystemPasswordChar = true;
+            But_iniciar.Enabled = true;
+
+            if (txtUsuario.Text.Length == 0)
+                txtUsuario.Focus();
+            else
+                txtContrasena.Focus();
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -44,17 +79,16 @@ namespace PROYECTO_RESTAURANTE
         {
             labFecha.Text = DateTime.Now.ToString(
                  "dddd, dd 'de' MMMM 'de' yyyy",
-                 new CultureInfo("es-ES") );
+                 new CultureInfo("es-ES"));
 
             LabHora.Text = DateTime.Now.ToString("hh:mm:ss tt");
         }
 
         private void But_iniciar_Click(object sender, EventArgs e)
-        {  // 1. Obtener los datos ingresados.
+        {
             string usuario = txtUsuario.Text.Trim();
             string contrasena = txtContrasena.Text;
 
-            // 2. Validar campos vacíos.
             if (usuario == "" || contrasena == "")
             {
                 MessageBox.Show(
@@ -62,153 +96,181 @@ namespace PROYECTO_RESTAURANTE
                     "Iniciar sesión",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
-
                 return;
             }
 
+            ResultadoAutenticacion resultado;
+            But_iniciar.Enabled = false;
+            Cursor = Cursors.WaitCursor;
             try
             {
-                // 3. Buscar al empleado en SQL Server.
-                DataTable empleados = BuscarEmpleado(usuario);
-
-                // 4. Comprobar que exista una cuenta activa.
-                if (empleados.Rows.Count != 1)
-                {
-                    MessageBox.Show(
-                        "Usuario o contraseña incorrectos.",
-                        "Acceso denegado",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-
-                    return;
-                }
-
-                DataRow empleado = empleados.Rows[0];
-
-                // 5. Obtener el hash almacenado.
-                string hashGuardado =
-                    Convert.ToString(empleado["contraseña"]);
-
-                // 6. Verificar la contraseña.
-                if (!VerificarContrasena(
-                    contrasena, hashGuardado))
-                {
-                    MessageBox.Show(
-                        "Usuario o contraseña incorrectos.",
-                        "Acceso denegado",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning);
-
-                    return;
-                }
-
-                // 7. Obtener el identificador real.
-                int idEmpleado =
-                    Convert.ToInt32(empleado["id_empleado"]);
-
-                // 8. Guardar la sesión del empleado.
-                SesionActual.IniciarSesion(idEmpleado);
-
-                // 9. Abrir el sistema principal.
-                FRM_INICIO ventana = new FRM_INICIO();
-
-                ventana.FormClosed += (s, args) =>
-                {
-                    SesionActual.CerrarSesion();
-                    this.Close();
-                };
-
-                ventana.Show();
-                this.Hide();
+                resultado = Autenticacion.Autenticar(usuario, contrasena);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Registro.Error("Sesion", ex);
                 MessageBox.Show(
-                    "No fue posible iniciar sesión. " +
-                    "Verifique la conexión con SQL Server.",
+                    "No fue posible iniciar sesión: SQL Server no respondió.\n" +
+                    "Inténtelo de nuevo en unos segundos.\n\nDetalle: " + ex.Message,
                     "Error de acceso",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
+                return;
             }
+            finally
+            {
+                Cursor = Cursors.Default;
+                But_iniciar.Enabled = true;
+                txtContrasena.Text = "";
+            }
+
+            if (!resultado.Correcto)
+            {
+                MessageBox.Show(
+                    resultado.Mensaje,
+                    "Acceso denegado",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                txtContrasena.Focus();
+                return;
+            }
+
+            // Contraseña temporal: cambio obligatorio antes de entrar.
+            if (resultado.DebeCambiarContrasena &&
+                !SolicitarCambioObligatorio(resultado, contrasena))
+            {
+                return;
+            }
+
+            SesionActual.IniciarSesion(
+                resultado.IdEmpleado,
+                resultado.Usuario,
+                resultado.NombreCompleto,
+                resultado.Cargo,
+                resultado.IdSucursal);
+
+            Navegador.IniciarAplicacion(this);
         }
 
-        private DataTable BuscarEmpleado(string usuario)
+        // ------------------------------------------------------
+        // Cambio obligatorio de contraseña temporal
+        // ------------------------------------------------------
+        private bool SolicitarCambioObligatorio(ResultadoAutenticacion r, string actual)
         {
-            DataTable tabla = new DataTable();
-
-            string conexionSQL =
-                BaseDatos.CadenaConexion;
-
-            string consulta = @"
-        SELECT
-            id_empleado,
-            id_sucursal,
-            usuario,
-            [contraseña],
-            estado
-        FROM dbo.EMPLEADO
-        WHERE usuario = @Usuario
-          AND estado = 'activo';";
-
-            using (SqlConnection conexion =
-                new SqlConnection(conexionSQL))
+            using (Form ventana = new Form())
             {
-                using (SqlCommand comando =
-                    new SqlCommand(consulta, conexion))
+                ventana.Text = "Cambiar contraseña temporal";
+                ventana.ClientSize = new Size(440, 330);
+                ventana.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+                ventana.StartPosition = FormStartPosition.CenterParent;
+                ventana.BackColor = Color.White;
+                ventana.ShowInTaskbar = false;
+
+                Guna2Panel encabezado = new Guna2Panel { Dock = DockStyle.Top, Height = 56, FillColor = Color.Gold };
+                Label titulo = new Label
                 {
-                    comando.Parameters.Add(
-                        "@Usuario", SqlDbType.VarChar, 100
-                    ).Value = usuario;
+                    Text = "NUEVA CONTRASEÑA",
+                    Font = new Font("Microsoft Sans Serif", 12F, FontStyle.Bold),
+                    Dock = DockStyle.Fill,
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    BackColor = Color.Transparent
+                };
+                encabezado.Controls.Add(titulo);
 
-                    using (SqlDataAdapter adaptador =
-                        new SqlDataAdapter(comando))
+                Label nota = new Label
+                {
+                    Text = "Hola " + r.NombreCompleto + ". Su contraseña es temporal: " +
+                           "elija una nueva (mínimo " + Contrasenas.LongitudMinima + " caracteres, con letras y números).",
+                    Font = new Font("Segoe UI", 9F),
+                    ForeColor = Color.DimGray,
+                    Location = new Point(30, 66),
+                    Size = new Size(380, 40)
+                };
+
+                Guna2TextBox txtNueva = Caja(140, "Nueva contraseña");
+                Guna2TextBox txtRepetir = Caja(196, "Repetir contraseña");
+                Label lblError = new Label { ForeColor = Color.Firebrick, Font = new Font("Segoe UI", 9F), Location = new Point(30, 240), Size = new Size(380, 34) };
+
+                Guna2Button btnGuardar = new Guna2Button
+                {
+                    Text = "Guardar y entrar",
+                    Location = new Point(230, 280),
+                    Size = new Size(180, 38),
+                    BorderRadius = 10,
+                    FillColor = Color.Gold,
+                    ForeColor = Color.Black,
+                    Font = new Font("Segoe UI", 10.5F, FontStyle.Bold)
+                };
+                Guna2Button btnCancelar = new Guna2Button
+                {
+                    Text = "Cancelar",
+                    Location = new Point(30, 280),
+                    Size = new Size(180, 38),
+                    BorderRadius = 10,
+                    FillColor = Color.Gainsboro,
+                    ForeColor = Color.Black,
+                    Font = new Font("Segoe UI", 10.5F, FontStyle.Bold)
+                };
+
+                bool cambiado = false;
+                btnGuardar.Click += (s, e) =>
+                {
+                    if (txtNueva.Text != txtRepetir.Text)
                     {
-                        adaptador.Fill(tabla);
+                        lblError.Text = "Las contraseñas no coinciden.";
+                        return;
                     }
-                }
-            }
+                    try
+                    {
+                        string error = Autenticacion.CambiarContrasena(r.IdEmpleado, r.Usuario, actual, txtNueva.Text);
+                        if (error != null) { lblError.Text = error; return; }
+                        cambiado = true;
+                        ventana.DialogResult = DialogResult.OK;
+                    }
+                    catch (Exception ex)
+                    {
+                        Registro.Error("Sesion", ex);
+                        lblError.Text = "SQL Server no respondió. Inténtelo de nuevo.";
+                    }
+                };
+                btnCancelar.Click += (s, e) => ventana.DialogResult = DialogResult.Cancel;
 
-            return tabla;
+                ventana.Controls.AddRange(new Control[] { nota, txtNueva, txtRepetir, lblError, btnGuardar, btnCancelar, encabezado });
+                ventana.Shown += (s, e) => txtNueva.Focus();
+                ventana.ShowDialog(this);
+
+                txtNueva.Text = "";
+                txtRepetir.Text = "";
+
+                if (cambiado)
+                {
+                    MessageBox.Show("Contraseña actualizada correctamente.", "Iniciar sesión",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                return cambiado;
+            }
         }
 
-        private bool VerificarContrasena(
-            string contrasenaIngresada,
-            string hashGuardado)
+        private static Guna2TextBox Caja(int y, string marcador)
         {
-            // Calcular SHA-256 de la contraseña ingresada.
-            using (SHA256 sha = SHA256.Create())
+            return new Guna2TextBox
             {
-                byte[] datos = Encoding.UTF8.GetBytes(
-                    contrasenaIngresada);
-
-                byte[] resultado = sha.ComputeHash(datos);
-
-                // Convertir el resultado a hexadecimal.
-                string hashCalculado =
-                    BitConverter.ToString(resultado)
-                    .Replace("-", "");
-
-                // Comparar con el valor guardado en SQL.
-                return string.Equals(
-                    hashCalculado,
-                    hashGuardado,
-                    StringComparison.OrdinalIgnoreCase);
-            }
+                Location = new Point(30, y),
+                Size = new Size(380, 38),
+                BorderRadius = 8,
+                BorderColor = Color.Goldenrod,
+                Font = new Font("Segoe UI", 10F),
+                ForeColor = Color.Black,
+                PlaceholderText = marcador,
+                UseSystemPasswordChar = true,
+                MaxLength = 128
+            };
         }
 
         private void guna2CheckBox1_CheckedChanged(object sender, EventArgs e)
         {
-
-            if (chkMostrarContrasena.Checked)
-            {
-                // Mostrar la contraseña.
-                txtContrasena.UseSystemPasswordChar = false;
-            }
-            else
-            {
-                // Ocultar la contraseña.
-                txtContrasena.UseSystemPasswordChar = true;
-            }
+            // Mostrar u ocultar la contraseña.
+            txtContrasena.UseSystemPasswordChar = !chkMostrarContrasena.Checked;
         }
     }
 }

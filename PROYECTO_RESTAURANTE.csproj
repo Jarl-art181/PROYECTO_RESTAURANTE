@@ -158,6 +158,7 @@
     <Compile Include="INICIAR_SESIÓN.Designer.cs">
       <DependentUpon>INICIAR_SESIÓN.cs</DependentUpon>
     </Compile>
+    <Compile Include="Autenticacion.cs" />
     <Compile Include="AutorizacionAdministrador.cs" />
     <Compile Include="BaseDatos.cs" />
     <Compile Include="Contrasenas.cs" />

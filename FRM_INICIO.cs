@@ -113,7 +113,8 @@ namespace PROYECTO_RESTAURANTE
 
         private void but_Cerrar_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            // "Cerrar Sesión": libera los módulos y vuelve al inicio de sesión.
+            Navegador.CerrarSesion();
         }
 
         // tarjeta de ventas de hoy 

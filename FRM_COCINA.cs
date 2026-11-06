@@ -714,7 +714,8 @@ namespace PROYECTO_RESTAURANTE
         // Navegación original.
         private void but_Cerrar_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            // "Cerrar Sesión": libera los módulos y vuelve al inicio de sesión.
+            Navegador.CerrarSesion();
         }
 
         private void guna2Button2_Click(object sender, EventArgs e)

@@ -124,7 +124,7 @@ namespace PROYECTO_RESTAURANTE
                 List<ReservaAviso> vencidas = LiberarReservasVencidas();
 
                 // Las preguntas solo tienen sentido con alguien en sesión.
-                List<ReservaAviso> avisos = SesionActual.IdEmpleado.HasValue
+                List<ReservaAviso> avisos = SesionActual.Iniciada && Permisos.AtiendeReservas(SesionActual.Cargo)
                     ? MarcarYObtenerAvisos15()
                     : new List<ReservaAviso>();
 
@@ -234,7 +234,7 @@ namespace PROYECTO_RESTAURANTE
                     ReservaAviso aviso = colaAvisos.Dequeue();
 
                     // Si se cerró la sesión mientras esperaba, no preguntar.
-                    if (!SesionActual.IdEmpleado.HasValue)
+                    if (!SesionActual.Iniciada || !Permisos.AtiendeReservas(SesionActual.Cargo))
                         continue;
 
                     DialogResult respuesta = MessageBox.Show(

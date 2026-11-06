@@ -30,6 +30,7 @@ namespace PROYECTO_RESTAURANTE
         private string tipoPedido = "";
         private string numeroMesa = "";
         private string atendidoPor = "";
+        private string estadoPedido = "";
 
         // Totales: los precios de los productos incluyen IGV
         private decimal subtotal = 0m;
@@ -446,9 +447,17 @@ namespace PROYECTO_RESTAURANTE
         private void RegistrarCobroSQL(
             List<KeyValuePair<string, decimal>> pagos)
         {
+            // Identidad: empleado autenticado en INICIAR_SESIÓN.
             if (!SesionActual.IdEmpleado.HasValue)
                 throw new Exception(
-                    "Debe iniciar sesión como cajero para cobrar.");
+                    "Debe iniciar sesión para cobrar.");
+
+            // Cargo autorizado (decisión aprobada: Administrador y Cajero).
+            // Se vuelve a comprobar en SQL dentro de la transacción.
+            if (!Permisos.PuedeCobrar(SesionActual.Cargo))
+                throw new Exception(
+                    "Su cargo (" + SesionActual.Cargo + ") no está autorizado para cobrar.\n" +
+                    "Solo pueden cobrar un Administrador o un Cajero.");
 
             int idCajero = SesionActual.IdEmpleado.Value;
 
@@ -477,16 +486,18 @@ namespace PROYECTO_RESTAURANTE
                 {
                     try
                     {
-                        // 1. Verificar que el empleado sea cajero activo.
+                        // 1. Verificar al empleado que cobra: activo, con
+                        //    cuenta habilitada, de esta sucursal y con cargo
+                        //    CAJERO o ADMINISTRADOR (igual que TR_PAGO_RN_E).
                         using (SqlCommand cmd = new SqlCommand(@"
                     SELECT COUNT(*)
-                    FROM dbo.CAJERO C
-                    INNER JOIN dbo.EMPLEADO E
-                        ON C.id_empleado = E.id_empleado
-                    WHERE C.id_empleado = @Cajero
+                    FROM dbo.EMPLEADO E
+                    WHERE E.id_empleado = @Cajero
                       AND E.id_sucursal = 1
-                      AND LOWER(LTRIM(RTRIM(E.estado)))
-                          = 'activo';",
+                      AND LOWER(LTRIM(RTRIM(E.estado))) = 'activo'
+                      AND E.acceso_habilitado = 1
+                      AND (EXISTS (SELECT 1 FROM dbo.CAJERO C WHERE C.id_empleado = E.id_empleado)
+                           OR EXISTS (SELECT 1 FROM dbo.ADMINISTRADOR A WHERE A.id_empleado = E.id_empleado));",
                             conexion, transaccion))
                         {
                             cmd.Parameters.Add(
@@ -497,7 +508,8 @@ namespace PROYECTO_RESTAURANTE
                                 cmd.ExecuteScalar()) != 1)
                             {
                                 throw new Exception(
-                                    "El empleado no es un cajero activo.");
+                                    "El empleado de la sesión no está autorizado para cobrar " +
+                                    "(debe ser Administrador o Cajero activo, con cuenta habilitada).");
                             }
                         }
 
@@ -530,7 +542,7 @@ namespace PROYECTO_RESTAURANTE
                     FROM dbo.PEDIDO P WITH (UPDLOCK, HOLDLOCK)
                     WHERE P.id_pedido = @Pedido
                       AND P.id_sucursal = 1
-                      AND P.estado IN ('listo', 'entregado');",
+                      AND P.estado = 'entregado';",
                             conexion, transaccion))
                         {
                             cmd.Parameters.Add(
@@ -539,11 +551,13 @@ namespace PROYECTO_RESTAURANTE
 
                             object resultado = cmd.ExecuteScalar();
 
+                            // Regla de SQL (TR_PEDIDO_VALIDACIONES): solo un
+                            // pedido 'entregado' puede pasar a 'cobrado'.
                             if (resultado == null ||
                                 resultado == DBNull.Value)
                             {
                                 throw new Exception(
-                                    "El pedido debe estar Listo o Entregado " +
+                                    "El pedido debe estar Entregado " +
                                     "y no debe estar cobrado.");
                             }
 
@@ -596,7 +610,7 @@ namespace PROYECTO_RESTAURANTE
                     SET estado = 'cobrado'
                     WHERE id_pedido = @Pedido
                       AND id_sucursal = 1
-                      AND estado IN ('listo', 'entregado');",
+                      AND estado = 'entregado';",
                             conexion, transaccion))
                         {
                             cmd.Parameters.Add(
@@ -610,7 +624,36 @@ namespace PROYECTO_RESTAURANTE
                             }
                         }
 
+                        // 6. Salón: la mesa queda libre en la MISMA transacción
+                        //    (antes nadie la liberaba y quedaba 'ocupada' sin
+                        //    pedido, bloqueando nuevos pedidos). Solo si no tiene
+                        //    otro pedido activo. No toca reservas.
+                        using (SqlCommand cmd = new SqlCommand(@"
+                    UPDATE M
+                       SET estado = 'libre'
+                      FROM dbo.MESA M
+                      INNER JOIN dbo.PEDIDO P ON P.id_mesa = M.id_mesa
+                     WHERE P.id_pedido = @Pedido
+                       AND P.canal = 'salon'
+                       AND M.estado = 'ocupada'
+                       AND NOT EXISTS
+                       (
+                           SELECT 1 FROM dbo.PEDIDO O
+                           WHERE O.id_mesa = M.id_mesa
+                             AND O.id_pedido <> P.id_pedido
+                             AND O.estado IN ('pendiente','en_preparacion','listo','entregado')
+                       );",
+                            conexion, transaccion))
+                        {
+                            cmd.Parameters.Add(
+                                "@Pedido", SqlDbType.Int).Value =
+                                idPedido;
+                            cmd.ExecuteNonQuery();
+                        }
+
                         transaccion.Commit();
+                        Registro.Info("Cobro", "Pedido " + idPedido + " cobrado por el empleado " +
+                            idCajero + " (" + SesionActual.Cargo + "), " + pagos.Count + " pago(s).");
                     }
                     catch
                     {
@@ -729,6 +772,7 @@ namespace PROYECTO_RESTAURANTE
                             .Trim().ToLowerInvariant();
                         if (estado == "cancelado")
                             throw new Exception("El pedido está cancelado.");
+                        estadoPedido = estado;
 
                         fechaPedido = Convert.ToDateTime(lector["fecha_hora"]);
                         tipoPedido = Convert.ToString(lector["canal"]);
@@ -1339,6 +1383,35 @@ namespace PROYECTO_RESTAURANTE
             {
                 MessageBox.Show(
                     "Primero debe seleccionar un pedido.",
+                    "Validación de pago",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return false;
+            }
+
+            // 1b. Antes de pedir datos de pago: estado del pedido y permiso.
+            //     (Regla de SQL: solo un pedido 'entregado' puede cobrarse.)
+            if (estadoPedido != "entregado")
+            {
+                MessageBox.Show(
+                    "El pedido N.º " + idPedido + " está '" + estadoPedido + "'.\n\n" +
+                    "Solo se puede cobrar un pedido ENTREGADO. Márquelo como " +
+                    "entregado en Cocina y vuelva a abrir la boleta.",
+                    "Validación de pago",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+
+                return false;
+            }
+
+            if (!Permisos.PuedeCobrar(SesionActual.Cargo))
+            {
+                MessageBox.Show(
+                    SesionActual.Iniciada
+                        ? "Su cargo (" + SesionActual.Cargo + ") no está autorizado para cobrar.\n" +
+                          "Solo pueden cobrar un Administrador o un Cajero."
+                        : "Debe iniciar sesión para cobrar.",
                     "Validación de pago",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);

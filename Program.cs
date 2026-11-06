@@ -11,21 +11,30 @@ namespace PROYECTO_RESTAURANTE
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // Conserva el comportamiento del repositorio: arranca en Inicio.
-            // Si ya activaste INICIAR_SESIÓN, NO reemplaces Program.cs sin adaptar
-            // esta parte al formulario que mantiene abierto el programa.
-            FRM_INICIO ventanaPrincipal = new FRM_INICIO();
+            // Errores no controlados: se registran y se informan una vez,
+            // sin cerrar la aplicación por un fallo recuperable.
+            Application.ThreadException += (s, e) =>
+            {
+                Registro.Error("Aplicacion", e.Exception);
+                MessageBox.Show(
+                    "Ocurrió un error inesperado:\n" + e.Exception.Message +
+                    "\n\nEl detalle quedó registrado en:\n" + Registro.Ruta,
+                    "Al Estilo Piurano",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            };
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+                Registro.Error("Aplicacion", e.ExceptionObject as Exception);
 
-            // El Navegador reutiliza esta instancia como Inicio
-            // y nunca la cierra al cambiar de módulo.
-            Navegador.EstablecerPrincipal(ventanaPrincipal);
-
-            ventanaPrincipal.Shown += (s, e) =>
-                ControlReservasAutomaticas.Iniciar(ventanaPrincipal);
+            // Primero se exige iniciar sesión. Tras autenticar,
+            // INICIAR_SESIÓN abre Inicio (Navegador.IniciarAplicacion)
+            // y arranca UNA sola vez el monitor de reservas.
+            // Cerrar la ventana de acceso termina la aplicación.
+            INICIAR_SESIÓN acceso = new INICIAR_SESIÓN();
 
             try
             {
-                Application.Run(ventanaPrincipal);
+                Application.Run(acceso);
             }
             finally
             {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace PROYECTO_RESTAURANTE
@@ -55,8 +56,11 @@ namespace PROYECTO_RESTAURANTE
         // Navegador (solo interesan los cierres del usuario).
         private static bool cerrandoDesdeNavegador;
 
+        // Ventana de inicio de sesión (formulario de Application.Run).
+        private static Form ventanaLogin;
+
         // ------------------------------------------------------
-        // Registrar el formulario principal (Application.Run).
+        // Registrar el formulario principal de los módulos (Inicio).
         // ------------------------------------------------------
         public static void EstablecerPrincipal(Form formulario)
         {
@@ -65,6 +69,97 @@ namespace PROYECTO_RESTAURANTE
 
             principal = formulario;
             Registrar(formulario);
+            MostrarUsuarioEnCabecera(formulario);
+        }
+
+        // ------------------------------------------------------
+        // Tras un inicio de sesión correcto: abrir Inicio y ocultar
+        // la ventana de acceso (que sigue siendo la principal de la
+        // aplicación y el destino de los avisos de reservas).
+        // ------------------------------------------------------
+        public static void IniciarAplicacion(Form login)
+        {
+            ventanaLogin = login;
+
+            FRM_INICIO inicio = new FRM_INICIO();
+            EstablecerPrincipal(inicio);
+
+            inicio.Show();
+            inicio.BringToFront();
+            inicio.Activate();
+            login.Hide();
+
+            // Una sola instancia del monitor durante toda la aplicación.
+            ControlReservasAutomaticas.Iniciar(login);
+        }
+
+        // ------------------------------------------------------
+        // CERRAR SESIÓN: cierra y libera TODOS los módulos (incluido
+        // Inicio), borra la sesión y vuelve a la ventana de acceso.
+        // ------------------------------------------------------
+        public static void CerrarSesion()
+        {
+            List<Form> abiertos = new List<Form>(instancias.Values);
+            Form inicio = principal;
+            principal = null;   // ya no se protege: también se libera
+
+            cerrandoDesdeNavegador = true;
+            try
+            {
+                // Las ventanas modales abiertas (boleta, reservas) se cierran primero.
+                foreach (Form f in new List<Form>(Application.OpenForms.Cast<Form>()))
+                {
+                    if (f.Modal && !f.IsDisposed)
+                        f.Close();
+                }
+
+                foreach (Form f in abiertos)
+                {
+                    if (f != null && !f.IsDisposed)
+                        f.Close();
+                }
+
+                if (inicio != null && !inicio.IsDisposed)
+                    inicio.Close();
+            }
+            finally
+            {
+                cerrandoDesdeNavegador = false;
+            }
+
+            instancias.Clear();
+            Registro.Info("Sesion", "Cierre de sesión del empleado " + SesionActual.IdEmpleado + ".");
+            SesionActual.CerrarSesion();
+
+            if (ventanaLogin != null && !ventanaLogin.IsDisposed)
+            {
+                ventanaLogin.Show();
+                ventanaLogin.BringToFront();
+                ventanaLogin.Activate();
+            }
+            else
+            {
+                Application.Exit();
+            }
+        }
+
+        // Nombre y cargo reales en la cabecera (los mismos controles
+        // del diseño: guna2HtmlLabel12, guna2HtmlLabel13, guna2HtmlLabel1).
+        private static void MostrarUsuarioEnCabecera(Form formulario)
+        {
+            if (!SesionActual.Iniciada || formulario == null)
+                return;
+
+            AsignarTexto(formulario, "guna2HtmlLabel12", SesionActual.NombreCorto);
+            AsignarTexto(formulario, "guna2HtmlLabel13", SesionActual.Cargo);
+            AsignarTexto(formulario, "guna2HtmlLabel1", (SesionActual.Cargo ?? "").ToUpperInvariant() + " ");
+        }
+
+        private static void AsignarTexto(Form formulario, string nombre, string texto)
+        {
+            Control[] encontrados = formulario.Controls.Find(nombre, true);
+            if (encontrados.Length > 0 && texto != null)
+                encontrados[0].Text = texto;
         }
 
         // ------------------------------------------------------
@@ -160,6 +255,7 @@ namespace PROYECTO_RESTAURANTE
 
             instancias[tipo] = formulario;
             formulario.FormClosed += Formulario_FormClosed;
+            MostrarUsuarioEnCabecera(formulario);
         }
 
         private static void Cambiar(
@@ -314,15 +410,26 @@ namespace PROYECTO_RESTAURANTE
                 instancias.Remove(formulario.GetType());
             }
 
-            // Si el usuario cerró una ventana (por ejemplo con
-            // Alt+F4) y no queda ninguna visible, volver a mostrar
-            // el principal para no dejar la aplicación invisible.
             if (cerrandoDesdeNavegador ||
-                formulario == principal ||
                 e.CloseReason != CloseReason.UserClosing)
             {
                 return;
             }
+
+            // El usuario cerró Inicio (por ejemplo con Alt+F4): se trata
+            // como "Cerrar sesión" para no dejar la aplicación invisible.
+            if (formulario == principal)
+            {
+                // Diferido: se ejecuta cuando Inicio terminó de cerrarse.
+                if (ventanaLogin != null && !ventanaLogin.IsDisposed)
+                    ventanaLogin.BeginInvoke((Action)CerrarSesion);
+                else
+                    Application.Exit();
+                return;
+            }
+
+            // Si cerró otra ventana y no queda ninguna visible, volver
+            // a mostrar Inicio.
 
             if (principal != null &&
                 !principal.IsDisposed &&
