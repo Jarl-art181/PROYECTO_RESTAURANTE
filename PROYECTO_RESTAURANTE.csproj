@@ -163,6 +163,7 @@
     <Compile Include="BaseDatos.cs" />
     <Compile Include="Contrasenas.cs" />
     <Compile Include="CorreccionesGuna.cs" />
+    <Compile Include="ClienteDatos.cs" />
     <Compile Include="CuentaDatos.cs" />
     <Compile Include="VentanaCuentaAcceso.cs">
       <SubType>Form</SubType>

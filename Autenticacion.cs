@@ -105,6 +105,12 @@ namespace PROYECTO_RESTAURANTE
             return cargo == Cargos.Administrador;
         }
 
+        // Registrar, editar y desactivar clientes (módulo Clientes).
+        public static bool PuedeGestionarClientes(string cargo)
+        {
+            return cargo == Cargos.Administrador;
+        }
+
         // Perfiles que atienden la llegada de comensales con reserva.
         public static bool AtiendeReservas(string cargo)
         {
