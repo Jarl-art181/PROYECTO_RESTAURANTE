@@ -263,5 +263,26 @@
   <ItemGroup>
     <None Include="Resources\c4a4592e-9318-4923-9f8b-ac343c0aa2ea.jpg" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Fotos de los platos sin tarjeta en el diseño (Resources\plato_<id>.jpg). -->
+    <EmbeddedResource Include="Resources\plato_1.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_1.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_2.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_2.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_3.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_3.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_5.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_5.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_6.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_6.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_7.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_7.jpg</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

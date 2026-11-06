@@ -392,6 +392,28 @@ namespace PROYECTO_RESTAURANTE
             return CargarSinBloquear(Path.Combine(CarpetaFotos, nombre));
         }
 
+        // Foto incluida en el programa (Resources\plato_<id>.jpg,
+        // recurso incrustado). null si el plato no tiene una.
+        public static Image ImagenIncluida(int idPlato)
+        {
+            try
+            {
+                using (Stream s = typeof(MenuDatos).Assembly.GetManifestResourceStream(
+                    "PROYECTO_RESTAURANTE.Fotos.plato_" + idPlato + ".jpg"))
+                {
+                    if (s == null)
+                        return null;
+                    using (Image img = Image.FromStream(s))
+                        return new Bitmap(img);
+                }
+            }
+            catch (Exception ex)
+            {
+                Registro.Error("Menu", ex);
+                return null;
+            }
+        }
+
         // Copia en memoria para no dejar el archivo bloqueado.
         private static Image CargarSinBloquear(string ruta)
         {

@@ -35,6 +35,7 @@ namespace PROYECTO_RESTAURANTE
             public ProductoMenu Producto;
             public string FotoMostrada;
             public Image FotoCargada;
+            public bool TieneFoto = true;
         }
 
         private readonly FlowLayoutPanel flow;
@@ -78,6 +79,19 @@ namespace PROYECTO_RESTAURANTE
         {
             Tarjeta t;
             return porId.TryGetValue(idPlato, out t) ? t.Producto : null;
+        }
+
+        // Productos activos que hoy se muestran con "Sin foto".
+        public List<string> ProductosSinFoto()
+        {
+            return tarjetas.Where(t => t.Producto.Activo && !t.TieneFoto)
+                .Select(t => t.Producto.IdPlato + " " + t.Producto.Nombre).ToList();
+        }
+
+        // Cantidad de tarjetas por producto (para comprobar duplicados).
+        public int TarjetasDe(int idPlato)
+        {
+            return tarjetas.Count(t => t.Producto.IdPlato == idPlato);
         }
 
         // Imagen que muestra la tarjeta (diseño o foto propia).
@@ -206,15 +220,21 @@ namespace PROYECTO_RESTAURANTE
             if (panel != null)
                 panel.BorderColor = activo ? Color.Gold : Color.Silver;
 
-            // Foto propia (si existe) o la imagen del diseño.
-            if (t.Imagen != null && t.FotoMostrada != p.Foto)
+            // Imagen, en este orden: foto subida desde Menú (PLATO.foto),
+            // imagen del diseño, foto incluida en el programa
+            // (Resources\plato_<id>.jpg) y, si no hay ninguna, "Sin foto".
+            string clave = p.Foto ?? "";
+            if (t.Imagen != null && t.FotoMostrada != clave)
             {
-                Image nueva = MenuDatos.CargarFoto(p.Foto);
-                Image anterior = t.FotoCargada;
+                Image propia = MenuDatos.CargarFoto(p.Foto);
+                if (propia == null && t.ImagenDiseno == null)
+                    propia = MenuDatos.ImagenIncluida(p.IdPlato);
 
-                t.Imagen.Image = nueva ?? t.ImagenDiseno ?? SinFoto();
-                t.FotoCargada = nueva;
-                t.FotoMostrada = p.Foto;
+                Image anterior = t.FotoCargada;
+                t.Imagen.Image = propia ?? t.ImagenDiseno ?? SinFoto();
+                t.FotoCargada = propia;
+                t.TieneFoto = propia != null || t.ImagenDiseno != null;
+                t.FotoMostrada = clave;
 
                 if (anterior != null)
                     anterior.Dispose();
