@@ -414,6 +414,66 @@ namespace PROYECTO_RESTAURANTE
             }
         }
 
+        // ------------------------------------------------------
+        // FOTO DE UN PRODUCTO (la MISMA en Menú, Pedidos e Inicio)
+        // ------------------------------------------------------
+        // Se identifica por id_plato, nunca por el nombre o la posición:
+        //  1. Imagenes\Productos\plato_<id>.jpg|png (reemplazo sin recompilar)
+        //  2. foto subida desde Gestión de Menú (PLATO.foto)
+        //  3. foto incluida en el programa (Resources\plato_<id>.jpg)
+        // null si no hay ninguna: cada ventana muestra su marcador.
+        public static Image FotoProducto(int idPlato, string foto, Size maximo)
+        {
+            string propia = Imagenes.Buscar(Imagenes.Productos, "plato_" + idPlato);
+            Image im = Imagenes.Cargar(propia, maximo);
+            if (im == null)
+                im = CargarFoto(foto);
+            if (im == null)
+                im = ImagenIncluida(idPlato);
+            return im;
+        }
+
+        // Cambia cuando cambia la foto que corresponde al producto
+        // (archivo personalizado nuevo, quitado o PLATO.foto distinto).
+        public static string ClaveFoto(int idPlato, string foto)
+        {
+            string propia = Imagenes.Buscar(Imagenes.Productos, "plato_" + idPlato);
+            return (propia ?? "") + "|" + Imagenes.Version(propia) + "|" + (foto ?? "");
+        }
+
+        // Marcador para productos sin ninguna foto: Imagenes\Productos\
+        // predeterminado.png si existe; si no, "Sin foto". Compartido (no se libera).
+        private static Image predeterminada;
+        private static string rutaPredeterminada;
+        private static long versionPredeterminada;
+
+        public static Image FotoPredeterminada()
+        {
+            string ruta = Imagenes.Buscar(Imagenes.Productos, "predeterminado");
+            long version = Imagenes.Version(ruta);
+            if (predeterminada != null && ruta == rutaPredeterminada && version == versionPredeterminada)
+                return predeterminada;
+
+            Image nueva = Imagenes.Cargar(ruta, new Size(AnchoFoto, AltoFoto));
+            if (nueva == null)
+            {
+                Bitmap b = new Bitmap(212, 147);
+                using (Graphics g = Graphics.FromImage(b))
+                using (Font f = new Font("Segoe UI", 11F, FontStyle.Italic))
+                using (StringFormat centro = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
+                {
+                    g.Clear(Color.FromArgb(250, 246, 225));
+                    g.DrawString("Sin foto", f, Brushes.DarkGoldenrod, new RectangleF(0, 0, b.Width, b.Height), centro);
+                }
+                nueva = b;
+            }
+            // La anterior puede seguir en pantalla hasta refrescarse: se deja al recolector.
+            predeterminada = nueva;
+            rutaPredeterminada = ruta;
+            versionPredeterminada = version;
+            return predeterminada;
+        }
+
         // Copia en memoria para no dejar el archivo bloqueado.
         private static Image CargarSinBloquear(string ruta)
         {

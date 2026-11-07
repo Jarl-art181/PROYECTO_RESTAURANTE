@@ -1,0 +1,3 @@
+Íconos de los botones (nuevo, guardar, editar, eliminar, buscar, imprimir, cobrar, reservar, cancelar...).
+Coloque aquí un PNG con el nombre indicado en GUIA_IMAGENES.md (por ejemplo: guardar.png).
+Para volver a la imagen original, quite o cambie el nombre del archivo.

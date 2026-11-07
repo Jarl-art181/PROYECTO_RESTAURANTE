@@ -132,7 +132,8 @@ namespace PROYECTO_RESTAURANTE
         private void PonerFotoPlato(PictureBox destino, Image foto)
         {
             Image anterior = destino.Image;
-            destino.Image = foto;
+            // Producto sin ninguna foto: marcador compartido (no se libera aquí).
+            destino.Image = foto ?? (destino.Tag as string == "conProducto" ? MenuDatos.FotoPredeterminada() : null);
             destino.SizeMode = PictureBoxSizeMode.Zoom;
             if (anterior != null && fotosPropias.Remove(anterior))
                 anterior.Dispose();
@@ -194,6 +195,7 @@ namespace PROYECTO_RESTAURANTE
 
             for (int i = 0; i < 4; i++)
             {
+                fotos[i].Tag = null;
                 PonerFotoPlato(fotos[i], null);
                 nombres[i].Text = "Sin ventas";
                 cantidades[i].Text = "0";
@@ -328,9 +330,13 @@ namespace PROYECTO_RESTAURANTE
                             // ==========================
 
                             nombres[posicion].Text = nombre;
+                            fotos[posicion].Tag = "conProducto";
+                            // Foto del producto por id_plato (la misma de Menú y Pedidos):
+                            // se mueve con el producto cuando cambia el ranking.
                             PonerFotoPlato(fotos[posicion],
-                                MenuDatos.CargarFoto(lector["Foto"] == DBNull.Value ? null : Convert.ToString(lector["Foto"]))
-                                ?? MenuDatos.ImagenIncluida(Convert.ToInt32(lector["id_plato"])));
+                                MenuDatos.FotoProducto(Convert.ToInt32(lector["id_plato"]),
+                                    lector["Foto"] == DBNull.Value ? null : Convert.ToString(lector["Foto"]),
+                                    new Size(fotos[posicion].Width * 2, fotos[posicion].Height * 2)));
 
                             cantidades[posicion].Text =
                                 cantidad.ToString();

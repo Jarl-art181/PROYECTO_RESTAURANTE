@@ -43,6 +43,9 @@ namespace PROYECTO_RESTAURANTE
             // Evita la fuga de GDI/USER del calendario interno de Guna2DateTimePicker.
             CorreccionesGuna.Aplicar(this);
 
+            // Imágenes por función (reemplazables desde la carpeta Imagenes).
+            Imagenes.Preparar(this);
+
             numeroMesaInicial = numeroMesa;
             Text = "Nueva reserva";
             StartPosition = FormStartPosition.CenterParent;

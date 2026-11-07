@@ -1,0 +1,3 @@
+Íconos del menú lateral, la barra superior y los filtros (Todos, Platos, Bebidas, Agregados, Salón, Delivery, Recojo).
+Coloque aquí un PNG con el nombre indicado en GUIA_IMAGENES.md (por ejemplo: inicio.png, mesas.png, reloj.png).
+Para volver a la imagen original, quite o cambie el nombre del archivo.

@@ -115,6 +115,9 @@ namespace PROYECTO_RESTAURANTE
 
             // Menú lateral común: todos los botones conectados y según el cargo.
             MenuLateral.Conectar(f);
+            // Imágenes por función (reemplazables desde la carpeta Imagenes)
+            // e íconos sobre botones centrados; antes de registrar el diseño.
+            Imagenes.Preparar(f);
             // Solo desde que la ventana se muestra: así los Load/Shown propios
             // ya terminaron de preparar sus controles en coordenadas de diseño.
             f.Shown += (s, a) => { e.Mostrado = true; Aplicar(f, e); };

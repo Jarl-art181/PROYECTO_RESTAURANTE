@@ -1,0 +1,4 @@
+Fotos de los productos del menú: plato_<id_plato>.jpg (por ejemplo plato_1.jpg = Ceviche clásico).
+La misma foto se muestra en Gestión de Menú, Gestión de Pedidos e Inicio (Productos más vendidos).
+predeterminado.png = imagen para productos sin ninguna foto.
+Para volver a la foto original, quite o cambie el nombre del archivo.

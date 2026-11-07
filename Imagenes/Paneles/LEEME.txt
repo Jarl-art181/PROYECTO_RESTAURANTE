@@ -1,0 +1,3 @@
+Imágenes de encabezados, tarjetas de indicadores, banner de Inicio y fotos de mesas.
+Coloque aquí el archivo con el nombre indicado en GUIA_IMAGENES.md (por ejemplo: encabezado_menu.png, banner_inicio.jpg).
+Para volver a la imagen original, quite o cambie el nombre del archivo.

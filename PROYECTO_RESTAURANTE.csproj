@@ -186,6 +186,7 @@
     <Compile Include="DisenoVentanas.cs" />
     <Compile Include="SelectorClientes.cs" />
     <Compile Include="TarjetasInventario.cs" />
+    <Compile Include="Imagenes.cs" />
     <Compile Include="MenuDatos.cs" />
     <Compile Include="TarjetasMenu.cs" />
     <Compile Include="CuentaDatos.cs" />
@@ -290,6 +291,63 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Fotos de los platos sin tarjeta en el diseño (Resources\plato_<id>.jpg). -->
+    <EmbeddedResource Include="Resources\plato_11.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_11.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_12.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_12.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_13.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_13.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_14.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_14.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_15.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_15.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_16.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_16.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_17.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_17.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_18.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_18.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_19.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_19.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_20.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_20.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_21.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_21.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_22.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_22.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_23.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_23.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_24.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_24.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_25.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_25.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_26.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_26.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_27.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_27.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_28.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_28.jpg</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\plato_29.jpg">
+      <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_29.jpg</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\plato_1.jpg">
       <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_1.jpg</LogicalName>
     </EmbeddedResource>
@@ -308,6 +366,21 @@
     <EmbeddedResource Include="Resources\plato_7.jpg">
       <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_7.jpg</LogicalName>
     </EmbeddedResource>
+    <Content Include="Imagenes\Iconos\LEEME.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Imagenes\Botones\LEEME.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Imagenes\Paneles\LEEME.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Imagenes\Productos\LEEME.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GUIA_IMAGENES.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

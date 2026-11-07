@@ -254,13 +254,15 @@ namespace PROYECTO_RESTAURANTE
                 if (hayPromo) t.Promo.Text = Promociones[p.IdPlato];
             }
 
-            // Imagen, en este orden: foto subida desde Menú (PLATO.foto),
-            // imagen del diseño, foto incluida en el programa
-            // (Resources\plato_<id>.jpg) y, si no hay ninguna, "Sin foto".
-            string clave = p.Foto ?? "";
+            // Imagen por id_plato (la misma que en Inicio): archivo de
+            // Imagenes\Productos, foto subida desde Menú (PLATO.foto), imagen
+            // del diseño, foto incluida en el programa y, si no hay, "Sin foto".
+            string clave = MenuDatos.ClaveFoto(p.IdPlato, p.Foto);
             if (t.Imagen != null && t.FotoMostrada != clave)
             {
-                Image propia = MenuDatos.CargarFoto(p.Foto);
+                Image propia = Imagenes.Cargar(Imagenes.Buscar(Imagenes.Productos, "plato_" + p.IdPlato),
+                                               new Size(t.Imagen.Width * 2, t.Imagen.Height * 2))
+                               ?? MenuDatos.CargarFoto(p.Foto);
                 if (propia == null && t.ImagenDiseno == null)
                     propia = MenuDatos.ImagenIncluida(p.IdPlato);
 
