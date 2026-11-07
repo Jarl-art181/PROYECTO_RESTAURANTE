@@ -68,7 +68,11 @@ namespace PROYECTO_RESTAURANTE
             {
                 if (Visible && fondo != null && guna2Panel2.Width > 300) DistribuirBarra(DisenoVentanas.Escala(this));
             };
-            Disposed += (s, e) => { if (letraMostrar != null) letraMostrar.Dispose(); };
+            Disposed += (s, e) =>
+            {
+                if (letraMostrar != null) letraMostrar.Dispose();
+                if (guna2Panel1.BackgroundImage != null) guna2Panel1.BackgroundImage.Dispose();
+            };
         }
 
         // ======================================================
@@ -163,6 +167,7 @@ namespace PROYECTO_RESTAURANTE
             x = Math.Max(margen, Math.Min(cs.Width - ancho - margen, x));
             int y = Math.Max(margen, (altoUtil - alto) / 2);
             guna2Panel1.Bounds = new Rectangle(x, y, ancho, alto);
+            EsquinasDelPanel(cs, img);
 
             // Interior: 26 | logo 256 | 16 | usuario 46 | 14 | contraseña 46 | 10 |
             //           mostrar 20 | 18 | botones 60 | 20 | Trujillo 120 | 24
@@ -211,6 +216,26 @@ namespace PROYECTO_RESTAURANTE
             But_iniciar.TextOffset = new Point(Math.Max(0, finIcono - inicioTexto), 0);
         }
 
+        // Las esquinas redondeadas del panel muestran el fondo que tienen detrás.
+        // El diseño traía un recorte fijo del fondo que ya no coincidía (franja
+        // amarilla a la derecha): se genera con el mismo encuadre del fondo visible.
+        private void EsquinasDelPanel(Size cs, RectangleF img)
+        {
+            Rectangle p = guna2Panel1.Bounds;
+            if (p.Width < 4 || p.Height < 4) return;
+            Bitmap esquinas = new Bitmap(p.Width, p.Height);
+            using (Graphics g = Graphics.FromImage(esquinas))
+            {
+                g.InterpolationMode = InterpolationMode.HighQualityBilinear;
+                g.PixelOffsetMode = PixelOffsetMode.Half;
+                g.DrawImage(fondo, new RectangleF(img.X - p.X, img.Y - p.Y, img.Width, img.Height));
+            }
+            Image anterior = guna2Panel1.BackgroundImage;
+            guna2Panel1.BackgroundImageLayout = ImageLayout.None;
+            guna2Panel1.BackgroundImage = esquinas;
+            if (anterior != null) anterior.Dispose();
+        }
+
         // Ícono y campo en la misma fila, centrados en vertical.
         private static void Fila(PictureBox icono, Control campo, int fy, float k, int bordeX, int campoX, int campoAncho)
         {
@@ -242,14 +267,16 @@ namespace PROYECTO_RESTAURANTE
             // La hora tiene un ancho fijo (el de sus dígitos más anchos) para que
             // nada se mueva cada segundo; la fecha se reacomoda al cambiar de día.
             int anchoFecha = labFecha.Width;
+            // Ancho medido con la propia etiqueta (la medición de TextRenderer
+            // no coincide con la letra que dibuja la etiqueta HTML).
             int anchoHora = 0;
-            string muestra = DateTime.Now.ToString("HH:mm:ss");
-            for (char d = '0'; d <= '9'; d++)
+            string actual = LabHora.Text;
+            foreach (string muestra in new[] { "00:00:00", "88:88:88", "44:44:44", "22:22:22" })
             {
-                char digito = d;
-                string texto = new string(Array.ConvertAll(muestra.ToCharArray(), c => char.IsDigit(c) ? digito : c));
-                anchoHora = Math.Max(anchoHora, Ancho(LabHora, texto));
+                LabHora.Text = muestra;
+                anchoHora = Math.Max(anchoHora, LabHora.PreferredSize.Width);
             }
+            LabHora.Text = actual;
             int anchoLugar = guna2HtmlLabel5.Width;
             int total = lado + junto + anchoFecha + separado + guna2HtmlLabel7.Width + separado +
                         lado + junto + anchoHora + separado + guna2HtmlLabel4.Width + separado +
@@ -263,11 +290,6 @@ namespace PROYECTO_RESTAURANTE
             x = EnBarra(guna2HtmlLabel4, x, guna2HtmlLabel4.Width, 0) + separado;
             x = EnBarra(guna2PictureBox9, x, lado, lado) + junto;
             EnBarra(guna2HtmlLabel5, x, anchoLugar, 0);
-        }
-
-        private static int Ancho(Control etiqueta, string muestra)
-        {
-            return Math.Max(etiqueta.Width, TextRenderer.MeasureText(muestra, etiqueta.Font).Width + 4);
         }
 
         // Coloca en la barra, centrado en vertical; devuelve el borde derecho de su lugar.

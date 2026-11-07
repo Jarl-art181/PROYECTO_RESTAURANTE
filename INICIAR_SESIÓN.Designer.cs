@@ -102,7 +102,7 @@
             this.guna2Panel1.Controls.Add(this.guna2PictureBox2);
             this.guna2Panel1.FillColor = System.Drawing.Color.White;
             this.guna2Panel1.ForeColor = System.Drawing.Color.Gold;
-            this.guna2Panel1.Location = new System.Drawing.Point(739, 135);
+            this.guna2Panel1.Location = new System.Drawing.Point(725, 137);
             this.guna2Panel1.Name = "guna2Panel1";
             this.guna2Panel1.Size = new System.Drawing.Size(447, 719);
             this.guna2Panel1.TabIndex = 2;
