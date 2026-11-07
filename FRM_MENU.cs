@@ -546,7 +546,8 @@ namespace PROYECTO_RESTAURANTE
             }
         }
 
-        // "Eliminar" = desactivar (o reactivar si ya está inactivo).
+        // "Eliminar": elige entre desactivar/reactivar (conserva todo) y
+        // eliminar definitivamente (solo sin ventas, combos, recetas ni promociones).
         private void CambiarEstado()
         {
             ProductoMenu p = seleccionado;
@@ -557,19 +558,24 @@ namespace PROYECTO_RESTAURANTE
             if (!operador.HasValue)
                 return;
 
-            bool activar = !p.Activo;
-            string pregunta = activar
-                ? "¿Reactivar " + p.Nombre + "? Volverá a aparecer en Pedidos."
-                : "¿Desactivar " + p.Nombre + "?\n\nDejará de aparecer en Pedidos. No se borra: " +
-                  "sus ventas, recetas y promociones se conservan y puede reactivarse.";
-
-            if (MessageBox.Show(pregunta, "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button2) != DialogResult.Yes)
-                return;
-
             try
             {
-                MenuDatos.CambiarEstado(p.IdPlato, activar, operador.Value);
+                List<string> historial = EliminacionSegura.HistorialPlato(p.IdPlato);
+                DialogoEliminar.Resultado r = DialogoEliminar.Mostrar(this, "Gestión de menú", "Producto", p.Nombre, p.Activo,
+                    historial, "deja de mostrarse para nuevos pedidos.");
+                if (r == DialogoEliminar.Resultado.Cancelar)
+                    return;
+
+                if (r == DialogoEliminar.Resultado.Eliminar)
+                {
+                    EliminacionSegura.EliminarPlato(p.IdPlato, operador.Value);
+                    CargarCatalogo(null);
+                    MessageBox.Show("\"" + p.Nombre + "\" se eliminó definitivamente.", "Gestión de menú",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                MenuDatos.CambiarEstado(p.IdPlato, !p.Activo, operador.Value);
                 CargarCatalogo(p.IdPlato);
             }
             catch (ReglaNegocioException ex)

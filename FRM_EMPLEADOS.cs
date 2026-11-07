@@ -208,6 +208,7 @@ namespace PROYECTO_RESTAURANTE
             menuAcciones.Font = new Font("Segoe UI", 10F);
             menuAcciones.Items.Add("Editar datos y cargo...", null, (s, e) => EditarEmpleado(empleadoMenu));
             menuAcciones.Items.Add("Desactivar empleado", null, (s, e) => CambiarEstado(empleadoMenu));
+            menuAcciones.Items.Add("Desactivar o eliminar...", null, (s, e) => DesactivarOEliminar(empleadoMenu));
             menuAcciones.Items.Add(new ToolStripSeparator());
             menuAcciones.Items.Add("Cuenta de acceso...", null, (s, e) => AbrirCuenta(empleadoMenu));
         }
@@ -537,6 +538,50 @@ namespace PROYECTO_RESTAURANTE
             catch (Exception ex)
             {
                 MessageBox.Show("No se pudo cambiar el estado:\n" + ex.Message,
+                    "Gestión de empleados", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Desactivar conserva al empleado y su historial (y le impide entrar);
+        // eliminar definitivamente solo si no tiene pedidos, cobros, cierres,
+        // mermas ni compras. Nunca el último Administrador ni la propia cuenta.
+        private void DesactivarOEliminar(EmpleadoInfo empleado)
+        {
+            if (empleado == null)
+                return;
+            try
+            {
+                List<string> historial = EliminacionSegura.HistorialEmpleado(empleado.IdEmpleado);
+                DialogoEliminar.Resultado r = DialogoEliminar.Mostrar(this, "Gestión de empleados",
+                    "Empleado (" + empleado.Cargo + ")", empleado.NombreCompleto, empleado.Estado == "activo",
+                    historial, "ya no podrá iniciar sesión en el sistema.");
+                if (r == DialogoEliminar.Resultado.Cancelar)
+                    return;
+
+                int? admin = ObtenerAutorizacion();
+                if (!admin.HasValue)
+                    return;
+
+                if (r == DialogoEliminar.Resultado.Eliminar)
+                {
+                    EliminacionSegura.EliminarEmpleado(empleado.IdEmpleado, admin.Value);
+                    CargarEmpleados(null);
+                    MessageBox.Show(empleado.NombreCompleto + " se eliminó definitivamente.", "Gestión de empleados",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                EmpleadoDatos.CambiarEstado(empleado.IdEmpleado, empleado.Estado != "activo", admin.Value);
+                CargarEmpleados(empleado.IdEmpleado);
+            }
+            catch (ReglaNegocioException ex)
+            {
+                MessageBox.Show(ex.Message, "Gestión de empleados", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex)
+            {
+                Registro.Error("Empleados", ex);
+                MessageBox.Show("No se pudo completar la operación. No se registró ningún cambio.\n\n" + ex.Message,
                     "Gestión de empleados", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

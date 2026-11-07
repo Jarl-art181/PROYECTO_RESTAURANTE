@@ -615,7 +615,8 @@ namespace PROYECTO_RESTAURANTE
             }
         }
 
-        // "Eliminar" = desactivar (o reactivar). Nunca borra.
+        // "Eliminar": elige entre desactivar/reactivar (conserva todo) y eliminar
+        // definitivamente (solo sin compras, mermas ni recetas). Stock y triggers intactos.
         private void CambiarEstado()
         {
             InsumoInfo i = seleccionado;
@@ -623,19 +624,25 @@ namespace PROYECTO_RESTAURANTE
             int? op = Operador();
             if (!op.HasValue) return;
 
-            bool activar = !i.Activo;
-            string pregunta = activar
-                ? "¿Reactivar el insumo " + i.Nombre + "?"
-                : "¿Desactivar el insumo " + i.Nombre + "?\n\nNo se borra: sus compras, mermas y recetas se conservan. " +
-                  "No podrá recibir entradas ni salidas mientras esté inactivo." +
-                  (i.Platos.Count > 0 ? "\n\nLo usan: " + string.Join(", ", i.Platos) + "." : "");
-            if (MessageBox.Show(pregunta, "Confirmar", MessageBoxButtons.YesNo, MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button2) != DialogResult.Yes)
-                return;
-
             try
             {
-                InventarioDatos.CambiarEstado(i.IdInsumo, activar, op.Value);
+                List<string> historial = EliminacionSegura.HistorialInsumo(i.IdInsumo);
+                DialogoEliminar.Resultado r = DialogoEliminar.Mostrar(this, "Gestión de inventario", "Insumo", i.Nombre, i.Activo,
+                    historial, "no podrá recibir entradas ni salidas mientras esté inactivo" +
+                    (i.Platos.Count > 0 ? " (lo usan: " + string.Join(", ", i.Platos) + ")." : "."));
+                if (r == DialogoEliminar.Resultado.Cancelar)
+                    return;
+
+                if (r == DialogoEliminar.Resultado.Eliminar)
+                {
+                    EliminacionSegura.EliminarInsumo(i.IdInsumo, op.Value);
+                    Cargar(null);
+                    MessageBox.Show("El insumo \"" + i.Nombre + "\" se eliminó definitivamente.", "Gestión de inventario",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                InventarioDatos.CambiarEstado(i.IdInsumo, !i.Activo, op.Value);
                 Cargar(i.IdInsumo);
             }
             catch (ReglaNegocioException ex)
