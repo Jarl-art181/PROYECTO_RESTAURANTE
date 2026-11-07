@@ -162,20 +162,93 @@ namespace PROYECTO_RESTAURANTE
                 Centrada(l, new Rectangle(0, l.Top - 2, anchoRecibo, l.Height + 4));
             dgvBoletaDetalle.ScrollBars = ScrollBars.None;           // la tabla crece con sus filas
 
-            int derecha = anchoRecibo - 10;
+            OrganizarTotalesRecibo(anchoRecibo);
+            OrganizarPieRecibo(anchoRecibo);
+        }
+
+        // ------------------------------------------------------
+        // RECIBO: totales y pie, en el mismo orden que la impresión
+        // (Documento_PrintPage). Solo posiciones y textos fijos.
+        // ------------------------------------------------------
+        private Guna2HtmlLabel lblPrevSubtotalTitulo, lblPrevSubtotal, lblPrevDescuentoTitulo, lblPrevDescuento,
+                               lblPrevCaja, lblPrevNota;
+
+        private Guna2HtmlLabel EtiquetaRecibo(Control padre, Font letra, Point lugar)
+        {
+            Guna2HtmlLabel l = new Guna2HtmlLabel { AutoSize = true, BackColor = Color.Transparent, Font = letra, ForeColor = Color.Black, Location = lugar };
+            padre.Controls.Add(l);
+            return l;
+        }
+
+        // Subtotal | Descuento | Base imponible | IGV | ---- | TOTAL
+        private void OrganizarTotalesRecibo(int anchoRecibo)
+        {
+            int derecha = anchoRecibo - 10, x = 13;
+            Font titulo = guna2HtmlLabel51.Font, valor = lblBoletaSubtotal.Font;
+
+            guna2HtmlLabel38.Top = 3;
+            lblPrevSubtotalTitulo = EtiquetaRecibo(guna2Panel10, titulo, new Point(x, 27));
+            lblPrevSubtotalTitulo.Text = "Subtotal (con IGV):";
+            lblPrevSubtotal = EtiquetaRecibo(guna2Panel10, valor, new Point(0, 27));
+            lblPrevSubtotal.AutoSize = false;
+            lblPrevSubtotal.Height = lblBoletaSubtotal.Height;
+            Derecha(lblPrevSubtotal, derecha, 150);
+
+            lblPrevDescuentoTitulo = EtiquetaRecibo(guna2Panel10, titulo, new Point(x, 49));
+            lblPrevDescuentoTitulo.Text = "Descuento:";
+            lblPrevDescuento = EtiquetaRecibo(guna2Panel10, valor, new Point(0, 49));
+            lblPrevDescuento.AutoSize = false;
+            lblPrevDescuento.Height = lblBoletaSubtotal.Height;
+            Derecha(lblPrevDescuento, derecha, 150);
+
+            guna2HtmlLabel51.Location = new Point(x, 71);
+            lblBoletaSubtotal.Top = 71;
             Derecha(lblBoletaSubtotal, derecha, 150);
+            guna2HtmlLabel36.Location = new Point(x, 93);
+            lblBoletaIGV.Top = 93;
             Derecha(lblBoletaIGV, derecha, 150);
+
+            guna2HtmlLabel40.Top = 115;
             guna2HtmlLabel52.Text = "TOTAL";
             guna2HtmlLabel52.Font = Propia(new Font(guna2HtmlLabel52.Font, FontStyle.Bold));
-            lblBoletaTotal.Top = guna2HtmlLabel52.Top;
+            guna2HtmlLabel52.Location = new Point(x - 2, 134);
+            lblBoletaTotal.Top = 134;
             lblBoletaTotal.Height = guna2HtmlLabel52.Height;
             Derecha(lblBoletaTotal, derecha, 180);
             lblBoletaTotal.Font = guna2HtmlLabel52.Font;
+            guna2HtmlLabel54.Top = 165;
+            guna2Panel10.Height = 190;
+        }
 
-            foreach (Guna2HtmlLabel l in new[] { guna2HtmlLabel34, guna2HtmlLabel46, lblBoletaCodigoFinal, guna2HtmlLabel56 })
-                Centrada(l, new Rectangle(0, l.Top - 2, anchoRecibo, l.Height + 4));
-            picQRBoleta.Left = (anchoRecibo - picQRBoleta.Width) / 2;
-            picCodigoBarrasBoleta.Left = (anchoRecibo - picCodigoBarrasBoleta.Width) / 2;
+        // Forma de pago | Caja | QR | código de barras | PEDIDO-000000 |
+        // ¡Gracias por su compra! | ¡Gracias por su preferencia! |
+        // ¡Sabor que te encanta! | nota discreta de recibo interno.
+        private void OrganizarPieRecibo(int anchoRecibo)
+        {
+            guna2HtmlLabel50.Text = "Forma de pago:";
+            guna2HtmlLabel50.Location = new Point(13, 8);
+            lblBoletaFormaPago.Location = new Point(guna2HtmlLabel50.Right + 6, 7);
+            lblPrevCaja = EtiquetaRecibo(guna2Panel11, Propia(new Font("Microsoft Sans Serif", 9.75F)), new Point(13, 32));
+
+            int qr = 160;
+            picQRBoleta.SizeMode = PictureBoxSizeMode.Zoom;
+            picQRBoleta.Bounds = new Rectangle((anchoRecibo - qr) / 2, 62, qr, qr);
+            picCodigoBarrasBoleta.SizeMode = PictureBoxSizeMode.Zoom;       // 5:1, sin deformar
+            picCodigoBarrasBoleta.Bounds = new Rectangle((anchoRecibo - 300) / 2, 232, 300, 60);
+
+            lblBoletaCodigoFinal.Font = Propia(new Font(lblBoletaCodigoFinal.Font, FontStyle.Bold));
+            guna2HtmlLabel56.Text = "¡Gracias por su compra!";
+            guna2HtmlLabel56.Font = Propia(new Font("Microsoft Sans Serif", 11.25F, FontStyle.Bold));
+            lblPrevNota = EtiquetaRecibo(guna2Panel11, Propia(new Font("Microsoft Sans Serif", 7.5F)), new Point(0, 0));
+            lblPrevNota.ForeColor = Color.DimGray;
+
+            int y = 298;
+            foreach (Guna2HtmlLabel l in new[] { lblBoletaCodigoFinal, guna2HtmlLabel56, guna2HtmlLabel34, guna2HtmlLabel46, lblPrevNota })
+            {
+                Centrada(l, new Rectangle(0, y, anchoRecibo, l.Height));
+                y += l.Height + (l == lblBoletaCodigoFinal ? 12 : 4);
+            }
+            guna2Panel11.Height = y + 10;
         }
 
         // Botones con su texto e ícono propios (las etiquetas superpuestas

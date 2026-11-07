@@ -34,7 +34,15 @@ namespace PROYECTO_RESTAURANTE
         // SUNAT exige DNI/CE y nombre en boletas electrónicas > S/ 700
         // (R.S. 303-2018). Aquí solo se avisa: el recibo es interno.
         private const decimal MontoIdentificacionSunat = 700m;
-        private const string NotaInterna = "Documento interno - no es comprobante electrónico SUNAT";
+        private const string NotaInterna = "Recibo interno · No es comprobante electrónico SUNAT";
+
+        // Número del pedido (formato PEDIDO-000019): va bajo el código de barras.
+        // El número interno del recibo (R001-...) se muestra aparte, bajo el título.
+        private string CodigoPedido { get { return "PEDIDO-" + idPedido.ToString("D6"); } }
+
+        // Importes con el mismo formato en todo el recibo (S/ 1,234.50).
+        private static readonly System.Globalization.CultureInfo Peru = System.Globalization.CultureInfo.GetCultureInfo("es-PE");
+        private static string Monto(decimal v) { return v.ToString("N2", Peru); }
 
         private string numeroRecibo;               // R001-00000001
         private int? idClienteSeleccionado;        // cliente registrado (se vincula al pedido)
@@ -1800,9 +1808,12 @@ namespace PROYECTO_RESTAURANTE
 
             // Títulos correctos.
             guna2HtmlLabel51.Text = "Base imponible:";
-            guna2HtmlLabel36.Text = "IGV incluido (18%):";
+            guna2HtmlLabel36.Text = "IGV (18%):";              // igual que la impresión
 
-            // Mostrar los importes.
+            // Mostrar los importes (mismo orden que la impresión).
+            lblPrevSubtotal.Text = FormatoSoles(subtotal);
+            lblPrevDescuentoTitulo.Text = TextoDescuento();
+            lblPrevDescuento.Text = FormatoSoles(descuentoTotal);
             lblBoletaSubtotal.Text = FormatoSoles(baseSinIGV);
             lblBoletaIGV.Text = FormatoSoles(igvIncluido);
             lblBoletaTotal.Text = FormatoSoles(total);
@@ -1818,8 +1829,9 @@ namespace PROYECTO_RESTAURANTE
                 ModoReimpresion ? "RECIBO DE VENTA (REIMPRESIÓN)" : "RECIBO DE VENTA";
             consejosBoleta.SetToolTip(guna2HtmlLabel20, NotaInterna);
 
-            guna2HtmlLabel56.Text = "¡Gracias por su compra!<br><span style='font-size:7pt;font-weight:normal'>" +
-                NotaInterna + "</span>";
+            guna2HtmlLabel56.Text = "¡Gracias por su compra!";
+            lblPrevNota.Text = NotaInterna;
+            lblPrevCaja.Text = "Caja: " + (cajeroRecibo ?? SesionActual.NombreCompleto ?? "");
 
             // ======================================
             // 5. CONFIGURAR TABLA
@@ -1902,14 +1914,15 @@ namespace PROYECTO_RESTAURANTE
             // ======================================
 
             dgvBoletaDetalle.Rows.Clear();
+            dgvBoletaDetalle.Columns[3].HeaderText = "Importe";       // igual que la impresión
 
             foreach (LineaBoleta linea in productos)
             {
                 dgvBoletaDetalle.Rows.Add(
                     linea.Cantidad,
                     linea.Descripcion,
-                    linea.PrecioUnitario.ToString("N2"),
-                    linea.Importe.ToString("N2")
+                    Monto(linea.PrecioUnitario),
+                    Monto(linea.Importe)
                 );
             }
 
@@ -1940,9 +1953,8 @@ namespace PROYECTO_RESTAURANTE
             // 10. CÓDIGO FINAL DE LA BOLETA
             // ======================================
 
-            // El mismo número usado en la cabecera.
-            lblBoletaCodigoFinal.Text =
-                numeroBoletaDemo;
+            // Número real del pedido bajo el código de barras.
+            lblBoletaCodigoFinal.Text = CodigoPedido;
         }
 
 
@@ -2262,9 +2274,13 @@ namespace PROYECTO_RESTAURANTE
 
             // Papel térmico de 80 mm.
             // Las medidas están en centésimas de pulgada.
-            int alto = Math.Max(
-                980,
-                790 + cantidadProductos * 55);
+            // Alto según el contenido (sin desperdiciar papel): base del recibo,
+            // cada producto con holgura para nombres en dos líneas, y los datos
+            // opcionales (cliente, mesa, reimpresión).
+            int alto = 760 + cantidadProductos * 36
+                     + (IncluirCliente() ? 60 : 0)
+                     + (ModoReimpresion ? 20 : 0)
+                     + 20;
 
             documento.DefaultPageSettings.PaperSize =
                 new PaperSize("Ticket 80 mm", 315, alto);
@@ -2284,555 +2300,189 @@ namespace PROYECTO_RESTAURANTE
 
 
 
+        // ==================================================
+        // IMPRESIÓN (papel térmico de 80 mm)
+        // --------------------------------------------------
+        // Mismo contenido y orden que la vista previa. Todo se
+        // centra respecto al ancho del papel; importes a la
+        // derecha con el mismo formato (S/ 0.00); los textos
+        // largos pasan a otra línea; QR y barras sin deformar.
+        // ==================================================
         private void Documento_PrintPage(
             object sender, PrintPageEventArgs e)
         {
             Graphics g = e.Graphics;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
-            // ======================================
-            // 1. ANCHO SEGURO PARA IMPRESORA POS-80
-            // ======================================
+            // Columna de impresión centrada en el papel (72 mm útiles en 80 mm).
+            float papel = e.PageBounds.Width;
+            float ancho = Math.Min(272f, papel - 32f);
+            float x = (papel - ancho) / 2f - e.PageSettings.HardMarginX;
+            float y = Math.Max(10f, e.MarginBounds.Top - e.PageSettings.HardMarginY);
 
-            float x = e.MarginBounds.Left + 4;
-            float y = e.MarginBounds.Top;
-
-            // No utilizar todo el ancho del papel.
-            float ancho = Math.Min(
-                240f, e.MarginBounds.Width - 26f);
-
-            using (Font titulo = new Font(
-                "Arial", 11, FontStyle.Bold))
-            using (Font negrita = new Font(
-                "Arial", 9, FontStyle.Bold))
-            using (Font texto = new Font(
-                "Arial", 8, FontStyle.Regular))
-            using (Font pequeño = new Font(
-                "Arial", 7.5f, FontStyle.Regular))
-            using (Font totalFont = new Font(
-                "Arial", 11, FontStyle.Bold))
-            using (StringFormat centro = new StringFormat())
-            using (StringFormat derecha = new StringFormat())
+            using (Font empresa = new Font("Arial", 11, FontStyle.Bold))
+            using (Font titulo = new Font("Arial", 10.5f, FontStyle.Bold))
+            using (Font negrita = new Font("Arial", 8.5f, FontStyle.Bold))
+            using (Font texto = new Font("Arial", 8.5f, FontStyle.Regular))
+            using (Font pequeño = new Font("Arial", 7.5f, FontStyle.Regular))
+            using (Font nota = new Font("Arial", 6.5f, FontStyle.Regular))
+            using (Font totalFont = new Font("Arial", 12, FontStyle.Bold))
+            using (StringFormat centro = new StringFormat { Alignment = StringAlignment.Center })
+            using (StringFormat derecha = new StringFormat { Alignment = StringAlignment.Far })
             {
-                centro.Alignment = StringAlignment.Center;
-                derecha.Alignment = StringAlignment.Far;
+                // Texto centrado (varias líneas si hace falta).
+                Action<string, Font, float> centrado = (t, f, despues) =>
+                {
+                    float h = g.MeasureString(t, f, (int)ancho, centro).Height;
+                    g.DrawString(t, f, Brushes.Black, new RectangleF(x, y, ancho, h + 2), centro);
+                    y += h + despues;
+                };
+                // Texto a la izquierda (varias líneas si hace falta).
+                Action<string, Font, float> izquierda = (t, f, despues) =>
+                {
+                    float h = g.MeasureString(t, f, (int)ancho).Height;
+                    g.DrawString(t, f, Brushes.Black, new RectangleF(x, y, ancho, h + 2));
+                    y += h + despues;
+                };
+                // Concepto a la izquierda e importe a la derecha.
+                Action<string, string, Font> fila = (concepto, importe, f) =>
+                {
+                    float anchoImporte = Math.Max(g.MeasureString(importe, f).Width + 4, 80f);
+                    float h = Math.Max(g.MeasureString(concepto, f, (int)(ancho - anchoImporte - 6)).Height, f.GetHeight(g));
+                    g.DrawString(concepto, f, Brushes.Black, new RectangleF(x, y, ancho - anchoImporte - 6, h + 2));
+                    g.DrawString(importe, f, Brushes.Black, new RectangleF(x + ancho - anchoImporte, y, anchoImporte, h + 2), derecha);
+                    y += h + 4;
+                };
+                Action<float> linea = espacio =>
+                {
+                    y += espacio;
+                    using (Pen p = new Pen(Color.Black, 1f) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dash })
+                        g.DrawLine(p, x, y, x + ancho, y);
+                    y += espacio;
+                };
 
-                // ======================================
-                // 2. LOGO DEL RESTAURANTE
-                // ======================================
-
+                // ---------- 1. Logotipo y empresa ----------
                 if (guna2PictureBox7.Image != null)
                 {
                     Image logo = guna2PictureBox7.Image;
-
-                    float anchoLogo = 150f;
-
-                    float altoLogo =
-                        anchoLogo * logo.Height / logo.Width;
-
-                    float posicionLogo =
-                        x + (ancho - anchoLogo) / 2;
-
-                    g.InterpolationMode =
-                        System.Drawing.Drawing2D.InterpolationMode
-                        .HighQualityBicubic;
-
-                    g.DrawImage(
-                        logo,
-                        posicionLogo,
-                        y,
-                        anchoLogo,
-                        altoLogo);
-
+                    float anchoLogo = 150f, altoLogo = anchoLogo * logo.Height / logo.Width;
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    g.DrawImage(logo, x + (ancho - anchoLogo) / 2, y, anchoLogo, altoLogo);
                     y += altoLogo + 6;
                 }
+                centrado("AL ESTILO PIURANO S.A.C.", empresa, 2);
+                centrado("RUC: 20601234567", texto, 1);
+                centrado("Av. Principal 123, Trujillo - Perú", pequeño, 1);
+                centrado("Tel.: 987 654 321", pequeño, 2);
+                linea(6);
 
-                // ======================================
-                // 3. INFORMACIÓN DE LA EMPRESA
-                // ======================================
-
-                g.DrawString(
-                    "AL ESTILO PIURANO S.A.C.",
-                    titulo,
-                    Brushes.Black,
-                    new RectangleF(x, y, ancho, 25),
-                    centro);
-
-                y += 23;
-
-                g.DrawString(
-                    "RUC : 20601234567",
-                    texto,
-                    Brushes.Black,
-                    new RectangleF(x, y, ancho, 18),
-                    centro);
-
-                y += 17;
-
-                g.DrawString(
-                    "Dirección : Av. Principal 123",
-                    pequeño,
-                    Brushes.Black,
-                    new RectangleF(x, y, ancho, 18),
-                    centro);
-
-                y += 17;
-
-                g.DrawString(
-                    "Tel. : 987 654 321",
-                    pequeño,
-                    Brushes.Black,
-                    new RectangleF(x, y, ancho, 18),
-                    centro);
-
-                y += 23;
-
-                g.DrawLine(
-                    Pens.Black, x, y, x + ancho, y);
-
-                y += 10;
-
-                // ======================================
-                // 4. BOLETA DEMOSTRATIVA
-                // ======================================
-
-                g.DrawString(
-                   "RECIBO DE VENTA",
-                    negrita,
-                    Brushes.Black,
-                    new RectangleF(x, y, ancho, 22),
-                    centro);
-
-                y += 22;
-
-
-
-                g.DrawString(
-                    numeroBoletaDemo,
-                    negrita,
-                    Brushes.Black,
-                    new RectangleF(x, y, ancho, 22),
-                    centro);
-                y += 22;
-
+                // ---------- 2. Título y número interno ----------
+                centrado("RECIBO DE VENTA", titulo, 1);
+                centrado(numeroBoletaDemo, negrita, 1);
                 if (ModoReimpresion)
+                    centrado("REIMPRESIÓN", negrita, 1);
+                linea(6);
+
+                // ---------- 3. Datos del pedido y del cliente ----------
+                izquierda("Fecha: " + fechaPedido.ToString("dd/MM/yyyy") + "   " + fechaPedido.ToString("HH:mm"), texto, 2);
+                string canalTicket = (tipoPedido ?? "").Trim().ToLower();
+                if (canalTicket == "salon" || canalTicket == "salón")
                 {
-                    g.DrawString("REIMPRESIÓN", negrita, Brushes.Black,
-                        new RectangleF(x, y, ancho, 20), centro);
-                    y += 20;
+                    izquierda("Mesa: " + numeroMesa + "  ·  Salón", texto, 2);
+                    izquierda("Atendido por: " + atendidoPor, texto, 2);
                 }
-
-                // Aclaración: no es un comprobante electrónico SUNAT.
-                float altoNota = g.MeasureString(NotaInterna, pequeño, (int)ancho).Height;
-                g.DrawString(NotaInterna, pequeño, Brushes.Black,
-                    new RectangleF(x, y, ancho, altoNota + 2), centro);
-                y += altoNota + 10;
-
-
-                // ======================================
-                // 5. DATOS DEL PEDIDO
-                // ======================================
-
-                // Número de pedido
-                g.DrawString(
-                    "Pedido: " + idPedido,
-                    texto, Brushes.Black, x, y);
-
-                y += 18;
-
-                // Fecha y hora
-                g.DrawString(
-                    "Fecha: " +
-                    fechaPedido.ToString("dd/MM/yyyy HH:mm"),
-                    texto, Brushes.Black, x, y);
-
-                y += 18;
-
-                // Modalidad
-                g.DrawString(
-                    "Tipo: " + FormatearCanal(tipoPedido),
-                    texto, Brushes.Black, x, y);
-
-                y += 18;
-
-                // Identificar el tipo de pedido.
-                string canalTicket = (tipoPedido ?? "")
-                    .Trim().ToLower();
-
-                // SOLO PARA SALÓN
-                if (canalTicket == "salon" ||
-                    canalTicket == "salón")
+                else
                 {
-                    g.DrawString(
-                        "Mesa: " + numeroMesa,
-                        texto, Brushes.Black, x, y);
-
-                    y += 18;
-
-                    string nombreAtencionTicket =
-                        "Atendido por: " + atendidoPor;
-
-                    float altoAtencionTicket = g.MeasureString(
-                        nombreAtencionTicket,
-                        pequeño,
-                        (int)ancho).Height;
-
-                    g.DrawString(
-                        nombreAtencionTicket,
-                        pequeño,
-                        Brushes.Black,
-                        new RectangleF(
-                            x, y, ancho, altoAtencionTicket + 3));
-
-                    y += altoAtencionTicket + 8;
+                    izquierda("Tipo de pedido: " + FormatearCanal(tipoPedido), texto, 2);
+                    izquierda(canalTicket == "delivery" ? "Entrega: A domicilio" : "Retiro: En el local", texto, 2);
                 }
-                // SOLO PARA DELIVERY
-                else if (canalTicket == "delivery")
-                {
-                    g.DrawString(
-                        "Entrega: A domicilio",
-                        texto, Brushes.Black, x, y);
-
-                    y += 20;
-                }
-                // SOLO PARA RECOJO
-                else if (canalTicket == "recojo")
-                {
-                    g.DrawString(
-                        "Retiro: En el local",
-                        texto, Brushes.Black, x, y);
-
-                    y += 20;
-                }
-
-
-                // ======================================
-                // 6. DATOS DEL CLIENTE
-                // ======================================
-
-                // Solo si el cliente pidió incluir sus datos.
                 if (IncluirCliente())
                 {
-                    string cliente =
-                        "Cliente: " + txtNombreCliente.Text.Trim();
-
-                    float altoCliente = g.MeasureString(
-                        cliente, pequeño, (int)ancho).Height;
-
-                    g.DrawString(
-                        cliente,
-                        pequeño,
-                        Brushes.Black,
-                        new RectangleF(
-                            x, y, ancho, altoCliente + 3));
-
-                    y += altoCliente + 4;
+                    izquierda("Cliente: " + txtNombreCliente.Text.Trim(), texto, 2);
+                    if (!string.IsNullOrWhiteSpace(txtDNICliente.Text))
+                        izquierda(EtiquetaDocumento(txtDNICliente.Text.Trim()) + ": " + txtDNICliente.Text.Trim(), texto, 2);
                 }
+                linea(5);
 
-                if (IncluirCliente() &&
-                    !string.IsNullOrWhiteSpace(txtDNICliente.Text))
+                // ---------- 4. Detalle: Cant. | Descripción | P. Unit. | Importe ----------
+                float colCant = g.MeasureString("Cant.", negrita).Width + 6f, colPrecio = 52f, colImporte = 58f;
+                float colDesc = ancho - colCant - colPrecio - colImporte - 6f;
+                g.DrawString("Cant.", negrita, Brushes.Black, new RectangleF(x, y, colCant, 16), centro);
+                g.DrawString("Descripción", negrita, Brushes.Black, x + colCant, y);
+                g.DrawString("P. Unit.", negrita, Brushes.Black, new RectangleF(x + colCant + colDesc, y, colPrecio, 16), derecha);
+                g.DrawString("Importe", negrita, Brushes.Black, new RectangleF(x + ancho - colImporte, y, colImporte, 16), derecha);
+                y += negrita.GetHeight(g) + 5;
+
+                foreach (LineaBoleta l in productos)
                 {
-                    g.DrawString(
-                        EtiquetaDocumento(txtDNICliente.Text.Trim()) + ": " + txtDNICliente.Text.Trim(),
-                        pequeño, Brushes.Black, x, y);
-                    y += 18;
+                    string descripcion = l.Descripcion ?? "";
+                    float h = Math.Max(g.MeasureString(descripcion, texto, (int)colDesc).Height, texto.GetHeight(g));
+                    g.DrawString(l.Cantidad.ToString(), texto, Brushes.Black, new RectangleF(x, y, colCant, h), centro);
+                    g.DrawString(descripcion, texto, Brushes.Black, new RectangleF(x + colCant, y, colDesc, h + 2));
+                    g.DrawString(Monto(l.PrecioUnitario), texto, Brushes.Black, new RectangleF(x + colCant + colDesc, y, colPrecio, h), derecha);
+                    g.DrawString(Monto(l.Importe), texto, Brushes.Black, new RectangleF(x + ancho - colImporte, y, colImporte, h), derecha);
+                    y += h + 4;
                 }
+                linea(5);
 
-                // ======================================
-                // 7. ENCABEZADO DE PRODUCTOS
-                // ======================================
+                // ---------- 5. Importes (mismos cálculos de siempre) ----------
+                decimal baseSinIGV = subtotal - descuentoTotal - igvIncluido;
+                fila("Subtotal (con IGV):", FormatoSoles(subtotal), texto);
+                fila(TextoDescuento(), FormatoSoles(descuentoTotal), texto);
+                fila("Base imponible:", FormatoSoles(baseSinIGV), texto);
+                fila("IGV (18%):", FormatoSoles(igvIncluido), texto);
+                linea(5);
+                fila("TOTAL", FormatoSoles(total), totalFont);
+                linea(5);
 
-                g.DrawLine(
-                    Pens.Black, x, y, x + ancho, y);
+                // ---------- 6. Pago ----------
+                izquierda("Forma de pago: " + lblBoletaFormaPago.Text, texto, 2);
+                izquierda("Caja: " + (cajeroRecibo ?? SesionActual.NombreCompleto ?? ""), pequeño, 8);
 
-                y += 9;
-
-                g.DrawString(
-                    "Cant.",
-                    pequeño, Brushes.Black, x, y);
-
-                g.DrawString(
-                    "Producto",
-                    negrita, Brushes.Black, x + 27, y);
-
-                g.DrawString(
-                    "Importe",
-                    pequeño,
-                    Brushes.Black,
-                    new RectangleF(
-                        x + ancho - 66,
-                        y,
-                        58,
-                        20),
-                    derecha);
-
-                y += 22;
-
-                // ======================================
-                // 8. DETALLE DE PRODUCTOS
-                // ======================================
-
-                foreach (LineaBoleta linea in productos)
-                {
-                    string cantidad =
-                        linea.Cantidad.ToString();
-
-                    string descripcion =
-                        linea.Descripcion ?? "";
-
-                    string importe =
-                        linea.Importe.ToString("N2");
-
-                    // Reservar espacio para el importe.
-                    float anchoDescripcion = ancho - 95f;
-
-                    // Calcular la altura del nombre.
-                    float altoDescripcion = g.MeasureString(
-                        descripcion,
-                        pequeño,
-                        (int)anchoDescripcion).Height;
-
-                    float altoFila = Math.Max(
-                        20f, altoDescripcion + 4f);
-
-                    // Cantidad.
-                    g.DrawString(
-                        cantidad,
-                        pequeño,
-                        Brushes.Black,
-                        x,
-                        y);
-
-                    // Descripción en varias líneas.
-                    g.DrawString(
-                        descripcion,
-                        pequeño,
-                        Brushes.Black,
-                        new RectangleF(
-                            x + 27,
-                            y,
-                            anchoDescripcion,
-                            altoFila));
-
-                    // Importe dentro del papel.
-                    g.DrawString(
-                        importe,
-                        pequeño,
-                        Brushes.Black,
-                        new RectangleF(
-                            x + ancho - 66,
-                            y,
-                            58,
-                            altoFila),
-                        derecha);
-
-                    y += altoFila + 5;
-                }
-
-
-                // ======================================
-                // 9. TOTALES ALINEADOS
-                // ======================================
-
-                y += 5;
-
-                g.DrawLine(
-                    Pens.Black, x, y, x + ancho, y);
-
-                y += 12;
-
-                // 1. Subtotal original de productos.
-                g.DrawString(
-                    "Subtotal (con IGV):",
-                    texto, Brushes.Black, x, y);
-
-                g.DrawString(
-                    FormatoSoles(subtotal),
-                    texto,
-                    Brushes.Black,
-                    new RectangleF(
-                        x + ancho - 105, y, 97, 20),
-                    derecha);
-
-                y += 21;
-
-                // 2. Descuentos aplicados.
-                g.DrawString(
-                    TextoDescuento(),
-                    texto, Brushes.Black, x, y);
-
-                g.DrawString(
-                    FormatoSoles(descuentoTotal),
-                    texto,
-                    Brushes.Black,
-                    new RectangleF(
-                        x + ancho - 105, y, 97, 20),
-                    derecha);
-
-                y += 21;
-
-                // 3. Separar el IGV del importe neto.
-                decimal baseSinIGV =
-                    subtotal - descuentoTotal - igvIncluido;
-
-                g.DrawString(
-                    "Base sin IGV:",
-                    texto, Brushes.Black, x, y);
-
-                g.DrawString(
-                    FormatoSoles(baseSinIGV),
-                    texto,
-                    Brushes.Black,
-                    new RectangleF(
-                        x + ancho - 105, y, 97, 20),
-                    derecha);
-
-                y += 21;
-
-                // 4. Mostrar el IGV incluido.
-                g.DrawString(
-                    "IGV (18%):",
-                    texto, Brushes.Black, x, y);
-
-                g.DrawString(
-                    FormatoSoles(igvIncluido),
-                    texto,
-                    Brushes.Black,
-                    new RectangleF(
-                        x + ancho - 105, y, 97, 20),
-                    derecha);
-
-                y += 25;
-
-                g.DrawLine(
-                    Pens.Black, x, y, x + ancho, y);
-
-                y += 12;
-
-                // ======================================
-                // 10. TOTAL A PAGAR
-                // ======================================
-
-                g.DrawString(
-                    "TOTAL:",
-                    totalFont, Brushes.Black, x, y);
-
-                g.DrawString(
-                    FormatoSoles(total),
-                    totalFont,
-                    Brushes.Black,
-                    new RectangleF(
-                        x + ancho - 108,
-                        y,
-                        100,
-                        28),
-                    derecha);
-
-                y += 35;
-
-                // ======================================
-                // 11. FORMA DE PAGO
-                // ======================================
-
-                g.DrawString(
-                    "Pago: " + lblBoletaFormaPago.Text,
-                    texto, Brushes.Black, x, y);
-                y += 18;
-
-                // Quién cobró (distinto del cliente comprador).
-                string cajero = "Caja: " + (cajeroRecibo ?? SesionActual.NombreCompleto ?? "");
-                float altoCajero = g.MeasureString(cajero, pequeño, (int)ancho).Height;
-                g.DrawString(cajero, pequeño, Brushes.Black,
-                    new RectangleF(x, y, ancho, altoCajero + 2));
-                y += altoCajero + 8;
-
-                // ======================================
-                // 12. CÓDIGO QR
-                // ======================================
-
+                // ---------- 7. QR, código de barras y número del pedido ----------
                 if (picQRBoleta.Image != null)
                 {
-                    float tamañoQR = 115f;
-
-                    float posicionQR =
-                        x + (ancho - tamañoQR) / 2;
-
-                    g.InterpolationMode =
-                        System.Drawing.Drawing2D.InterpolationMode
-                        .NearestNeighbor;
-
-                    g.DrawImage(
-                        picQRBoleta.Image,
-                        posicionQR,
-                        y,
-                        tamañoQR,
-                        tamañoQR);
-
-                    y += tamañoQR + 10;
+                    float qr = 120f;
+                    Codigo(g, picQRBoleta.Image, new RectangleF(x + (ancho - qr) / 2, y, qr, qr));
+                    y += qr + 8;
                 }
-
-                // ======================================
-                // 13. CÓDIGO DE BARRAS
-                // ======================================
-
                 if (picCodigoBarrasBoleta.Image != null)
                 {
-                    float anchoBarras = 195f;
-                    float altoBarras = 55f;
-
-                    float posicionBarras =
-                        x + (ancho - anchoBarras) / 2;
-
-                    g.DrawImage(
-                        picCodigoBarrasBoleta.Image,
-                        posicionBarras,
-                        y,
-                        anchoBarras,
-                        altoBarras);
-
-                    y += altoBarras + 8;
+                    Image barras = picCodigoBarrasBoleta.Image;
+                    float anchoBarras = Math.Min(220f, ancho);
+                    float altoBarras = anchoBarras * barras.Height / barras.Width;     // sin deformar
+                    Codigo(g, barras, new RectangleF(x + (ancho - anchoBarras) / 2, y, anchoBarras, altoBarras));
+                    y += altoBarras + 3;
                 }
+                centrado(CodigoPedido, negrita, 10);
 
-                g.DrawString(
-                    numeroBoletaDemo,
-                    pequeño,
-                    Brushes.Black,
-                    new RectangleF(
-                        x, y, ancho, 20),
-                    centro);
-
-                y += 24;
-
-                // ======================================
-                // 14. MENSAJE FINAL
-                // ======================================
-
-                g.DrawLine(
-                    Pens.Black, x, y, x + ancho, y);
-
-                y += 12;
-
-                g.DrawString(
-                    "¡Gracias por su preferencia!",
-                    negrita,
-                    Brushes.Black,
-                    new RectangleF(
-                        x, y, ancho, 24),
-                    centro);
-
-                y += 23;
-
-                g.DrawString(
-                    "¡Sabor que te encanta!",
-                    pequeño,
-                    Brushes.Black,
-                    new RectangleF(
-                        x, y, ancho, 20),
-                    centro);
+                // ---------- 8. Agradecimientos y nota discreta ----------
+                centrado("¡Gracias por su compra!", titulo, 2);
+                centrado("¡Gracias por su preferencia!", texto, 1);
+                centrado("¡Sabor que te encanta!", texto, 8);
+                centrado(NotaInterna, nota, 0);
 
                 e.HasMorePages = false;
             }
         }
 
+
+        // QR y barras nítidos y sin el borde gris que deja el escalado.
+        private static void Codigo(Graphics g, Image imagen, RectangleF destino)
+        {
+            var antes = g.InterpolationMode;
+            var desfase = g.PixelOffsetMode;
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+            using (System.Drawing.Imaging.ImageAttributes atributos = new System.Drawing.Imaging.ImageAttributes())
+            {
+                atributos.SetWrapMode(System.Drawing.Drawing2D.WrapMode.TileFlipXY);
+                g.DrawImage(imagen, new[] { destino.Location, new PointF(destino.Right, destino.Top), new PointF(destino.Left, destino.Bottom) },
+                    new RectangleF(0, 0, imagen.Width, imagen.Height), GraphicsUnit.Pixel, atributos);
+            }
+            g.InterpolationMode = antes;
+            g.PixelOffsetMode = desfase;
+        }
 
         private void GenerarCodigos()
         {
@@ -2857,7 +2507,7 @@ namespace PROYECTO_RESTAURANTE
                 GenerarBoletaPrueba();
             }
 
-            string codigoPedido = numeroBoletaDemo;
+            string codigoPedido = CodigoPedido;
 
             // ======================================
             // 3. INFORMACIÓN DEL CÓDIGO QR
@@ -2865,8 +2515,8 @@ namespace PROYECTO_RESTAURANTE
 
             string datosQR =
                 "AL ESTILO PIURANO" +
-    "\nRECIBO: " + numeroBoletaDemo +
-    "\nPEDIDO: " + idPedido +
+    "\nRECIBO: " + (numeroRecibo ?? "pendiente de cobro") +
+    "\nPEDIDO: " + CodigoPedido +
     "\nFECHA: " +
     fechaPedido.ToString("dd/MM/yyyy HH:mm") +
     "\nTOTAL: S/ " +
@@ -2932,8 +2582,7 @@ namespace PROYECTO_RESTAURANTE
             // 6. MOSTRAR IDENTIFICADOR
             // ======================================
 
-            lblBoletaCodigoFinal.Text =
-                numeroBoletaDemo;
+            lblBoletaCodigoFinal.Text = CodigoPedido;
         }
 
 
