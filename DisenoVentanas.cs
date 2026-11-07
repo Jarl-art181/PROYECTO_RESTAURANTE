@@ -57,6 +57,7 @@ namespace PROYECTO_RESTAURANTE
             public Size Ultimo;
             public float Escala = 1f;
             public Size LienzoReal = Lienzo;
+            public Size? LienzoFijo;          // ventanas modales con su propio tamaño de diseño
         }
 
         private static readonly ConditionalWeakTable<Form, Estado> estados = new ConditionalWeakTable<Form, Estado>();
@@ -126,6 +127,16 @@ namespace PROYECTO_RESTAURANTE
             f.Resize += (s, a) => Aplicar(f, e);
         }
 
+        // Ventana (modal) diseñada con otro tamaño que el lienzo común:
+        // se escala respecto de su propio tamaño de diseño.
+        public static void Adaptar(Form f, Size lienzo)
+        {
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime || f == null)
+                return;
+            estados.GetValue(f, x => new Estado()).LienzoFijo = lienzo;
+            Adaptar(f);
+        }
+
         private static void Aplicar(Form f, Estado e)
         {
             if (!e.Mostrado || f.IsDisposed || !f.IsHandleCreated || f.WindowState == FormWindowState.Minimized)
@@ -140,7 +151,7 @@ namespace PROYECTO_RESTAURANTE
                 Capturar(f, e);
                 // Lo que se quita después (tarjetas recreadas) no queda retenido.
                 f.ControlRemoved += (s, a) => Olvidar(a.Control, e);
-                e.LienzoReal = MedirLienzo(f, e);
+                e.LienzoReal = e.LienzoFijo ?? MedirLienzo(f, e);
             }
             else
             {

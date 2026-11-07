@@ -105,6 +105,13 @@ namespace PROYECTO_RESTAURANTE
             {
                 return;
             }
+
+            // Orden de la ventana (coordenadas de diseño) y adaptación a la
+            // pantalla: antes de conectar Shown, así se escala antes de cargar.
+            OrganizarVentana();
+            AjustarAPantalla();
+            DisenoVentanas.Adaptar(this, new Size(AnchoDiseno, AltoDiseno));
+            Shown += (s, e) => RecentrarTodo();
             // =====================================
             // CONFIGURAR FORMAS DE PAGO
             // =====================================
@@ -189,7 +196,7 @@ namespace PROYECTO_RESTAURANTE
             panel.Controls.Add(chkIncluirCliente);
             chkIncluirCliente.BringToFront();
             consejosBoleta.SetToolTip(chkIncluirCliente,
-                "Incluir datos del cliente en la boleta (opcional). Sin marcar, el recibo sale sin nombre.");
+                "Incluir datos del cliente en el recibo (opcional). Sin marcar, el recibo sale sin nombre.");
 
             int derecha = txtDNICliente.Right;
             txtDNICliente.Width = 232;
@@ -684,7 +691,7 @@ namespace PROYECTO_RESTAURANTE
             {
                 MessageBox.Show(
                     "No se recibió ningún pedido.",
-                    "Generar Boleta",
+                    "Generar recibo de venta",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
 
@@ -698,7 +705,7 @@ namespace PROYECTO_RESTAURANTE
             {
                 MessageBox.Show(
                     "El número del pedido no es válido.",
-                    "Generar Boleta",
+                    "Generar recibo de venta",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
 
@@ -736,7 +743,7 @@ namespace PROYECTO_RESTAURANTE
                 MessageBox.Show(
                     "Pedido N.º " + idPedido +
                     " cargado correctamente.",
-                    "Generar Boleta",
+                    "Generar recibo de venta",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }
@@ -744,7 +751,7 @@ namespace PROYECTO_RESTAURANTE
             {
                 MessageBox.Show(
                     "Error al cargar el pedido:\n" + ex.Message,
-                    "Generar Boleta",
+                    "Generar recibo de venta",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
 
@@ -1318,6 +1325,7 @@ namespace PROYECTO_RESTAURANTE
         private void PrepararReimpresion()
         {
             Text = "Reimprimir recibo";
+            guna2HtmlLabel1.Text = "REIMPRIMIR RECIBO DE VENTA";
             BloquearDatosCliente();
             btnRegistrarCobro.Enabled = false;
             guna2HtmlLabel22.Enabled = false;
@@ -1731,7 +1739,7 @@ namespace PROYECTO_RESTAURANTE
             {
                 // Conservar la presentación original de Salón.
                 guna2HtmlLabel26.Text = "Mesa:";
-                lblBoletaMesa.Location = new Point(86, 108);
+                lblBoletaMesa.Location = new Point(DisenoVentanas.Medida(this, 86), DisenoVentanas.Medida(this, 108));
                 lblBoletaMesa.Text = numeroMesa;
 
                 guna2HtmlLabel25.Visible = true;
@@ -1748,7 +1756,7 @@ namespace PROYECTO_RESTAURANTE
                 // Delivery y Recojo no tienen mesa.
                 guna2HtmlLabel26.Text = "Tipo de pedido:";
 
-                lblBoletaMesa.Location = new Point(145, 108);
+                lblBoletaMesa.Location = new Point(DisenoVentanas.Medida(this, 145), DisenoVentanas.Medida(this, 108));
                 lblBoletaMesa.Text =
                     FormatearCanal(tipoPedido);
 
@@ -1838,19 +1846,19 @@ namespace PROYECTO_RESTAURANTE
                 DataGridViewAutoSizeColumnsMode.None;
 
             // Cantidad (50 px: el encabezado "Cant." ya no se corta).
-            dgvBoletaDetalle.Columns[0].Width = 50;
+            dgvBoletaDetalle.Columns[0].Width = DisenoVentanas.Medida(this, 50);
 
             // Descripción.
-            dgvBoletaDetalle.Columns[1].MinimumWidth = 100;
+            dgvBoletaDetalle.Columns[1].MinimumWidth = DisenoVentanas.Medida(this, 100);
 
             dgvBoletaDetalle.Columns[1].AutoSizeMode =
                 DataGridViewAutoSizeColumnMode.Fill;
 
             // Precio unitario.
-            dgvBoletaDetalle.Columns[2].Width = 70;
+            dgvBoletaDetalle.Columns[2].Width = DisenoVentanas.Medida(this, 70);
 
             // Importe.
-            dgvBoletaDetalle.Columns[3].Width = 75;
+            dgvBoletaDetalle.Columns[3].Width = DisenoVentanas.Medida(this, 75);
 
             // ======================================
             // 7. AJUSTAR TEXTO
@@ -2014,7 +2022,7 @@ namespace PROYECTO_RESTAURANTE
                 MessageBox.Show(
                     "El pedido N.º " + idPedido + " está '" + estadoPedido + "'.\n\n" +
                     "Solo se puede cobrar un pedido ENTREGADO. Márquelo como " +
-                    "entregado en Cocina y vuelva a abrir la boleta.",
+                    "entregado en Cocina y vuelva a abrir el recibo.",
                     "Validación de pago",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);

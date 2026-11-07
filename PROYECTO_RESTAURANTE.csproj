@@ -153,6 +153,9 @@
     <Compile Include="Generar_Boleta.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Generar_Boleta.Diseno.cs">
+      <DependentUpon>Generar_Boleta.cs</DependentUpon>
+    </Compile>
     <Compile Include="Generar_Boleta.Designer.cs">
       <DependentUpon>Generar_Boleta.cs</DependentUpon>
     </Compile>

@@ -156,6 +156,10 @@ namespace PROYECTO_RESTAURANTE
 
             // Diseño común: se adapta a la pantalla (1366x768 a 1920x1080 y escalado
             // de Windows) y el encabezado muestra la sesión (el reloj ya es propio).
+            // Comprobante interno R001 (no boleta electrónica SUNAT).
+            But_generarboleta.Text = "         Generar recibo";
+            guna2HtmlLabel4.Text = "Registra pedidos al instante y genera el recibo de venta";
+
             DisenoVentanas.Adaptar(this);
             DisenoVentanas.Encabezado(this, false);
         }
@@ -3408,7 +3412,7 @@ AND NOT EXISTS
                 MessageBox.Show(
                     "Seleccione primero un pedido " +
                     "de la tabla presionando VER.",
-                    "Generar Boleta",
+                    "Generar recibo de venta",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
 
@@ -3423,8 +3427,8 @@ AND NOT EXISTS
             {
                 MessageBox.Show(
                     "Guarde los productos nuevos " +
-                    "antes de generar la boleta.",
-                    "Generar Boleta",
+                    "antes de generar el recibo.",
+                    "Generar recibo de venta",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
 
@@ -3449,7 +3453,7 @@ AND NOT EXISTS
                     {
                         MessageBox.Show(
                             "Este pedido ya tiene comprobante.",
-                            "Generar Boleta",
+                            "Generar recibo de venta",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Information);
 
@@ -3550,7 +3554,7 @@ AND NOT EXISTS
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "Error al generar boleta:\n" +
+                    "Error al generar el recibo:\n" +
                     ex.Message,
                     "Gestión de Pedidos",
                     MessageBoxButtons.OK,
