@@ -126,6 +126,20 @@ namespace PROYECTO_RESTAURANTE
 
 
 
+        // Las fotos que pone Inicio se liberan al reemplazarse (sin fugas).
+        private readonly System.Collections.Generic.HashSet<Image> fotosPropias = new System.Collections.Generic.HashSet<Image>();
+
+        private void PonerFotoPlato(PictureBox destino, Image foto)
+        {
+            Image anterior = destino.Image;
+            destino.Image = foto;
+            destino.SizeMode = PictureBoxSizeMode.Zoom;
+            if (anterior != null && fotosPropias.Remove(anterior))
+                anterior.Dispose();
+            if (foto != null)
+                fotosPropias.Add(foto);
+        }
+
         private void CargarPlatosMasVendidos()
         {
             // ======================================
@@ -164,12 +178,23 @@ namespace PROYECTO_RESTAURANTE
         barraPlato4
     };
 
+            // Foto de cada producto (antes eran imágenes fijas del diseño
+            // que no correspondían al producto: una bebida mostraba un plato).
+            Guna.UI2.WinForms.Guna2PictureBox[] fotos =
+            {
+        guna2PictureBox20,
+        guna2PictureBox21,
+        guna2PictureBox22,
+        guna2PictureBox23
+    };
+
             // ======================================
             // 2. REINICIAR LOS CONTROLES
             // ======================================
 
             for (int i = 0; i < 4; i++)
             {
+                PonerFotoPlato(fotos[i], null);
                 nombres[i].Text = "Sin ventas";
                 cantidades[i].Text = "0";
                 porcentajes[i].Text = "0%";
@@ -208,6 +233,7 @@ namespace PROYECTO_RESTAURANTE
             SELECT
                 D.id_plato,
                 PL.nombre AS Nombre,
+                PL.foto AS Foto,
                 SUM(D.cantidad) AS Cantidad
 
             FROM dbo.DETALLE_PEDIDO_PLATO D
@@ -225,7 +251,7 @@ namespace PROYECTO_RESTAURANTE
               AND P.estado <> 'cancelado'
               AND D.cantidad > 0
 
-            GROUP BY D.id_plato, PL.nombre
+            GROUP BY D.id_plato, PL.nombre, PL.foto
         ),
 
         TotalPlatos AS
@@ -237,6 +263,8 @@ namespace PROYECTO_RESTAURANTE
         )
 
         SELECT TOP (4)
+            R.id_plato,
+            R.Foto,
             R.Nombre,
             R.Cantidad,
             T.TotalUnidades
@@ -300,6 +328,9 @@ namespace PROYECTO_RESTAURANTE
                             // ==========================
 
                             nombres[posicion].Text = nombre;
+                            PonerFotoPlato(fotos[posicion],
+                                MenuDatos.CargarFoto(lector["Foto"] == DBNull.Value ? null : Convert.ToString(lector["Foto"]))
+                                ?? MenuDatos.ImagenIncluida(Convert.ToInt32(lector["id_plato"])));
 
                             cantidades[posicion].Text =
                                 cantidad.ToString();
