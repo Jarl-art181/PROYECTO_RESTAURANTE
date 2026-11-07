@@ -72,6 +72,7 @@ namespace PROYECTO_RESTAURANTE
             catalogo.Seleccionado += Seleccionar;
 
             ConfigurarControles();
+            CrearApartadoPromociones();
             MostrarProducto(null);
 
             Shown += (s, e) => CargarCatalogo(null);
@@ -197,6 +198,7 @@ namespace PROYECTO_RESTAURANTE
                 catalogo.Advertencias = advertencias;
                 catalogo.Promociones = EtiquetasPromocion();
                 catalogo.Cargar(productos);
+                promocionesLeidas = null;      // el apartado de promociones vuelve a leerlas
 
                 guna2HtmlLabel28.Text = MenuDatos.PromocionesVigentes().ToString("D2");
             }
@@ -338,6 +340,7 @@ namespace PROYECTO_RESTAURANTE
 
             MostrarImagen(p);
             ActualizarModo();
+            ActualizarApartadoPromociones();
         }
 
         private void MostrarImagen(ProductoMenu p)

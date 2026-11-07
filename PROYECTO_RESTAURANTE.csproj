@@ -114,6 +114,9 @@
     <Compile Include="FRM_MENU.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="FRM_MENU.Promociones.cs">
+      <DependentUpon>FRM_MENU.cs</DependentUpon>
+    </Compile>
     <Compile Include="FRM_MENU.Designer.cs">
       <DependentUpon>FRM_MENU.cs</DependentUpon>
     </Compile>
