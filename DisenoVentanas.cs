@@ -627,7 +627,8 @@ namespace PROYECTO_RESTAURANTE
 
             Action datos = () =>
             {
-                string nombre = SesionActual.Iniciada ? (SesionActual.Usuario ?? SesionActual.NombreCorto) : "-";
+                // Igual que el Navegador: nombre corto (p. ej. "Ana Seminario"), no el usuario de la cuenta.
+                string nombre = SesionActual.Iniciada ? (SesionActual.NombreCorto ?? SesionActual.Usuario) : "-";
                 string cargoTexto = SesionActual.Iniciada ? (SesionActual.Cargo ?? "") : "";
                 foreach (Control c in usuario) c.Text = nombre;
                 foreach (Control c in cargo) c.Text = cargoTexto;
