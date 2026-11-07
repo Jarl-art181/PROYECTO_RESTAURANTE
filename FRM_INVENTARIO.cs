@@ -100,7 +100,7 @@ namespace PROYECTO_RESTAURANTE
         {
             guna2HtmlLabel4.Text = "Insumos de cocina, compras, mermas y alertas de stock";
             guna2HtmlLabel138.Text = "Insumos de cocina";
-            guna2HtmlLabel131.Text = "Movimientos recientes  ·  ver historial";
+            guna2HtmlLabel131.Text = "Movimientos recientes  ·  Ver historial completo";
             guna2HtmlLabel131.Cursor = Cursors.Hand;
             guna2Button24.Text = "         Nuevo insumo";
             guna2Button14.Text = "          Registrar salida";
@@ -160,39 +160,101 @@ namespace PROYECTO_RESTAURANTE
             };
 
             // Movimientos: la fila del diseño es el molde.
-            flowLayoutPanel1.AutoScroll = true;
             FijarColumnas(guna2Panel31);
+            CrearEncabezadoMovimientos();
+            flowLayoutPanel1.SizeChanged += (s, e) =>
+            {
+                if (IsHandleCreated && !IsDisposed) BeginInvoke((Action)ReajustarMovimientos);
+            };
             filasMovimiento.Add(guna2Panel31);
             guna2Panel31.Visible = false;
         }
 
-        // Fila de movimiento en dos renglones (seis datos no caben legibles en
-        // una sola línea en pantallas chicas):
-        //   1.º  TIPO   Insumo (+cantidad)                      Hoy   06/11
-        //   2.º         Detalle (proveedor / motivo)   ·   Responsable
-        // Orden de las etiquetas del diseño (por posición): tipo, insumo,
-        // detalle, responsable, "Hoy/Ayer" y fecha.
+        // ======================================================
+        // MOVIMIENTOS RECIENTES: tabla de una línea por movimiento
+        // ------------------------------------------------------
+        // Columnas (lienzo de diseño, fila de 752 px):
+        //   TIPO | INSUMO Y CANTIDAD | PROVEEDOR / MOTIVO | RESPONSABLE | FECHA
+        // Un solo formato de fecha (dd/MM/yyyy): ya no "Hoy" y "06/11" juntos.
+        // Las etiquetas del diseño se identifican por su número de columna
+        // (Tag): tipo, insumo, detalle, responsable, relativo (oculto), fecha.
+        // ======================================================
+        private const int AnchoFilaMovimiento = 752, AltoFilaMovimiento = 32;
+
+        private static readonly Rectangle[] ColumnasMovimiento =
+        {
+            new Rectangle(10, 0, 74, AltoFilaMovimiento),     // tipo
+            new Rectangle(88, 0, 160, AltoFilaMovimiento),    // insumo y cantidad
+            new Rectangle(252, 0, 206, AltoFilaMovimiento),   // proveedor o motivo
+            new Rectangle(462, 0, 202, AltoFilaMovimiento),   // responsable (nombre completo)
+            Rectangle.Empty,                                  // "Hoy/Ayer": ya no se muestra
+            new Rectangle(668, 0, 78, AltoFilaMovimiento)     // fecha
+        };
+
+        private static readonly string[] TitulosMovimiento =
+            { "TIPO", "INSUMO Y CANTIDAD", "PROVEEDOR / MOTIVO", "RESPONSABLE", "", "FECHA" };
+
         private static void FijarColumnas(Control fila)
         {
-            Rectangle[] r =
-            {
-                new Rectangle(8, 4, 100, 27),      // tipo
-                new Rectangle(112, 4, 420, 27),    // insumo y cantidad
-                new Rectangle(112, 32, 400, 21),   // detalle
-                new Rectangle(516, 32, 216, 21),   // responsable
-                new Rectangle(540, 4, 70, 27),     // Hoy / Ayer
-                new Rectangle(614, 4, 118, 27)     // fecha
-            };
+            fila.Size = new Size(AnchoFilaMovimiento, AltoFilaMovimiento);
+            fila.Margin = new Padding(3, 1, 3, 1);
             Guna2HtmlLabel[] l = fila.Controls.OfType<Guna2HtmlLabel>().OrderBy(c => c.Left).ToArray();
-            for (int i = 0; i < l.Length && i < r.Length; i++)
+            for (int i = 0; i < l.Length && i < ColumnasMovimiento.Length; i++)
             {
-                l[i].Tag = i;   // número de columna: el relleno ya no depende de la posición
+                l[i].Tag = i;   // número de columna: el relleno no depende de la posición
                 l[i].AutoSize = false;
-                l[i].Bounds = r[i];
-                l[i].TextAlignment = i >= 4 ? ContentAlignment.TopRight : ContentAlignment.TopLeft;
-                if (i == 2 || i == 3)
-                    l[i].Font = new Font(l[i].Font.FontFamily, 8.5F, FontStyle.Italic);
+                if (ColumnasMovimiento[i].IsEmpty)
+                {
+                    l[i].Visible = false;
+                    l[i].Bounds = new Rectangle(0, 0, 1, 1);
+                    continue;
+                }
+                // Misma franja de texto en todas las columnas (línea base común):
+                // el centrado vertical de Guna varía con la letra.
+                Rectangle r = ColumnasMovimiento[i];
+                l[i].Bounds = new Rectangle(r.X, 7, r.Width, 20);
+                l[i].TextAlignment = i == 5 ? ContentAlignment.TopRight : ContentAlignment.TopLeft;
+                l[i].Font = new Font("Segoe UI", 9.5F, i <= 1 ? FontStyle.Bold : FontStyle.Regular);
+                if (i >= 2) l[i].ForeColor = Color.FromArgb(40, 40, 40);
             }
+        }
+
+        // Encabezado de columnas, fijo sobre el área desplazable.
+        private void CrearEncabezadoMovimientos()
+        {
+            Guna2Panel encabezado = new Guna2Panel
+            {
+                Name = "pnlEncabezadoMovimientos",
+                Bounds = new Rectangle(flowLayoutPanel1.Left, flowLayoutPanel1.Top, AnchoFilaMovimiento + 6, 26),   // mismo ancho que las filas (con su margen)
+                FillColor = Color.FromArgb(255, 243, 176), BorderRadius = 6, BackColor = Color.Transparent
+            };
+            for (int i = 0; i < ColumnasMovimiento.Length; i++)
+            {
+                if (ColumnasMovimiento[i].IsEmpty) continue;
+                Rectangle r = ColumnasMovimiento[i];
+                encabezado.Controls.Add(new Label
+                {
+                    Text = TitulosMovimiento[i], BackColor = Color.Transparent, ForeColor = Color.Black,
+                    Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                    Bounds = new Rectangle(r.X + 3, 0, r.Width, 26),
+                    TextAlign = i == 5 ? ContentAlignment.MiddleRight : ContentAlignment.MiddleLeft
+                });
+            }
+            Controls.Add(encabezado);
+            encabezado.BringToFront();
+
+            // El área desplazable empieza debajo del encabezado y solo se
+            // desplaza en vertical (las filas caben a lo ancho).
+            flowLayoutPanel1.Top += 28;
+            flowLayoutPanel1.Height -= 28;
+            flowLayoutPanel1.FlowDirection = FlowDirection.TopDown;
+            flowLayoutPanel1.WrapContents = false;
+            flowLayoutPanel1.AutoScroll = false;
+            flowLayoutPanel1.HorizontalScroll.Maximum = 0;
+            flowLayoutPanel1.HorizontalScroll.Enabled = false;
+            flowLayoutPanel1.HorizontalScroll.Visible = false;
+            flowLayoutPanel1.AutoScroll = true;
+            flowLayoutPanel1.Padding = new Padding(0, 1, 0, 1);
         }
 
         private static void ClicEnTarjeta(Control panel, Action accion)
@@ -304,9 +366,47 @@ namespace PROYECTO_RESTAURANTE
                     continue;
                 }
                 LlenarFila(fila, movimientos[k]);
+                ((Guna2Panel)fila).FillColor = k % 2 == 0 ? Color.White : Color.FromArgb(250, 248, 238);
                 fila.Visible = true;
             }
             flowLayoutPanel1.ResumeLayout(true);
+        }
+
+        // Texto largo: termina en "…" dentro de su columna; completo al pasar el mouse.
+        // La ayuda es de cada ventana (se libera con ella: no retiene filas cerradas).
+        private ToolTip ayudaMovimientos;
+
+        private static void Encajar(Guna2HtmlLabel etiqueta, string texto)
+        {
+            texto = texto ?? "";
+            string visible = texto;
+            int disponible = etiqueta.Width - 4;
+            if (disponible > 20 && TextRenderer.MeasureText(texto, etiqueta.Font).Width > disponible)
+            {
+                while (visible.Length > 1 && TextRenderer.MeasureText(visible + "…", etiqueta.Font).Width > disponible)
+                    visible = visible.Substring(0, visible.Length - 1);
+                visible = visible.TrimEnd() + "…";
+            }
+            etiqueta.Text = visible;
+            etiqueta.AccessibleDescription = texto;     // texto completo (para recalcular)
+            FRM_INVENTARIO ventana = etiqueta.FindForm() as FRM_INVENTARIO;
+            if (ventana == null) return;
+            if (ventana.ayudaMovimientos == null)
+            {
+                if (visible == texto) return;
+                ventana.ayudaMovimientos = new ToolTip(ventana.components) { AutoPopDelay = 10000 };
+            }
+            ventana.ayudaMovimientos.SetToolTip(etiqueta, visible == texto ? "" : texto);
+        }
+
+        // Tras adaptarse la ventana (otra escala y otra letra) se vuelve a
+        // ajustar cada texto a su columna.
+        private void ReajustarMovimientos()
+        {
+            foreach (Control fila in filasMovimiento)
+                foreach (Guna2HtmlLabel l in fila.Controls.OfType<Guna2HtmlLabel>())
+                    if (l.Tag is int && (int)l.Tag >= 1 && (int)l.Tag <= 3 && l.AccessibleDescription != null)
+                        Encajar(l, l.AccessibleDescription);
         }
 
         private static void LlenarFila(Control fila, MovimientoInfo m)
@@ -323,13 +423,12 @@ namespace PROYECTO_RESTAURANTE
                 return;
             }
             l[0].Text = m.Tipo;
-            l[0].ForeColor = m.Tipo == "ENTRADA" ? Color.FromArgb(0, 192, 0) : Color.Firebrick;
-            l[1].Text = m.Insumo + " (" + (m.Tipo == "SALIDA" ? "-" : "+") + InventarioDatos.Cantidad(m.Cantidad) + " " + m.Unidad + ")";
-            l[2].Text = m.Detalle;
-            l[3].Text = m.Responsable;
-            int dias = (DateTime.Today - m.Fecha.Date).Days;
-            l[4].Text = dias == 0 ? "Hoy" : dias == 1 ? "Ayer" : "";
-            l[5].Text = m.Fecha.ToString("dd/MM");
+            l[0].ForeColor = m.Tipo == "ENTRADA" ? Color.FromArgb(0, 160, 0) : Color.Firebrick;
+            Encajar(l[1], m.Insumo + " (" + (m.Tipo == "SALIDA" ? "-" : "+") + InventarioDatos.Cantidad(m.Cantidad) + " " + m.Unidad + ")");
+            Encajar(l[2], m.Detalle);
+            Encajar(l[3], m.Responsable);
+            l[4].Text = "";
+            l[5].Text = m.Fecha.ToString("dd/MM/yyyy");
         }
 
         private Control CrearFilaMovimiento()

@@ -3750,7 +3750,7 @@
             this.guna2Panel31.Controls.Add(this.guna2HtmlLabel132);
             this.guna2Panel31.Location = new System.Drawing.Point(3, 3);
             this.guna2Panel31.Name = "guna2Panel31";
-            this.guna2Panel31.Size = new System.Drawing.Size(740, 54);
+            this.guna2Panel31.Size = new System.Drawing.Size(752, 32);
             this.guna2Panel31.TabIndex = 0;
             // 
             // guna2HtmlLabel137
