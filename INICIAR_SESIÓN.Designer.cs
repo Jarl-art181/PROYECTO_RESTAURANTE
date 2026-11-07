@@ -32,6 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(INICIAR_SESIÓN));
             this.guna2PictureBox1 = new Guna.UI2.WinForms.Guna2PictureBox();
             this.guna2Panel1 = new Guna.UI2.WinForms.Guna2Panel();
+            this.chkMostrarContrasena = new Guna.UI2.WinForms.Guna2CheckBox();
             this.txtUsuario = new Guna.UI2.WinForms.Guna2TextBox();
             this.guna2PictureBox7 = new Guna.UI2.WinForms.Guna2PictureBox();
             this.guna2PictureBox6 = new Guna.UI2.WinForms.Guna2PictureBox();
@@ -56,7 +57,6 @@
             this.guna2HtmlLabel2 = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.guna2PictureBox8 = new Guna.UI2.WinForms.Guna2PictureBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.chkMostrarContrasena = new Guna.UI2.WinForms.Guna2CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox1)).BeginInit();
             this.guna2Panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureBox7)).BeginInit();
@@ -106,6 +106,26 @@
             this.guna2Panel1.Name = "guna2Panel1";
             this.guna2Panel1.Size = new System.Drawing.Size(447, 719);
             this.guna2Panel1.TabIndex = 2;
+            // 
+            // chkMostrarContrasena
+            // 
+            this.chkMostrarContrasena.AutoSize = true;
+            this.chkMostrarContrasena.CheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.chkMostrarContrasena.CheckedState.BorderRadius = 0;
+            this.chkMostrarContrasena.CheckedState.BorderThickness = 0;
+            this.chkMostrarContrasena.CheckedState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
+            this.chkMostrarContrasena.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chkMostrarContrasena.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.chkMostrarContrasena.Location = new System.Drawing.Point(94, 429);
+            this.chkMostrarContrasena.Name = "chkMostrarContrasena";
+            this.chkMostrarContrasena.Size = new System.Drawing.Size(141, 20);
+            this.chkMostrarContrasena.TabIndex = 11;
+            this.chkMostrarContrasena.Text = "Mostrar contraseña";
+            this.chkMostrarContrasena.UncheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
+            this.chkMostrarContrasena.UncheckedState.BorderRadius = 0;
+            this.chkMostrarContrasena.UncheckedState.BorderThickness = 0;
+            this.chkMostrarContrasena.UncheckedState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
+            this.chkMostrarContrasena.CheckedChanged += new System.EventHandler(this.guna2CheckBox1_CheckedChanged);
             // 
             // txtUsuario
             // 
@@ -264,7 +284,7 @@
             this.guna2Panel2.Controls.Add(this.guna2HtmlLabel3);
             this.guna2Panel2.Controls.Add(this.guna2HtmlLabel1);
             this.guna2Panel2.Controls.Add(this.guna2HtmlLabel2);
-            this.guna2Panel2.Location = new System.Drawing.Point(-3, 897);
+            this.guna2Panel2.Location = new System.Drawing.Point(-3, 905);
             this.guna2Panel2.Name = "guna2Panel2";
             this.guna2Panel2.Size = new System.Drawing.Size(1563, 71);
             this.guna2Panel2.TabIndex = 3;
@@ -406,26 +426,6 @@
             this.timer1.Enabled = true;
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
-            // chkMostrarContrasena
-            // 
-            this.chkMostrarContrasena.AutoSize = true;
-            this.chkMostrarContrasena.CheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.chkMostrarContrasena.CheckedState.BorderRadius = 0;
-            this.chkMostrarContrasena.CheckedState.BorderThickness = 0;
-            this.chkMostrarContrasena.CheckedState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(94)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
-            this.chkMostrarContrasena.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.chkMostrarContrasena.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.chkMostrarContrasena.Location = new System.Drawing.Point(94, 429);
-            this.chkMostrarContrasena.Name = "chkMostrarContrasena";
-            this.chkMostrarContrasena.Size = new System.Drawing.Size(141, 20);
-            this.chkMostrarContrasena.TabIndex = 11;
-            this.chkMostrarContrasena.Text = "Mostrar contraseña";
-            this.chkMostrarContrasena.UncheckedState.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
-            this.chkMostrarContrasena.UncheckedState.BorderRadius = 0;
-            this.chkMostrarContrasena.UncheckedState.BorderThickness = 0;
-            this.chkMostrarContrasena.UncheckedState.FillColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(137)))), ((int)(((byte)(149)))));
-            this.chkMostrarContrasena.CheckedChanged += new System.EventHandler(this.guna2CheckBox1_CheckedChanged);
             // 
             // INICIAR_SESIÓN
             // 

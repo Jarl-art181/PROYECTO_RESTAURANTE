@@ -87,6 +87,22 @@ namespace PROYECTO_RESTAURANTE
             };
 
             FormClosed += (s, e) => temporizadorCocina.Dispose();
+
+            // Diseño común: se adapta a la pantalla (1366x768 a 1920x1080 y escalado
+            // de Windows) y el encabezado muestra la sesión (el reloj ya es propio).
+            DisenoVentanas.Adaptar(this);
+            DisenoVentanas.Encabezado(this, false);
+
+            // Las tarjetas de pedidos se dibujan con la escala real de la
+            // pantalla: tras adaptarse la ventana (al mostrarse o al cambiar
+            // de resolución) se vuelven a dibujar a la medida de cada columna.
+            EventHandler redibujar = (s, e) =>
+            {
+                if (Visible && IsHandleCreated && !IsDisposed)
+                    BeginInvoke((Action)MostrarPedidos);
+            };
+            Shown += redibujar;
+            Resize += redibujar;
         }
 
         // Llamado por el Navegador al volver a Cocina: cargar los
@@ -420,10 +436,10 @@ namespace PROYECTO_RESTAURANTE
                 {
                     Label vacio = new Label();
                     vacio.Text = "No hay pedidos en este estado.";
-                    vacio.Font = new Font("Segoe UI", 10F);
+                    vacio.Font = DisenoVentanas.Fuente(this, "Segoe UI", 10F, FontStyle.Regular);
                     vacio.ForeColor = Color.DimGray;
                     vacio.TextAlign = ContentAlignment.MiddleCenter;
-                    vacio.Size = new Size(Math.Max(260, contenedor.ClientSize.Width - 20), 85);
+                    vacio.Size = new Size(Math.Max(M(200), contenedor.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - M(10)), M(85));
                     contenedor.Controls.Add(vacio);
                 }
                 else
@@ -439,25 +455,34 @@ namespace PROYECTO_RESTAURANTE
             }
         }
 
+        // Medida de diseño a la escala actual de la ventana.
+        private int M(int valor)
+        {
+            return DisenoVentanas.Medida(this, valor);
+        }
+
         private Control CrearTarjetaPedido(PedidoCocina pedido,
             FlowLayoutPanel contenedor)
         {
-            int ancho = Math.Max(295, contenedor.ClientSize.Width - 26);
+            // Medidas de diseño escaladas a la pantalla (DisenoVentanas).
+            // Ancho de la columna menos la barra vertical y los márgenes de la
+            // tarjeta: nunca más ancha que la columna (sin barra horizontal).
+            int ancho = Math.Max(M(200), contenedor.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - M(10));
             Guna2Panel tarjeta = new Guna2Panel();
             tarjeta.Width = ancho;
             tarjeta.FillColor = Color.White;
             tarjeta.BorderColor = Color.Gainsboro;
             tarjeta.BorderThickness = 1;
-            tarjeta.BorderRadius = 10;
+            tarjeta.BorderRadius = M(10);
             tarjeta.Margin = new Padding(3, 4, 3, 7);
 
             Label titulo = new Label();
-            titulo.Font = new Font("Segoe UI", 10.5F, FontStyle.Bold);
+            titulo.Font = DisenoVentanas.Fuente(this, "Segoe UI", 10.5F, FontStyle.Bold);
             titulo.ForeColor = Color.Black;
             titulo.BackColor = Color.Transparent;
             titulo.AutoSize = false;
-            titulo.Location = new Point(12, 10);
-            titulo.Size = new Size(ancho - 24, 25);
+            titulo.Location = new Point(M(12), M(10));
+            titulo.Size = new Size(ancho - M(24), M(25));
             titulo.Text = "Pedido #" + pedido.IdPedido.ToString("D4") +
                 "  |  " + (pedido.Canal == "salon"
                     ? "Salón - Mesa " + pedido.NumeroMesa
@@ -465,33 +490,33 @@ namespace PROYECTO_RESTAURANTE
             tarjeta.Controls.Add(titulo);
 
             Label tiempo = new Label();
-            tiempo.Font = new Font("Segoe UI", 9F, FontStyle.Italic);
+            tiempo.Font = DisenoVentanas.Fuente(this, "Segoe UI", 9F, FontStyle.Italic);
             tiempo.ForeColor = Color.DimGray;
             tiempo.BackColor = Color.Transparent;
             tiempo.AutoSize = false;
-            tiempo.Location = new Point(12, 37);
-            tiempo.Size = new Size(ancho - 24, 21);
+            tiempo.Location = new Point(M(12), M(37));
+            tiempo.Size = new Size(ancho - M(24), M(21));
             int minutos = Math.Max(0, (int)(horaServidor - pedido.FechaHora).TotalMinutes);
             tiempo.Text = "Recibido " + pedido.FechaHora.ToString("dd/MM HH:mm") +
                 "  ·  Hace " + minutos + " min";
             tarjeta.Controls.Add(tiempo);
 
             Label productos = new Label();
-            productos.Font = new Font("Segoe UI", 10F);
+            productos.Font = DisenoVentanas.Fuente(this, "Segoe UI", 10F, FontStyle.Regular);
             productos.ForeColor = Color.Black;
             productos.BackColor = Color.Transparent;
             productos.AutoSize = true;
-            productos.MaximumSize = new Size(ancho - 24, 0);
-            productos.Location = new Point(12, 66);
+            productos.MaximumSize = new Size(ancho - M(24), 0);
+            productos.Location = new Point(M(12), M(66));
             productos.Text = string.Join(Environment.NewLine, pedido.Productos);
             tarjeta.Controls.Add(productos);
 
             Guna2Button accion = new Guna2Button();
-            accion.Width = ancho - 24;
-            accion.Height = 38;
-            accion.Location = new Point(12, Math.Max(100, productos.Bottom + 12));
-            accion.BorderRadius = 8;
-            accion.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            accion.Width = ancho - M(24);
+            accion.Height = M(38);
+            accion.Location = new Point(M(12), Math.Max(M(100), productos.Bottom + M(12)));
+            accion.BorderRadius = M(8);
+            accion.Font = DisenoVentanas.Fuente(this, "Segoe UI", 10F, FontStyle.Bold);
             accion.ForeColor = pedido.Estado == "pendiente" ? Color.White : Color.Black;
             accion.FillColor = pedido.Estado == "pendiente"
                 ? Color.FromArgb(230, 35, 35)
@@ -505,7 +530,7 @@ namespace PROYECTO_RESTAURANTE
             accion.Click += (s, e) => CambiarEstadoPedido(idPedido, estadoActual);
             tarjeta.Controls.Add(accion);
 
-            tarjeta.Height = accion.Bottom + 12;
+            tarjeta.Height = accion.Bottom + M(12);
             return tarjeta;
         }
 

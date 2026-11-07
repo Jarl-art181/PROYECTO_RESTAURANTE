@@ -1688,7 +1688,7 @@
             this.guna2HtmlLabel6.Name = "guna2HtmlLabel6";
             this.guna2HtmlLabel6.Size = new System.Drawing.Size(157, 24);
             this.guna2HtmlLabel6.TabIndex = 27;
-            this.guna2HtmlLabel6.Text = "Selecionar Mesa";
+            this.guna2HtmlLabel6.Text = "Seleccionar mesa";
             // 
             // guna2Panel17
             // 
@@ -3291,7 +3291,7 @@
             this.guna2HtmlLabel7.Name = "guna2HtmlLabel7";
             this.guna2HtmlLabel7.Size = new System.Drawing.Size(193, 24);
             this.guna2HtmlLabel7.TabIndex = 23;
-            this.guna2HtmlLabel7.Text = "Selecionar Producto";
+            this.guna2HtmlLabel7.Text = "Seleccionar producto";
             // 
             // guna2Panel19
             // 

@@ -77,6 +77,14 @@ namespace PROYECTO_RESTAURANTE
 
             MostrarPromocion(null);
             Shown += (s, e) => Cargar(null);
+
+            // Encabezado: tenía el ícono de Inventario; ahora una etiqueta de descuento.
+            DisenoVentanas.PonerIcono(guna2PictureBox1, '\uE8EC', Color.Black);
+
+            // Diseño común: se adapta a la pantalla (1366x768 a 1920x1080 y escalado
+            // de Windows) y el encabezado muestra la sesión y la hora.
+            DisenoVentanas.Adaptar(this);
+            DisenoVentanas.Encabezado(this, true);
         }
 
         public void ActualizarAlMostrar()
@@ -160,7 +168,7 @@ namespace PROYECTO_RESTAURANTE
             lblPedidos = Tarjeta(938, Color.PaleVioletRed, "Pedidos con promoción");
             lblOtorgado = new Label
             {
-                Location = new Point(14, 52), Size = new Size(160, 18), BackColor = Color.Transparent,
+                Location = new Point(14, 55), Size = new Size(160, 17), BackColor = Color.Transparent,
                 Font = new Font("Segoe UI", 8.5F, FontStyle.Bold), ForeColor = Color.Black
             };
             lblPedidos.Parent.Controls.Add(lblOtorgado);
@@ -171,12 +179,12 @@ namespace PROYECTO_RESTAURANTE
             Guna2Panel p = new Guna2Panel { Bounds = new Rectangle(x, 206, 186, 74), BorderRadius = 12, FillColor = color, BackColor = Color.Transparent };
             p.Controls.Add(new Label
             {
-                Text = titulo, Location = new Point(14, 8), AutoSize = true, BackColor = Color.Transparent,
+                Text = titulo, Location = new Point(14, 6), AutoSize = true, BackColor = Color.Transparent,
                 Font = new Font("Segoe UI", 10F, FontStyle.Bold)
             });
             Label valor = new Label
             {
-                Text = "00", Location = new Point(14, 26), Size = new Size(160, 28), BackColor = Color.Transparent,
+                Text = "00", Location = new Point(14, 29), Size = new Size(160, 26), BackColor = Color.Transparent,
                 Font = new Font("Segoe UI", 15F, FontStyle.Bold | FontStyle.Italic)
             };
             p.Controls.Add(valor);
@@ -276,7 +284,7 @@ namespace PROYECTO_RESTAURANTE
             {
                 chkDias[i] = new CheckBox
                 {
-                    Text = dias[i], Location = new Point(14 + i * 52, 366), Size = new Size(52, 24),
+                    Text = dias[i], Location = new Point(10 + i * 53, 366), Size = new Size(54, 24),
                     Font = new Font("Segoe UI", 9F), BackColor = Color.Transparent, Checked = true
                 };
                 p.Controls.Add(chkDias[i]);

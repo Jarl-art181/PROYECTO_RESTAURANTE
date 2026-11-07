@@ -80,6 +80,25 @@ namespace PROYECTO_RESTAURANTE
                 DescartarFotoPendiente();
                 catalogo.Dispose();
             };
+
+            // Íconos heredados de Gestión de Mesas (mesa) reemplazados por uno
+            // propio de cada indicador y botón.
+            DisenoVentanas.PonerIcono(guna2PictureBox37, '\uE8FD', Color.Black);   // lista: total de productos
+            DisenoVentanas.PonerIcono(guna2PictureBox34, '\uED56', Color.Black);   // plato: platos activos
+            DisenoVentanas.PonerIcono(guna2PictureBox36, '\uEC32', Color.Black);   // taza: bebidas
+            DisenoVentanas.PonerIcono(guna2PictureBox35, '\uE8EC', Color.Black);   // etiqueta: promociones
+            DisenoVentanas.PonerIcono(guna2PictureBox30, '\uE74E', Color.Black);   // guardar
+            DisenoVentanas.PonerIcono(guna2PictureBox32, '\uE70F', Color.Black);   // editar
+            DisenoVentanas.PonerIcono(guna2PictureBox33, '\uE74D', Color.Black);   // eliminar
+
+            // Ícono de la barra (imagen de 1069x1014 en un cuadro de 58x38):
+            // copia reducida y sin deformar.
+            DisenoVentanas.ReducirImagen(guna2PictureBox28);
+
+            // Diseño común: se adapta a la pantalla (1366x768 a 1920x1080 y escalado
+            // de Windows) y el encabezado muestra la sesión y la hora.
+            DisenoVentanas.Adaptar(this);
+            DisenoVentanas.Encabezado(this, true);
         }
 
         public void ActualizarAlMostrar()
@@ -617,6 +636,11 @@ namespace PROYECTO_RESTAURANTE
         private void guna2Button8_Click(object sender, EventArgs e)
         {
             Navegador.Ir<FRM_INVENTARIO>(this);
+        }
+
+        private void guna2PictureBox28_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

@@ -72,6 +72,19 @@ namespace PROYECTO_RESTAURANTE
                 guna2PictureBox39.Image = null;
                 if (img != null) img.Dispose();
             };
+
+            // Tarjetas de estadísticas: tenían el ícono de mesa (heredado de
+            // Gestión de Mesas). Ícono propio de cada indicador.
+            DisenoVentanas.PonerIcono(guna2PictureBox37, '\uE7B8', Color.Black);   // paquete: total de insumos
+            DisenoVentanas.PonerIcono(guna2PictureBox34, '\uE73E', Color.Black);   // visto: stock adecuado
+            DisenoVentanas.PonerIcono(guna2PictureBox36, '\uE7BA', Color.Black);   // advertencia: stock bajo
+            DisenoVentanas.PonerIcono(guna2PictureBox35, '\uE719', Color.Black);   // tienda: proveedores
+            DisenoVentanas.PonerIcono(guna2PictureBox38, '\uE74E', Color.Black);   // guardar (antes: mesa)
+
+            // Diseño común: se adapta a la pantalla (1366x768 a 1920x1080 y escalado
+            // de Windows) y el encabezado muestra la sesión y la hora.
+            DisenoVentanas.Adaptar(this);
+            DisenoVentanas.Encabezado(this, true);
         }
 
         public void ActualizarAlMostrar()
@@ -153,17 +166,32 @@ namespace PROYECTO_RESTAURANTE
             guna2Panel31.Visible = false;
         }
 
-        // Columnas de ancho fijo: tipo, insumo, detalle, responsable,
-        // "Hoy/Ayer" y fecha (en el diseño crecían y se encimaban).
+        // Fila de movimiento en dos renglones (seis datos no caben legibles en
+        // una sola línea en pantallas chicas):
+        //   1.º  TIPO   Insumo (+cantidad)                      Hoy   06/11
+        //   2.º         Detalle (proveedor / motivo)   ·   Responsable
+        // Orden de las etiquetas del diseño (por posición): tipo, insumo,
+        // detalle, responsable, "Hoy/Ayer" y fecha.
         private static void FijarColumnas(Control fila)
         {
-            int[] x = { 14, 106, 268, 500, 666, 710 };
-            int[] ancho = { 90, 158, 228, 162, 42, 56 };
-            Guna2HtmlLabel[] l = fila.Controls.OfType<Guna2HtmlLabel>().OrderBy(c => c.Left).ToArray();
-            for (int i = 0; i < l.Length && i < x.Length; i++)
+            Rectangle[] r =
             {
+                new Rectangle(8, 4, 100, 27),      // tipo
+                new Rectangle(112, 4, 420, 27),    // insumo y cantidad
+                new Rectangle(112, 32, 400, 21),   // detalle
+                new Rectangle(516, 32, 216, 21),   // responsable
+                new Rectangle(540, 4, 70, 27),     // Hoy / Ayer
+                new Rectangle(614, 4, 118, 27)     // fecha
+            };
+            Guna2HtmlLabel[] l = fila.Controls.OfType<Guna2HtmlLabel>().OrderBy(c => c.Left).ToArray();
+            for (int i = 0; i < l.Length && i < r.Length; i++)
+            {
+                l[i].Tag = i;   // número de columna: el relleno ya no depende de la posición
                 l[i].AutoSize = false;
-                l[i].Bounds = new Rectangle(x[i], l[i].Top, ancho[i], 22);
+                l[i].Bounds = r[i];
+                l[i].TextAlignment = i >= 4 ? ContentAlignment.TopRight : ContentAlignment.TopLeft;
+                if (i == 2 || i == 3)
+                    l[i].Font = new Font(l[i].Font.FontFamily, 8.5F, FontStyle.Italic);
             }
         }
 
@@ -283,7 +311,8 @@ namespace PROYECTO_RESTAURANTE
 
         private static void LlenarFila(Control fila, MovimientoInfo m)
         {
-            Guna2HtmlLabel[] l = fila.Controls.OfType<Guna2HtmlLabel>().OrderBy(c => c.Left).ToArray();
+            Guna2HtmlLabel[] l = fila.Controls.OfType<Guna2HtmlLabel>()
+                .OrderBy(c => c.Tag is int ? (int)c.Tag : 100 + c.Left).ToArray();
             // tipo · insumo · detalle · responsable · fecha · relativo
             if (l.Length < 6) return;
             if (m == null)
@@ -316,7 +345,7 @@ namespace PROYECTO_RESTAURANTE
             {
                 fila.Controls.Add(new Guna2HtmlLabel
                 {
-                    Location = m.Location, AutoSize = false, Size = m.Size,
+                    Location = m.Location, AutoSize = false, Size = m.Size, TextAlignment = m.TextAlignment, Tag = m.Tag,
                     Font = m.Font, ForeColor = m.ForeColor, BackColor = m.BackColor
                 });
             }

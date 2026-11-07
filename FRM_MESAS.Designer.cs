@@ -1354,7 +1354,7 @@
             this.btnReservadas.ForeColor = System.Drawing.Color.Black;
             this.btnReservadas.Location = new System.Drawing.Point(742, 11);
             this.btnReservadas.Name = "btnReservadas";
-            this.btnReservadas.Size = new System.Drawing.Size(107, 45);
+            this.btnReservadas.Size = new System.Drawing.Size(124, 45);
             this.btnReservadas.TabIndex = 32;
             this.btnReservadas.Text = "Reservada";
             this.btnReservadas.Click += new System.EventHandler(this.btnReservadas_Click);

@@ -66,6 +66,11 @@ namespace PROYECTO_RESTAURANTE
                 if (this.Visible)
                     ActualizarReloj();
             };
+
+            // Diseño común: se adapta a la pantalla (1366x768 a 1920x1080 y escalado
+            // de Windows) y el encabezado muestra la sesión (el reloj ya es propio).
+            DisenoVentanas.Adaptar(this);
+            DisenoVentanas.Encabezado(this, false);
         }
 
         // Llamado por el Navegador al volver a Inicio:

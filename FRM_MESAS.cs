@@ -55,6 +55,11 @@ namespace PROYECTO_RESTAURANTE
             // Los datos (contadores, tarjetas, reservas y filtro) se cargan
             // al mostrarse la ventana (FRM_MESAS_VisibleChanged). Antes se
             // cargaban aquí Y otra vez al mostrarse: consultas duplicadas.
+
+            // Diseño común: se adapta a la pantalla (1366x768 a 1920x1080 y escalado
+            // de Windows) y el encabezado muestra la sesión (el reloj ya es propio).
+            DisenoVentanas.Adaptar(this);
+            DisenoVentanas.Encabezado(this, false);
         }
 
 

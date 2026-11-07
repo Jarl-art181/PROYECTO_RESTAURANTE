@@ -23,6 +23,11 @@ namespace PROYECTO_RESTAURANTE
             this.FormBorderStyle = FormBorderStyle.None;
             this.DoubleBuffered = true;
 
+            // Diseño común: se adapta a la pantalla (1366x768 a 1920x1080 y escalado
+            // de Windows), el encabezado muestra la sesión y la hora, y el menú
+            // lateral queda conectado (MenuLateral).
+            DisenoVentanas.Adaptar(this);
+            DisenoVentanas.Encabezado(this, true);
         }
 
 

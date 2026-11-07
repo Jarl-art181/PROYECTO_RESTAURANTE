@@ -211,6 +211,25 @@ namespace PROYECTO_RESTAURANTE
         }
 
         // ------------------------------------------------------
+        // Ir a un módulo conociendo solo su tipo (menú lateral común).
+        // Usa exactamente la misma lógica y validación que Ir<T>.
+        // ------------------------------------------------------
+        public static void Ir(Type modulo, Form actual)
+        {
+            System.Reflection.MethodInfo generico = null;
+            foreach (System.Reflection.MethodInfo m in typeof(Navegador).GetMethods())
+                if (m.Name == "Ir" && m.IsGenericMethodDefinition) { generico = m; break; }
+            try
+            {
+                generico.MakeGenericMethod(modulo).Invoke(null, new object[] { actual });
+            }
+            catch (System.Reflection.TargetInvocationException ex)
+            {
+                throw ex.InnerException ?? ex;
+            }
+        }
+
+        // ------------------------------------------------------
         // Abrir Pedidos con una mesa fija (desde Gestión de
         // Mesas o desde el aviso de reservas).
         // Siempre crea un contexto nuevo para esa mesa.

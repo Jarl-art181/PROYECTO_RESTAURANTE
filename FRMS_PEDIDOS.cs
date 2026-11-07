@@ -153,6 +153,11 @@ namespace PROYECTO_RESTAURANTE
                 if (Visible)
                     ActualizarReloj();
             };
+
+            // Diseño común: se adapta a la pantalla (1366x768 a 1920x1080 y escalado
+            // de Windows) y el encabezado muestra la sesión (el reloj ya es propio).
+            DisenoVentanas.Adaptar(this);
+            DisenoVentanas.Encabezado(this, false);
         }
 
         // ==========================================
@@ -2740,7 +2745,7 @@ AND NOT EXISTS
                         .Cells[4].Value =
                             Convert.ToDateTime(
                                 dato["Fecha"])
-                            .ToString("dd/MM/yyyy HH:mm");
+                            .ToString("dd/MM HH:mm");   // cabe completo en la columna
 
                     dgvListaPedidos.Rows[fila]
                         .Cells[5].Value = "VER";

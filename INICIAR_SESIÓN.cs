@@ -44,6 +44,11 @@ namespace PROYECTO_RESTAURANTE
                 timer1.Enabled = Visible;
                 if (Visible) PrepararParaIngreso();
             };
+
+            // Diseño común: se adapta a la pantalla (1366x768 a 1920x1080 y escalado
+            // de Windows) y el encabezado muestra la sesión y la hora.
+            DisenoVentanas.Adaptar(this);
+            DisenoVentanas.Encabezado(this, true);
         }
 
         // Deja la ventana limpia (al iniciar y al volver tras cerrar sesión).

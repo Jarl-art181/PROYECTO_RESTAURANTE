@@ -3335,9 +3335,9 @@
             // 
             this.guna2PictureBox38.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox38.Image")));
             this.guna2PictureBox38.ImageRotate = 0F;
-            this.guna2PictureBox38.Location = new System.Drawing.Point(10, 638);
+            this.guna2PictureBox38.Location = new System.Drawing.Point(8, 550);
             this.guna2PictureBox38.Name = "guna2PictureBox38";
-            this.guna2PictureBox38.Size = new System.Drawing.Size(40, 44);
+            this.guna2PictureBox38.Size = new System.Drawing.Size(28, 32);
             this.guna2PictureBox38.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.guna2PictureBox38.TabIndex = 69;
             this.guna2PictureBox38.TabStop = false;
@@ -3750,7 +3750,7 @@
             this.guna2Panel31.Controls.Add(this.guna2HtmlLabel132);
             this.guna2Panel31.Location = new System.Drawing.Point(3, 3);
             this.guna2Panel31.Name = "guna2Panel31";
-            this.guna2Panel31.Size = new System.Drawing.Size(770, 40);
+            this.guna2Panel31.Size = new System.Drawing.Size(740, 54);
             this.guna2Panel31.TabIndex = 0;
             // 
             // guna2HtmlLabel137

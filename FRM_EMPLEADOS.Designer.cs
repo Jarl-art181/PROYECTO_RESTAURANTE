@@ -1589,7 +1589,7 @@
             this.guna2CircleButton1.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
             this.guna2CircleButton1.Size = new System.Drawing.Size(17, 19);
             this.guna2CircleButton1.TabIndex = 55;
-            this.guna2CircleButton1.Text = "guna2CircleButton1";
+            this.guna2CircleButton1.Text = "";
             // 
             // lblPorcentajeTotal
             // 
@@ -1677,7 +1677,7 @@
             this.guna2CircleButton6.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
             this.guna2CircleButton6.Size = new System.Drawing.Size(17, 19);
             this.guna2CircleButton6.TabIndex = 45;
-            this.guna2CircleButton6.Text = "guna2CircleButton6";
+            this.guna2CircleButton6.Text = "";
             // 
             // lblCantidadDelivery
             // 
@@ -1715,7 +1715,7 @@
             this.guna2CircleButton5.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
             this.guna2CircleButton5.Size = new System.Drawing.Size(17, 19);
             this.guna2CircleButton5.TabIndex = 42;
-            this.guna2CircleButton5.Text = "guna2CircleButton5";
+            this.guna2CircleButton5.Text = "";
             // 
             // lblCantidadSalon
             // 
@@ -1753,7 +1753,7 @@
             this.guna2CircleButton4.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
             this.guna2CircleButton4.Size = new System.Drawing.Size(17, 19);
             this.guna2CircleButton4.TabIndex = 39;
-            this.guna2CircleButton4.Text = "guna2CircleButton4";
+            this.guna2CircleButton4.Text = "";
             // 
             // guna2HtmlLabel50
             // 

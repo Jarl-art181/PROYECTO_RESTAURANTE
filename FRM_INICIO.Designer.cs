@@ -928,7 +928,7 @@
             this.guna2HtmlLabel10.Name = "guna2HtmlLabel10";
             this.guna2HtmlLabel10.Size = new System.Drawing.Size(123, 22);
             this.guna2HtmlLabel10.TabIndex = 4;
-            this.guna2HtmlLabel10.Text = "PEDIDOS COBRADO";
+            this.guna2HtmlLabel10.Text = "PEDIDOS COBRADOS";
             // 
             // guna2Panel8
             // 
@@ -1112,7 +1112,7 @@
             this.guna2CircleButton3.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
             this.guna2CircleButton3.Size = new System.Drawing.Size(17, 19);
             this.guna2CircleButton3.TabIndex = 36;
-            this.guna2CircleButton3.Text = "guna2CircleButton3";
+            this.guna2CircleButton3.Text = "";
             // 
             // guna2HtmlLabel38
             // 
@@ -1140,7 +1140,7 @@
             this.guna2CircleButton2.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
             this.guna2CircleButton2.Size = new System.Drawing.Size(17, 19);
             this.guna2CircleButton2.TabIndex = 34;
-            this.guna2CircleButton2.Text = "guna2CircleButton2";
+            this.guna2CircleButton2.Text = "";
             // 
             // guna2HtmlLabel37
             // 
@@ -1168,7 +1168,7 @@
             this.guna2CircleButton1.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
             this.guna2CircleButton1.Size = new System.Drawing.Size(17, 19);
             this.guna2CircleButton1.TabIndex = 32;
-            this.guna2CircleButton1.Text = "guna2CircleButton1";
+            this.guna2CircleButton1.Text = "";
             // 
             // panelMesa10
             // 
@@ -1543,7 +1543,7 @@
             this.guna2CircleButton6.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
             this.guna2CircleButton6.Size = new System.Drawing.Size(17, 19);
             this.guna2CircleButton6.TabIndex = 45;
-            this.guna2CircleButton6.Text = "guna2CircleButton6";
+            this.guna2CircleButton6.Text = "";
             // 
             // lblCantidadDelivery
             // 
@@ -1581,7 +1581,7 @@
             this.guna2CircleButton5.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
             this.guna2CircleButton5.Size = new System.Drawing.Size(17, 19);
             this.guna2CircleButton5.TabIndex = 42;
-            this.guna2CircleButton5.Text = "guna2CircleButton5";
+            this.guna2CircleButton5.Text = "";
             // 
             // lblCantidadSalon
             // 
@@ -1619,7 +1619,7 @@
             this.guna2CircleButton4.ShadowDecoration.Mode = Guna.UI2.WinForms.Enums.ShadowMode.Circle;
             this.guna2CircleButton4.Size = new System.Drawing.Size(17, 19);
             this.guna2CircleButton4.TabIndex = 39;
-            this.guna2CircleButton4.Text = "guna2CircleButton4";
+            this.guna2CircleButton4.Text = "";
             // 
             // guna2HtmlLabel50
             // 
@@ -1667,9 +1667,9 @@
             // 
             this.barraPlato4.BackColor = System.Drawing.Color.Transparent;
             this.barraPlato4.BorderRadius = 8;
-            this.barraPlato4.Location = new System.Drawing.Point(238, 227);
+            this.barraPlato4.Location = new System.Drawing.Point(306, 227);
             this.barraPlato4.Name = "barraPlato4";
-            this.barraPlato4.Size = new System.Drawing.Size(216, 30);
+            this.barraPlato4.Size = new System.Drawing.Size(160, 30);
             this.barraPlato4.TabIndex = 52;
             this.barraPlato4.Text = "guna2ProgressBar3";
             this.barraPlato4.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
@@ -1678,9 +1678,9 @@
             // 
             this.barraPlato3.BackColor = System.Drawing.Color.Transparent;
             this.barraPlato3.BorderRadius = 8;
-            this.barraPlato3.Location = new System.Drawing.Point(238, 172);
+            this.barraPlato3.Location = new System.Drawing.Point(306, 172);
             this.barraPlato3.Name = "barraPlato3";
-            this.barraPlato3.Size = new System.Drawing.Size(216, 30);
+            this.barraPlato3.Size = new System.Drawing.Size(160, 30);
             this.barraPlato3.TabIndex = 51;
             this.barraPlato3.Text = "guna2ProgressBar2";
             this.barraPlato3.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
@@ -1689,9 +1689,9 @@
             // 
             this.barraPlato2.BackColor = System.Drawing.Color.Transparent;
             this.barraPlato2.BorderRadius = 8;
-            this.barraPlato2.Location = new System.Drawing.Point(238, 111);
+            this.barraPlato2.Location = new System.Drawing.Point(306, 111);
             this.barraPlato2.Name = "barraPlato2";
-            this.barraPlato2.Size = new System.Drawing.Size(216, 30);
+            this.barraPlato2.Size = new System.Drawing.Size(160, 30);
             this.barraPlato2.TabIndex = 50;
             this.barraPlato2.Text = "guna2ProgressBar1";
             this.barraPlato2.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
@@ -1830,9 +1830,9 @@
             // 
             this.barraPlato1.BackColor = System.Drawing.Color.Transparent;
             this.barraPlato1.BorderRadius = 8;
-            this.barraPlato1.Location = new System.Drawing.Point(238, 61);
+            this.barraPlato1.Location = new System.Drawing.Point(306, 61);
             this.barraPlato1.Name = "barraPlato1";
-            this.barraPlato1.Size = new System.Drawing.Size(216, 30);
+            this.barraPlato1.Size = new System.Drawing.Size(160, 30);
             this.barraPlato1.TabIndex = 32;
             this.barraPlato1.Text = "guna2ProgressBar1";
             this.barraPlato1.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;

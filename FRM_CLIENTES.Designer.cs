@@ -31,14 +31,14 @@
         {
             this.components = new System.ComponentModel.Container();
             Guna.Charts.WinForms.GunaDoughnutDataset gunaDoughnutDataset1;
-            Guna.Charts.WinForms.LPoint lPoint5 = new Guna.Charts.WinForms.LPoint();
-            Guna.Charts.WinForms.LPoint lPoint6 = new Guna.Charts.WinForms.LPoint();
-            Guna.Charts.WinForms.LPoint lPoint7 = new Guna.Charts.WinForms.LPoint();
-            Guna.Charts.WinForms.LPoint lPoint8 = new Guna.Charts.WinForms.LPoint();
+            Guna.Charts.WinForms.LPoint lPoint1 = new Guna.Charts.WinForms.LPoint();
+            Guna.Charts.WinForms.LPoint lPoint2 = new Guna.Charts.WinForms.LPoint();
+            Guna.Charts.WinForms.LPoint lPoint3 = new Guna.Charts.WinForms.LPoint();
+            Guna.Charts.WinForms.LPoint lPoint4 = new Guna.Charts.WinForms.LPoint();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FRM_CLIENTES));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.guna2Panel1 = new Guna.UI2.WinForms.Guna2Panel();
             this.guna2PictureCerrar = new Guna.UI2.WinForms.Guna2PictureBox();
             this.guna2HtmlLabel21 = new Guna.UI2.WinForms.Guna2HtmlLabel();
@@ -133,6 +133,12 @@
             this.guna2Button16 = new Guna.UI2.WinForms.Guna2Button();
             this.guna2Panel5 = new Guna.UI2.WinForms.Guna2Panel();
             this.guna2DataGridView1 = new Guna.UI2.WinForms.Guna2DataGridView();
+            this.Column_N = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_tipo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_Documento = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Column_nombre = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Columntelefono = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Columncorreo = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.guna2HtmlLabel5 = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.guna2PictureBox5 = new Guna.UI2.WinForms.Guna2PictureBox();
             this.guna2Panel6 = new Guna.UI2.WinForms.Guna2Panel();
@@ -176,12 +182,6 @@
             this.guna2HtmlLabel42 = new Guna.UI2.WinForms.Guna2HtmlLabel();
             this.guna2PictureBox16 = new Guna.UI2.WinForms.Guna2PictureBox();
             this.guna2HtmlLabel14 = new Guna.UI2.WinForms.Guna2HtmlLabel();
-            this.Column_N = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_tipo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_Documento = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Column_nombre = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Columntelefono = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Columncorreo = new System.Windows.Forms.DataGridViewTextBoxColumn();
             gunaDoughnutDataset1 = new Guna.Charts.WinForms.GunaDoughnutDataset();
             this.guna2Panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.guna2PictureCerrar)).BeginInit();
@@ -227,19 +227,19 @@
             // 
             // gunaDoughnutDataset1
             // 
-            lPoint5.Label = "Salón";
-            lPoint5.Y = 2D;
-            lPoint6.Label = "Delivery";
-            lPoint6.Y = 3D;
-            lPoint7.Label = "Recojo";
-            lPoint7.Y = 2D;
-            lPoint8.Label = "Promociones";
-            lPoint8.Y = 4D;
+            lPoint1.Label = "Salón";
+            lPoint1.Y = 2D;
+            lPoint2.Label = "Delivery";
+            lPoint2.Y = 3D;
+            lPoint3.Label = "Recojo";
+            lPoint3.Y = 2D;
+            lPoint4.Label = "Promociones";
+            lPoint4.Y = 4D;
             gunaDoughnutDataset1.DataPoints.AddRange(new Guna.Charts.WinForms.LPoint[] {
-            lPoint5,
-            lPoint6,
-            lPoint7,
-            lPoint8});
+            lPoint1,
+            lPoint2,
+            lPoint3,
+            lPoint4});
             gunaDoughnutDataset1.Label = "Doughnut1";
             // 
             // guna2Panel1
@@ -1459,7 +1459,7 @@
             this.guna2HtmlLabel8.Text = "N° Documento:";
             // 
             // cmbTipoDocumento
-            //
+            // 
             this.cmbTipoDocumento.BackColor = System.Drawing.Color.Transparent;
             this.cmbTipoDocumento.BorderRadius = 10;
             this.cmbTipoDocumento.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
@@ -1528,19 +1528,19 @@
             // 
             // guna2DataGridView1
             // 
-            dataGridViewCellStyle4.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle4.ForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.FloralWhite;
-            this.guna2DataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle4;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.Color.Gold;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle5.ForeColor = System.Drawing.Color.Black;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Info;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.guna2DataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.Color.FloralWhite;
+            this.guna2DataGridView1.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.Color.Gold;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.Black;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Info;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.guna2DataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             this.guna2DataGridView1.ColumnHeadersHeight = 40;
             this.guna2DataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.EnableResizing;
             this.guna2DataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -1550,14 +1550,14 @@
             this.Column_nombre,
             this.Columntelefono,
             this.Columncorreo});
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.Color.White;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle6.ForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.Color.White;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.guna2DataGridView1.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.Color.White;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.Color.White;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.guna2DataGridView1.DefaultCellStyle = dataGridViewCellStyle3;
             this.guna2DataGridView1.GridColor = System.Drawing.Color.FromArgb(((int)(((byte)(231)))), ((int)(((byte)(229)))), ((int)(((byte)(255)))));
             this.guna2DataGridView1.Location = new System.Drawing.Point(5, 40);
             this.guna2DataGridView1.Name = "guna2DataGridView1";
@@ -1578,6 +1578,43 @@
             this.guna2DataGridView1.ThemeStyle.RowsStyle.SelectionBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.guna2DataGridView1.ThemeStyle.RowsStyle.SelectionForeColor = System.Drawing.Color.White;
             // 
+            // Column_N
+            // 
+            this.Column_N.FillWeight = 99.08655F;
+            this.Column_N.HeaderText = "N°";
+            this.Column_N.MinimumWidth = 6;
+            this.Column_N.Name = "Column_N";
+            // 
+            // Column_tipo
+            // 
+            this.Column_tipo.FillWeight = 91.72583F;
+            this.Column_tipo.HeaderText = "TIPO";
+            this.Column_tipo.Name = "Column_tipo";
+            // 
+            // Column_Documento
+            // 
+            this.Column_Documento.FillWeight = 134.0101F;
+            this.Column_Documento.HeaderText = "DOCUMENTO";
+            this.Column_Documento.Name = "Column_Documento";
+            // 
+            // Column_nombre
+            // 
+            this.Column_nombre.FillWeight = 91.72583F;
+            this.Column_nombre.HeaderText = "NOMBRE";
+            this.Column_nombre.Name = "Column_nombre";
+            // 
+            // Columntelefono
+            // 
+            this.Columntelefono.FillWeight = 91.72583F;
+            this.Columntelefono.HeaderText = "TELÉFONO";
+            this.Columntelefono.Name = "Columntelefono";
+            // 
+            // Columncorreo
+            // 
+            this.Columncorreo.FillWeight = 91.72583F;
+            this.Columncorreo.HeaderText = "CORREO";
+            this.Columncorreo.Name = "Columncorreo";
+            // 
             // guna2HtmlLabel5
             // 
             this.guna2HtmlLabel5.BackColor = System.Drawing.Color.Transparent;
@@ -1585,9 +1622,9 @@
             this.guna2HtmlLabel5.ForeColor = System.Drawing.Color.Black;
             this.guna2HtmlLabel5.Location = new System.Drawing.Point(14, 10);
             this.guna2HtmlLabel5.Name = "guna2HtmlLabel5";
-            this.guna2HtmlLabel5.Size = new System.Drawing.Size(157, 24);
+            this.guna2HtmlLabel5.Size = new System.Drawing.Size(153, 24);
             this.guna2HtmlLabel5.TabIndex = 28;
-            this.guna2HtmlLabel5.Text = "Selecionar Mesa";
+            this.guna2HtmlLabel5.Text = "Lista de clientes";
             // 
             // guna2PictureBox5
             // 
@@ -2063,7 +2100,7 @@
             this.guna2PictureBox16.BorderRadius = 10;
             this.guna2PictureBox16.Image = ((System.Drawing.Image)(resources.GetObject("guna2PictureBox16.Image")));
             this.guna2PictureBox16.ImageRotate = 0F;
-            this.guna2PictureBox16.Location = new System.Drawing.Point(20, 64);
+            this.guna2PictureBox16.Location = new System.Drawing.Point(16, 94);
             this.guna2PictureBox16.Name = "guna2PictureBox16";
             this.guna2PictureBox16.Size = new System.Drawing.Size(100, 104);
             this.guna2PictureBox16.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -2080,43 +2117,6 @@
             this.guna2HtmlLabel14.Size = new System.Drawing.Size(134, 20);
             this.guna2HtmlLabel14.TabIndex = 90;
             this.guna2HtmlLabel14.Text = "Detalle del Cliente";
-            // 
-            // Column_N
-            // 
-            this.Column_N.FillWeight = 99.08655F;
-            this.Column_N.HeaderText = "N°";
-            this.Column_N.MinimumWidth = 6;
-            this.Column_N.Name = "Column_N";
-            // 
-            // Column_tipo
-            // 
-            this.Column_tipo.FillWeight = 91.72583F;
-            this.Column_tipo.HeaderText = "TIPO";
-            this.Column_tipo.Name = "Column_tipo";
-            // 
-            // Column_Documento
-            // 
-            this.Column_Documento.FillWeight = 134.0101F;
-            this.Column_Documento.HeaderText = "DOCUMENTO";
-            this.Column_Documento.Name = "Column_Documento";
-            // 
-            // Column_nombre
-            // 
-            this.Column_nombre.FillWeight = 91.72583F;
-            this.Column_nombre.HeaderText = "NOMBRE";
-            this.Column_nombre.Name = "Column_nombre";
-            // 
-            // Columntelefono
-            // 
-            this.Columntelefono.FillWeight = 91.72583F;
-            this.Columntelefono.HeaderText = "TELÉFONO";
-            this.Columntelefono.Name = "Columntelefono";
-            // 
-            // Columncorreo
-            // 
-            this.Columncorreo.FillWeight = 91.72583F;
-            this.Columncorreo.HeaderText = "CORREO";
-            this.Columncorreo.Name = "Columncorreo";
             // 
             // FRM_CLIENTES
             // 
