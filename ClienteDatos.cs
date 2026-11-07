@@ -407,6 +407,56 @@ namespace PROYECTO_RESTAURANTE
             EmpleadoDatos.VerificarAdministrador(conexion, tx, idOperador);
             VerificarDocumentoLibre(conexion, tx, c.Documento, null);
 
+            int id = Insertar(conexion, tx, c);
+            Registro.Info("Clientes", "Empleado " + idOperador + " registró el cliente " + id + ".");
+            return id;
+        }
+
+        // ------------------------------------------------------
+        // COMPRADOR REGISTRADO AL COBRAR (Generar recibo)
+        // ------------------------------------------------------
+        // Dentro de la transacción del cobro y solo con la autorización del
+        // comprador. Quien cobra (Cajero o Administrador activo) puede hacerlo.
+        //  * Documento ya registrado y activo: se devuelve ese cliente (sin
+        //    duplicarlo ni cambiar sus datos).
+        //  * Documento de un cliente inactivo: no se vincula (null).
+        //  * Documento nuevo: se valida y se registra.
+        internal static int? RegistrarDesdeCobro(SqlConnection conexion, SqlTransaction tx, ClienteInfo c, int idOperador)
+        {
+            using (SqlCommand cmd = new SqlCommand(@"
+                SELECT COUNT(*)
+                FROM dbo.EMPLEADO E
+                WHERE E.id_empleado = @Id AND E.estado = 'activo' AND E.acceso_habilitado = 1
+                  AND (EXISTS (SELECT 1 FROM dbo.CAJERO K WHERE K.id_empleado = E.id_empleado)
+                       OR EXISTS (SELECT 1 FROM dbo.ADMINISTRADOR A WHERE A.id_empleado = E.id_empleado));", conexion, tx))
+            {
+                cmd.Parameters.Add("@Id", SqlDbType.Int).Value = idOperador;
+                if (Convert.ToInt32(cmd.ExecuteScalar()) != 1)
+                    throw new ReglaNegocioException("Operación no autorizada: solo un Cajero o Administrador activo puede registrar al comprador.");
+            }
+
+            string documento = (c.Documento ?? "").Trim().ToUpperInvariant();
+            using (SqlCommand cmd = new SqlCommand(@"
+                SELECT TOP (1) id_cliente, estado FROM dbo.CLIENTE WITH (UPDLOCK, HOLDLOCK)
+                WHERE documento = @Documento;", conexion, tx))
+            {
+                cmd.Parameters.Add("@Documento", SqlDbType.VarChar, 20).Value = documento;
+                using (SqlDataReader r = cmd.ExecuteReader())
+                {
+                    if (r.Read())
+                        return Convert.ToString(r["estado"]) == "activo" ? (int?)Convert.ToInt32(r["id_cliente"]) : null;
+                }
+            }
+
+            Validar(c);
+            int id = Insertar(conexion, tx, c);
+            Registro.Info("Clientes", "Empleado " + idOperador + " registró al comprador como cliente " + id +
+                " al cobrar (autorizado por el cliente" + (c.AceptaPromociones ? ", acepta promociones" : "") + ").");
+            return id;
+        }
+
+        private static int Insertar(SqlConnection conexion, SqlTransaction tx, ClienteInfo c)
+        {
             int id;
             using (SqlCommand cmd = new SqlCommand(@"
                 INSERT INTO dbo.CLIENTE
@@ -422,8 +472,6 @@ namespace PROYECTO_RESTAURANTE
                 Parametros(cmd, c);
                 id = Convert.ToInt32(cmd.ExecuteScalar());
             }
-
-            Registro.Info("Clientes", "Empleado " + idOperador + " registró el cliente " + id + ".");
             return id;
         }
 

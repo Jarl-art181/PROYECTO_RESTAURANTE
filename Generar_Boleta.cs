@@ -938,6 +938,11 @@ namespace PROYECTO_RESTAURANTE
                                 idCajero, pago.Key, pago.Value);
                         }
 
+                        // 4a. Comprador autorizado: se registra (o se vincula si su
+                        //     documento ya existe), en esta misma transacción.
+                        if (!clienteVinculado.HasValue && compradorPorRegistrar != null)
+                            clienteVinculado = RegistrarCompradorEnCobro(conexion, transaccion, idCajero);
+
                         // 4b. Cliente registrado elegido: debe seguir activo.
                         if (clienteVinculado.HasValue)
                         {
@@ -1035,6 +1040,12 @@ namespace PROYECTO_RESTAURANTE
                         }
 
                         transaccion.Commit();
+                        if (compradorPorRegistrar != null && clienteVinculado.HasValue)
+                        {
+                            clienteRegistradoAlCobrar = clienteVinculado;
+                            idClienteSeleccionado = clienteVinculado;
+                            documentoClienteRegistrado = documentoCliente;
+                        }
                         Registro.Info("Cobro", "Pedido " + idPedido + " cobrado por el empleado " +
                             idCajero + " (" + SesionActual.Cargo + "), " + pagos.Count + " pago(s).");
                     }
@@ -3629,6 +3640,11 @@ namespace PROYECTO_RESTAURANTE
                             metodo, total));
                 }
 
+                // Comprador con documento y aún no registrado: se pide su
+                // autorización para guardarlo en Gestión de Clientes.
+                if (!AutorizarRegistroComprador())
+                    return;
+
                 // ======================================
                 // 3. CONFIRMAR EL COBRO
                 // ======================================
@@ -3690,6 +3706,9 @@ namespace PROYECTO_RESTAURANTE
                     "Recibo " + numeroRecibo + "\n" +
                     "Pedido N.º " + idPedido +
                     "\nTotal: S/ " + total.ToString("N2") +
+                    (clienteRegistradoAlCobrar.HasValue
+                        ? "\n\nCliente vinculado en Gestión de Clientes: " + txtNombreCliente.Text.Trim()
+                        : "") +
                     "\n\nYa puede imprimir el recibo.",
                     "Cobro exitoso",
                     MessageBoxButtons.OK,
