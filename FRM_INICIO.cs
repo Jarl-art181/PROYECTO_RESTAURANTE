@@ -131,6 +131,20 @@ namespace PROYECTO_RESTAURANTE
 
         private void PonerFotoPlato(PictureBox destino, Image foto)
         {
+            // La foto cubre el cuadro (recorte centrado, sin deformar ni bandas a
+            // los lados) y con esquinas redondeadas.
+            if (foto != null && destino.Width > 4 && destino.Height > 4)
+            {
+                Image cubierta = Cubrir(foto, destino.Width * 2, destino.Height * 2);
+                foto.Dispose();
+                foto = cubierta;
+            }
+            Guna.UI2.WinForms.Guna2PictureBox redondeada = destino as Guna.UI2.WinForms.Guna2PictureBox;
+            if (redondeada != null)
+            {
+                redondeada.BorderRadius = Math.Max(4, destino.Height / 6);
+                redondeada.FillColor = Color.Transparent;
+            }
             Image anterior = destino.Image;
             // Producto sin ninguna foto: marcador compartido (no se libera aquí).
             destino.Image = foto ?? (destino.Tag as string == "conProducto" ? MenuDatos.FotoPredeterminada() : null);
@@ -139,6 +153,20 @@ namespace PROYECTO_RESTAURANTE
                 anterior.Dispose();
             if (foto != null)
                 fotosPropias.Add(foto);
+        }
+
+        private static Image Cubrir(Image foto, int ancho, int alto)
+        {
+            Bitmap b = new Bitmap(ancho, alto);
+            using (Graphics g = Graphics.FromImage(b))
+            {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                float k = Math.Max((float)ancho / foto.Width, (float)alto / foto.Height);
+                float w = foto.Width * k, h = foto.Height * k;
+                g.DrawImage(foto, (ancho - w) / 2f, (alto - h) / 2f, w, h);
+            }
+            return b;
         }
 
         private void CargarPlatosMasVendidos()
