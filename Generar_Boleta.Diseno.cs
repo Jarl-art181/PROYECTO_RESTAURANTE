@@ -304,19 +304,7 @@ namespace PROYECTO_RESTAURANTE
             b.BorderRadius = 12;
             etiqueta.Visible = false;
 
-            Bitmap icono = new Bitmap(28, 28);
-            using (Graphics g = Graphics.FromImage(icono))
-            using (Font f = new Font("Segoe MDL2 Assets", 20F, FontStyle.Regular, GraphicsUnit.Pixel))
-            using (SolidBrush pincel = new SolidBrush(letra))
-            using (StringFormat centro = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
-            {
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                g.DrawString(glifo.ToString(), f, pincel, new RectangleF(0, 0, 28, 28), centro);
-            }
-            iconosBotones.Add(icono);
-            b.Image = icono;
-            b.ImageSize = new Size(22, 22);
-            b.ImageAlign = HorizontalAlignment.Center;      // ícono junto al texto, ambos centrados
+            // El ícono lo pone el estilo común de botones (EstiloBotones).
         }
 
         // La ventana es modal: se dimensiona para caber en la pantalla

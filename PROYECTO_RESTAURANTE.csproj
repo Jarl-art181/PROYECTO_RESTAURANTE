@@ -197,6 +197,7 @@
     <Compile Include="DialogoAutorizacionCliente.cs" />
     <Compile Include="DialogoEliminar.cs" />
     <Compile Include="EliminacionSegura.cs" />
+    <Compile Include="EstiloBotones.cs" />
     <Compile Include="EstiloTablas.cs" />
     <Compile Include="FRM_REGISTRO_EMPLEADO.cs">
       <SubType>Form</SubType>
@@ -291,6 +292,138 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Fotos de los platos sin tarjeta en el diseño (Resources\plato_<id>.jpg). -->
+    <EmbeddedResource Include="Resources\Iconos\actividad.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.actividad.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\alerta.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.alerta.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\banco.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.banco.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\bebida.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.bebida.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\buscar.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.buscar.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\caja.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.caja.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\calcular.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.calcular.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\calendario.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.calendario.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\cancelar.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.cancelar.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\cobrar.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.cobrar.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\desactivar.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.desactivar.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\detalle.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.detalle.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\editar.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.editar.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\eliminar.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.eliminar.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\entrada.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.entrada.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\etiqueta.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.etiqueta.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\excel.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.excel.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\generar.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.generar.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\grafico.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.grafico.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\guardar.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.guardar.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\historial.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.historial.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\imagen.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.imagen.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\imprimir.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.imprimir.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\inactivo.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.inactivo.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\inicio.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.inicio.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\liberar.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.liberar.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\limpiar.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.limpiar.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\lista.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.lista.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\nueva_reserva.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.nueva_reserva.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\nuevo.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.nuevo.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\pdf.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.pdf.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\persona.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.persona.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\personas.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.personas.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\plato.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.plato.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\proveedores.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.proveedores.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\recibo.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.recibo.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\reloj.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.reloj.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\reportes.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.reportes.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\reservar.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.reservar.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\salida.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.salida.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\tarjeta.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.tarjeta.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\todos.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.todos.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\vista_previa.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.vista_previa.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Iconos\visto.png">
+      <LogicalName>PROYECTO_RESTAURANTE.Iconos.visto.png</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="Resources\plato_11.jpg">
       <LogicalName>PROYECTO_RESTAURANTE.Fotos.plato_11.jpg</LogicalName>
     </EmbeddedResource>

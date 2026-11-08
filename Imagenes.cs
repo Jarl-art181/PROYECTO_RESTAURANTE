@@ -165,21 +165,32 @@ namespace PROYECTO_RESTAURANTE
             });
         }
 
-        private static Func<Image> Glifo(char glifo, string clave)
+        // Ícono PNG del juego del sistema (Resources\Iconos\<nombre>.png, incluido en el programa).
+        private static Func<Image> Sistema(string nombre)
         {
-            return () => Compartida("glifo." + clave, () =>
+            return () => IconoSistema(nombre);
+        }
+
+        public static Image IconoSistema(string nombre)
+        {
+            return Compartida("icono." + nombre, () =>
             {
-                Bitmap b = new Bitmap(96, 96);
-                using (Graphics g = Graphics.FromImage(b))
-                using (Font f = new Font("Segoe MDL2 Assets", 60f, FontStyle.Regular, GraphicsUnit.Pixel))
-                using (StringFormat c = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
+                using (Stream st = typeof(Imagenes).Assembly.GetManifestResourceStream("PROYECTO_RESTAURANTE.Iconos." + nombre + ".png"))
                 {
-                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-                    g.DrawString(glifo.ToString(), f, Brushes.Black, new RectangleF(0, 0, 96, 96), c);
+                    if (st == null) return null;
+                    using (Image im = Image.FromStream(st))
+                        return new Bitmap(im);
                 }
-                return b;
             });
         }
+
+        // Pictograma negro (sin fondo) de una imagen del diseño de otra ventana.
+        public static Image SiluetaDe(Type ventana, string control)
+        {
+            return Silueta(De(ventana, control), () => Color.Black, ventana.Name + "." + control)();
+        }
+
+        internal static Image Compartir(string clave, Func<Image> crear) { return Compartida(clave, crear); }
 
         private static Image Compartida(string clave, Func<Image> crear)
         {
@@ -251,21 +262,10 @@ namespace PROYECTO_RESTAURANTE
             foreach (string c in new[] { "guna2PictureBox12", "guna2PictureBox13", "guna2PictureBox14", "guna2PictureBox15", "guna2PictureBox16",
                                          "guna2PictureBox17", "guna2PictureBox18", "guna2PictureBox19", "guna2PictureBox20", "guna2PictureBox21", "guna2PictureBox22" })
                 e("FRM_MESAS", c, Paneles, "mesa", "Mesas: foto de cada mesa y del detalle");
-            e("FRM_MESAS", "guna2PictureBox9", Botones, "nueva_reserva", "Mesas: botón Nueva reserva");
             e("FRM_MESAS", "guna2PictureBox11", Botones, "buscar", "Mesas: buscar");
-            e("FRM_MESAS", "guna2PictureBox23", Botones, "detalle_pedido", "Mesas: botón Detalle pedido");
-            e("FRM_MESAS", "guna2PictureBox24", Botones, "reservar", "Mesas: botón Reservar");
-            e("FRM_MESAS", "guna2PictureBox25", Botones, "liberar_mesa", "Mesas: botón Liberar mesa");
 
             // ---- Pedidos ----
             e("FRMS_PEDIDOS", "guna2PictureBox1", Paneles, "encabezado_pedidos", "Pedidos: ícono del encabezado");
-            e("FRMS_PEDIDOS", "guna2PictureBox44", Botones, "nuevo_pedido", "Pedidos: botón Nuevo pedido");
-            d("FRMS_PEDIDOS", "guna2PictureBox42", Botones, "guardar", "Pedidos: botón Guardar",
-                "disquete (antes: el de Generar recibo)", De(clientes, "guna2PictureBox11"));
-            d("FRMS_PEDIDOS", "guna2PictureBox41", Botones, "limpiar", "Pedidos: botón Limpiar",
-                "escoba, como en Clientes", De(clientes, "guna2PictureBox4"));
-            e("FRMS_PEDIDOS", "guna2PictureBox43", Botones, "cancelar", "Pedidos: botón Cancelar");
-            e("FRMS_PEDIDOS", "guna2PictureBox45", Botones, "generar_recibo", "Pedidos: botón Generar recibo");
             e("FRMS_PEDIDOS", "guna2PictureBox28", Iconos, "categoria_platos", "Filtro Platos");
             e("FRMS_PEDIDOS", "guna2PictureBox29", Iconos, "categoria_agregados", "Filtro Agregados");
             e("FRMS_PEDIDOS", "guna2PictureBox30", Iconos, "categoria_bebidas", "Filtro Bebidas");
@@ -277,10 +277,6 @@ namespace PROYECTO_RESTAURANTE
 
             // ---- Cocina ----
             e("FRM_COCINA", "guna2PictureBox1", Paneles, "encabezado_cocina", "Cocina: ícono del encabezado");
-            e("FRM_COCINA", "guna2PictureBox28", Iconos, "filtro_todos", "Filtro Todos");
-            e("FRM_COCINA", "guna2PictureBox29", Iconos, "tipo_salon", "Tipo de pedido / filtro: Salón");
-            e("FRM_COCINA", "guna2PictureBox30", Iconos, "tipo_delivery", "Tipo de pedido / filtro: Delivery");
-            e("FRM_COCINA", "guna2PictureBox31", Iconos, "tipo_recojo", "Tipo de pedido / filtro: Recojo");
             e("FRM_COCINA", "guna2PictureBox11", Botones, "buscar", "Cocina: buscar");
             e("FRM_COCINA", "guna2PictureBox3", Paneles, "cocina_por_iniciar", "Cocina: tarjeta Por iniciar");
             e("FRM_COCINA", "guna2PictureBox2", Paneles, "cocina_en_proceso", "Cocina: tarjeta En proceso");
@@ -288,13 +284,6 @@ namespace PROYECTO_RESTAURANTE
 
             // ---- Clientes ----
             e("FRM_CLIENTES", "guna2PictureBox1", Paneles, "encabezado_clientes", "Clientes: ícono del encabezado");
-            e("FRM_CLIENTES", "guna2PictureBox30", Botones, "nuevo", "Botón Nuevo (cliente)");
-            e("FRM_CLIENTES", "guna2PictureBox2", Botones, "editar", "Botón Editar");
-            e("FRM_CLIENTES", "guna2PictureBox3", Botones, "eliminar", "Botón Eliminar");
-            e("FRM_CLIENTES", "guna2PictureBox4", Botones, "limpiar", "Botón Limpiar");
-            e("FRM_CLIENTES", "guna2PictureBox5", Botones, "buscar", "Botón Buscar");
-            e("FRM_CLIENTES", "guna2PictureBox11", Botones, "guardar", "Botón Guardar");
-            e("FRM_CLIENTES", "guna2PictureBox9", Botones, "cancelar", "Botón Cancelar");
             e("FRM_CLIENTES", "guna2PictureBox12", Paneles, "clientes_total", "Clientes: tarjeta Total de clientes");
             e("FRM_CLIENTES", "guna2PictureBox13", Paneles, "clientes_activos", "Clientes: tarjeta Clientes activos");
             e("FRM_CLIENTES", "guna2PictureBox14", Paneles, "clientes_inactivos", "Clientes: tarjeta Clientes inactivos");
@@ -303,7 +292,6 @@ namespace PROYECTO_RESTAURANTE
 
             // ---- Empleados ----
             e("FRM_EMPLEADOS", "guna2PictureBox1", Paneles, "encabezado_empleados", "Empleados: ícono del encabezado");
-            e("FRM_EMPLEADOS", "guna2PictureBox30", Botones, "nuevo", "Botón Nuevo (empleado)");
             e("FRM_EMPLEADOS", "guna2PictureBox11", Botones, "buscar", "Empleados: buscar");
             e("FRM_EMPLEADOS", "guna2PictureBox2", Paneles, "empleados_total", "Empleados: tarjeta Total empleados");
             e("FRM_EMPLEADOS", "guna2PictureBox3", Paneles, "empleados_administradores", "Empleados: tarjeta Administradores");
@@ -314,53 +302,29 @@ namespace PROYECTO_RESTAURANTE
             // ---- Menú ----
             d("FRM_MENU", "guna2PictureBox1", Paneles, "encabezado_menu", "Menú: ícono del encabezado",
                 "carta del menú lateral (antes: el de Pedidos)", SiluetaClara(De(typeof(FRM_MENU), "pictureBox10"), Color.Black, "menu"));
-            e("FRM_MENU", "guna2PictureBox28", Botones, "nuevo_producto", "Menú: botón Nuevo producto");
-            e("FRM_MENU", "guna2PictureBox27", Iconos, "filtro_todos", "Filtro Todos");
-            d("FRM_MENU", "guna2PictureBox26", Iconos, "categoria_platos", "Filtro Platos", "plato, como en Pedidos (antes: mesa)", De(pedidos, "guna2PictureBox28"));
-            d("FRM_MENU", "guna2PictureBox25", Iconos, "categoria_bebidas", "Filtro Bebidas", "bebida, como en Pedidos (antes: moto)", De(pedidos, "guna2PictureBox30"));
-            d("FRM_MENU", "guna2PictureBox31", Iconos, "categoria_agregados", "Filtro Agregados", "agregados, como en Pedidos (antes: bolsa)", De(pedidos, "guna2PictureBox29"));
-            e("FRM_MENU", "guna2PictureBox30", Botones, "guardar", "Botón Guardar");
-            e("FRM_MENU", "guna2PictureBox32", Botones, "editar", "Botón Editar");
-            e("FRM_MENU", "guna2PictureBox33", Botones, "eliminar", "Botón Eliminar");
-            e("FRM_MENU", "guna2PictureBox37", Paneles, "menu_total", "Menú: tarjeta Total productos");
-            e("FRM_MENU", "guna2PictureBox34", Paneles, "menu_platos", "Menú: tarjeta Platos activos");
-            e("FRM_MENU", "guna2PictureBox36", Paneles, "menu_bebidas", "Menú: tarjeta Bebidas");
-            e("FRM_MENU", "guna2PictureBox35", Paneles, "menu_promociones", "Menú: tarjeta Promociones");
+            d("FRM_MENU", "guna2PictureBox37", Paneles, "menu_total", "Menú: tarjeta Total productos", "lista (ícono del sistema)", Sistema("lista"));
+            d("FRM_MENU", "guna2PictureBox34", Paneles, "menu_platos", "Menú: tarjeta Platos activos", "plato (ícono del sistema)", Sistema("plato"));
+            d("FRM_MENU", "guna2PictureBox36", Paneles, "menu_bebidas", "Menú: tarjeta Bebidas", "bebida (ícono del sistema)", Sistema("bebida"));
+            d("FRM_MENU", "guna2PictureBox35", Paneles, "menu_promociones", "Menú: tarjeta Promociones", "etiqueta (ícono del sistema)", Sistema("etiqueta"));
 
             // ---- Inventario ----
             d("FRM_INVENTARIO", "guna2PictureBox1", Paneles, "encabezado_inventario", "Inventario: ícono del encabezado",
                 "almacén del menú lateral (antes: el de Pedidos)", SiluetaClara(De(typeof(FRM_INVENTARIO), "pictureBox9"), Color.Black, "inventario"));
-            d("FRM_INVENTARIO", "guna2PictureBox28", Botones, "nuevo", "Inventario: botón Nuevo insumo", "documento con +, como Nuevo pedido (antes: bolsa)", De(pedidos, "guna2PictureBox44"));
-            e("FRM_INVENTARIO", "guna2PictureBox27", Iconos, "filtro_todos", "Filtro Todos");
-            d("FRM_INVENTARIO", "guna2PictureBox26", Iconos, "categoria_platos", "Filtro Platos", "plato, como en Pedidos (antes: mesa)", De(pedidos, "guna2PictureBox28"));
-            d("FRM_INVENTARIO", "guna2PictureBox25", Iconos, "categoria_bebidas", "Filtro Bebidas", "bebida, como en Pedidos (antes: moto)", De(pedidos, "guna2PictureBox30"));
-            d("FRM_INVENTARIO", "guna2PictureBox31", Iconos, "categoria_agregados", "Filtro Agregados", "agregados, como en Pedidos (antes: bolsa)", De(pedidos, "guna2PictureBox29"));
-            d("FRM_INVENTARIO", "guna2PictureBox30", Botones, "registrar_entrada", "Inventario: botón Registrar entrada", "flecha de ingreso (antes: bolsa)", Glifo('', "entrada"));
-            d("FRM_INVENTARIO", "guna2PictureBox29", Botones, "registrar_salida", "Inventario: botón Registrar salida", "flecha de salida (antes: bolsa)", Glifo('', "salida"));
-            e("FRM_INVENTARIO", "guna2PictureBox38", Botones, "guardar", "Botón Guardar");
-            d("FRM_INVENTARIO", "guna2Button16", Botones, "editar", "Inventario: botón Editar", "lápiz (antes sin ícono)", Glifo('', "editar"));
-            d("FRM_INVENTARIO", "guna2Button17", Botones, "eliminar", "Inventario: botón Eliminar", "papelera (antes sin ícono)", Glifo('', "eliminar"));
-            e("FRM_INVENTARIO", "guna2PictureBox37", Paneles, "inventario_total", "Inventario: tarjeta Total insumos");
-            e("FRM_INVENTARIO", "guna2PictureBox34", Paneles, "inventario_stock_adecuado", "Inventario: tarjeta Stock adecuado");
-            e("FRM_INVENTARIO", "guna2PictureBox36", Paneles, "inventario_stock_bajo", "Inventario: tarjeta Stock bajo");
-            e("FRM_INVENTARIO", "guna2PictureBox35", Paneles, "inventario_proveedores", "Inventario: tarjeta Proveedores");
+            d("FRM_INVENTARIO", "guna2PictureBox37", Paneles, "inventario_total", "Inventario: tarjeta Total insumos", "caja (ícono del sistema)", Sistema("caja"));
+            d("FRM_INVENTARIO", "guna2PictureBox34", Paneles, "inventario_stock_adecuado", "Inventario: tarjeta Stock adecuado", "visto (ícono del sistema)", Sistema("visto"));
+            d("FRM_INVENTARIO", "guna2PictureBox36", Paneles, "inventario_stock_bajo", "Inventario: tarjeta Stock bajo", "alerta (ícono del sistema)", Sistema("alerta"));
+            d("FRM_INVENTARIO", "guna2PictureBox35", Paneles, "inventario_proveedores", "Inventario: tarjeta Proveedores", "bolsa (ícono del sistema)", Sistema("proveedores"));
 
             // ---- Promociones y Reportes ----
-            e("FRM_PROMOCIONES", "guna2PictureBox1", Paneles, "encabezado_promociones", "Promociones: ícono del encabezado");
-            e("FRM_REPORTES", "guna2PictureBox1", Paneles, "encabezado_reportes", "Reportes: ícono del encabezado");
+            d("FRM_PROMOCIONES", "guna2PictureBox1", Paneles, "encabezado_promociones", "Promociones: ícono del encabezado", "etiqueta (ícono del sistema)", Sistema("etiqueta"));
+            d("FRM_REPORTES", "guna2PictureBox1", Paneles, "encabezado_reportes", "Reportes: ícono del encabezado", "gráfico (ícono del sistema)", Sistema("reportes"));
 
             // ---- Reservar mesa ----
             d("RESERVAR_MESA", "guna2PictureBox1", Paneles, "encabezado_reservas", "Reservar mesa: ícono del encabezado",
                 "calendario, como Nueva reserva (antes: recibo)", De(mesas, "guna2PictureBox9"));
-            d("RESERVAR_MESA", "guna2PictureBox43", Botones, "guardar", "Reservar mesa: botón Guardar", "disquete (antes: una X)", De(clientes, "guna2PictureBox11"));
-            e("RESERVAR_MESA", "guna2PictureBox2", Botones, "cancelar", "Reservar mesa: botón Cancelar");
 
             // ---- Generar recibo ----
             e("Generar_Boleta", "guna2PictureBox1", Paneles, "encabezado_recibo", "Generar recibo: ícono del encabezado");
-            e("Generar_Boleta", "btnVistaPreviaBoleta", Botones, "vista_previa", "Generar recibo: botón Vista previa");
-            e("Generar_Boleta", "btnImprimirBoleta", Botones, "imprimir", "Generar recibo: botón Imprimir");
-            e("Generar_Boleta", "btnCancelarBoleta", Botones, "cancelar", "Generar recibo: botón Cancelar");
-            e("Generar_Boleta", "btnRegistrarCobro", Botones, "cobrar", "Generar recibo: botón Cobrar");
             return m;
         }
 
@@ -390,6 +354,7 @@ namespace PROYECTO_RESTAURANTE
             {
                 preparadas.Add(f, new object());
                 AsegurarCarpetas();
+                EstiloBotones.Aplicar(f);
                 AlinearIconosDeBotones(f);
                 f.VisibleChanged += (s, e) => { if (f.Visible) Aplicar(f); };
             }
@@ -407,7 +372,7 @@ namespace PROYECTO_RESTAURANTE
                 if (en.Ventana != ventana && en.Ventana != "*")
                     continue;
                 Control c;
-                if (!porNombre.TryGetValue(en.Control, out c))
+                if (!porNombre.TryGetValue(en.Control, out c) || !Visible(c))
                     continue;
                 // Las comunes solo en su lugar real: menú lateral y barra superior negra.
                 if (en.Ventana == "*" && !EsComun(c, en))
@@ -450,6 +415,13 @@ namespace PROYECTO_RESTAURANTE
                 st.Original = pred ?? diseno;
                 if (pred != null)
                     PonerImagen(c, pred);
+                // Íconos del sistema en encabezados: sin el cuadro blanco del diseño.
+                if (en.Archivo.StartsWith("encabezado_") && pred != null && EsSilueta(pred))
+                {
+                    c.BackColor = Color.Transparent;
+                    Guna2PictureBox gp = c as Guna2PictureBox;
+                    if (gp != null) gp.FillColor = Color.Transparent;
+                }
                 c.Disposed += (s, e) =>
                 {
                     if (st.Propia != null) { st.Propia.Dispose(); st.Propia = null; }
@@ -620,6 +592,8 @@ namespace PROYECTO_RESTAURANTE
         private static readonly PropertyInfo eventos = typeof(Component).GetProperty("Events", BindingFlags.Instance | BindingFlags.NonPublic);
 
         // Visible "propio" del control (Control.Visible es falso mientras la ventana no se muestra).
+        internal static bool VisiblePropio(Control c) { return Visible(c); }
+
         private static bool Visible(Control c)
         {
             try { return (bool)getState.Invoke(c, new object[] { 2 }); }

@@ -353,6 +353,9 @@ namespace PROYECTO_RESTAURANTE
             // Guna deja unos 10 px de margen a cada lado (medido: el texto
             // se parte con menos de 20 px libres).
             int disponible = b.Width - 20;
+            Guna2Button gb = b as Guna2Button;
+            if (gb != null && gb.Image != null)
+                disponible -= gb.ImageSize.Width + 8;
             using (Graphics g = b.CreateGraphics())
             {
                 for (int i = 0; i < 12; i++)
@@ -676,10 +679,30 @@ namespace PROYECTO_RESTAURANTE
         // Para tarjetas que heredaron un ícono de otro módulo. Si la
         // fuente no existe, se conserva la imagen del diseño.
         // ======================================================
+        // Íconos PNG del sistema (Resources\Iconos) que reemplazan a los antiguos
+        // caracteres de la fuente de símbolos.
+        private static readonly Dictionary<char, string> IconoDeGlifo = new Dictionary<char, string>
+        {
+            { '\uE8FD', "lista" }, { '\uED56', "plato" }, { '\uEC32', "bebida" }, { '\uE8EC', "etiqueta" },
+            { '\uE74E', "guardar" }, { '\uE70F', "editar" }, { '\uE74D', "eliminar" }, { '\uE7B8', "caja" },
+            { '\uE73E', "visto" }, { '\uE7BA', "alerta" }, { '\uE719', "proveedores" }, { '\uE9D9', "reportes" }
+        };
+
         public static void PonerIcono(PictureBox destino, char glifo, Color color)
         {
             if (destino == null || destino.Width < 8 || destino.Height < 8)
                 return;
+            string nombre;
+            if (IconoDeGlifo.TryGetValue(glifo, out nombre))
+            {
+                Image png = EstiloBotones.Icono(nombre, color);     // compartido: no se libera
+                if (png != null)
+                {
+                    destino.Image = png;
+                    destino.SizeMode = PictureBoxSizeMode.Zoom;
+                    return;
+                }
+            }
             bool existe = false;
             foreach (FontFamily fam in FontFamily.Families)
                 if (fam.Name == "Segoe MDL2 Assets") { existe = true; break; }

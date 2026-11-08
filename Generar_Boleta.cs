@@ -221,6 +221,7 @@ namespace PROYECTO_RESTAURANTE
             btnBuscarCliente.Bounds = new Rectangle(txtDNICliente.Right + 8, txtDNICliente.Top,
                 derecha - txtDNICliente.Right - 8, txtDNICliente.Height);
             consejosBoleta.SetToolTip(btnBuscarCliente, "Buscar un cliente registrado en Gestión de Clientes.");
+            EstiloBotones.AplicarA(btnBuscarCliente);
 
             txtDNICliente.PlaceholderText = "DNI o CE (opcional)";
             txtDNICliente.MaxLength = 12;
