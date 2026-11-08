@@ -145,6 +145,10 @@ namespace PROYECTO_RESTAURANTE
 
             ActualizarPagos();
 
+            // El reloj se libera con la ventana aunque el diseñador no lo
+            // registre en "components" (si no, cada apertura deja uno vivo).
+            Disposed += (s, e) => timerReloj.Dispose();
+
             // El reloj solo trabaja mientras Pedidos está visible.
             VisibleChanged += (s, e) =>
             {
