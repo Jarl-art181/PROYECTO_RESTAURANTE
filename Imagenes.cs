@@ -571,9 +571,21 @@ namespace PROYECTO_RESTAURANTE
                 if (alLado && Math.Abs(p.Top - arriba) > 2 && p.Height <= boton.Height)
                     p.Top = arriba;
 
+            });
+
+            // Clic: toda imagen o etiqueta sin evento propio dibujada encima de un
+            // botón (ícono, texto "Salón", número de mesa...) lo pasa al botón.
+            Recorrer(f, c =>
+            {
+                if (!(c is PictureBox || c is Label || c is Guna2HtmlLabel) || c.Parent == null || !Visible(c) || TieneClic(c))
+                    return;
+                Control boton = c.Parent.Controls.Cast<Control>().FirstOrDefault(x => x != c && x is Guna2Button && Visible(x) &&
+                    x.Bounds.Contains(new Point(c.Left + c.Width / 2, c.Top + c.Height / 2)) && c.Width <= x.Width && c.Height <= x.Height);
+                if (boton == null)
+                    return;
                 IButtonControl ib = (IButtonControl)boton;
-                p.Click += (s, e) => { if (boton.Enabled && Visible(boton)) ib.PerformClick(); };
-                p.Cursor = boton.Cursor;
+                c.Click += (s, e) => { if (boton.Enabled && Visible(boton)) ib.PerformClick(); };
+                c.Cursor = boton.Cursor;
             });
         }
 

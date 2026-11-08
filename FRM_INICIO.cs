@@ -1060,7 +1060,7 @@ namespace PROYECTO_RESTAURANTE
         private void CargarVentasPorCanal()
         {
             // =====================================
-            // 1. CONTADORES DE PEDIDOS CANCELADOS
+            // 1. PEDIDOS COBRADOS POR CANAL (mismo criterio que la tarjeta "PEDIDOS COBRADOS")
             // =====================================
 
             int salon = 0;
@@ -1068,7 +1068,7 @@ namespace PROYECTO_RESTAURANTE
             int recojo = 0;
 
             // =====================================
-            // 2. CONSULTAR SOLO CANCELADOS
+            // 2. CONSULTAR SOLO COBRADOS (un pedido por fila: los pagos mixtos no se cuentan dos veces)
             // =====================================
 
             string sql = @"
@@ -1078,7 +1078,7 @@ namespace PROYECTO_RESTAURANTE
         FROM dbo.PEDIDO
         WHERE id_sucursal = @Sucursal
           AND LOWER(LTRIM(RTRIM(estado))) =
-              'cancelado'
+              'cobrado'
         GROUP BY
             LOWER(LTRIM(RTRIM(canal)));";
 
@@ -1126,7 +1126,7 @@ namespace PROYECTO_RESTAURANTE
                 }
 
                 // =====================================
-                // 3. CALCULAR TOTAL DE CANCELADOS
+                // 3. CALCULAR TOTAL DE COBRADOS
                 // =====================================
 
                 int total = salon + delivery + recojo;
@@ -1145,6 +1145,19 @@ namespace PROYECTO_RESTAURANTE
 
                     porcentajeRecojo =
                         recojo * 100.0 / total;
+                }
+
+                // Redondeados a un decimal deben sumar 100 %: la diferencia
+                // del redondeo se suma al canal con más pedidos.
+                if (total > 0)
+                {
+                    porcentajeSalon = Math.Round(porcentajeSalon, 1);
+                    porcentajeDelivery = Math.Round(porcentajeDelivery, 1);
+                    porcentajeRecojo = Math.Round(porcentajeRecojo, 1);
+                    double resto = Math.Round(100.0 - porcentajeSalon - porcentajeDelivery - porcentajeRecojo, 1);
+                    if (salon >= delivery && salon >= recojo) porcentajeSalon += resto;
+                    else if (delivery >= recojo) porcentajeDelivery += resto;
+                    else porcentajeRecojo += resto;
                 }
 
                 // =====================================
@@ -1190,7 +1203,7 @@ namespace PROYECTO_RESTAURANTE
                     GunaDoughnutDataset datos =
                         new GunaDoughnutDataset();
 
-                    datos.Label = "Pedidos cancelados";
+                    datos.Label = "Pedidos cobrados";
 
                     datos.DataPoints.Add(new LPoint()
                     {
@@ -1224,12 +1237,12 @@ namespace PROYECTO_RESTAURANTE
 
                 // Título correcto.
                 guna2HtmlLabel50.Text =
-                    "Pedidos cancelados por canal";
+                    "Pedidos cobrados por canal";
             }
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "Error al cargar pedidos cancelados:\n" +
+                    "Error al cargar pedidos cobrados:\n" +
                     ex.Message,
                     "INICIO",
                     MessageBoxButtons.OK,
@@ -1322,7 +1335,7 @@ namespace PROYECTO_RESTAURANTE
             // 5. CORREGIR LOS TÍTULOS
             // ======================================
             guna2HtmlLabel50.Text =
-                "Pedidos cancelados por canal";
+                "Pedidos cobrados por canal";
 
             guna2HtmlLabel40.Text =
                 "PRODUCTOS MÁS VENDIDOS";

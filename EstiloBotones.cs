@@ -174,6 +174,11 @@ namespace PROYECTO_RESTAURANTE
                 if (tarjeta == null || p.Image == null || !Imagenes.VisiblePropio(p) || p.Width > 160 || p.Height > 160 ||
                     tarjeta.Width > 420 || tarjeta.Height > 260 || tarjeta.FillColor.A < 255)
                     continue;
+                // Ícono sobre un botón (Salón, Delivery, Recojo, mesas...): se deja como
+                // está. Un cuadro transparente mostraría el fondo del panel, no el botón.
+                Point centro = new Point(p.Left + p.Width / 2, p.Top + p.Height / 2);
+                if (tarjeta.Controls.OfType<Guna2Button>().Any(b => b.Bounds.Contains(centro)))
+                    continue;
                 // El cuadro de la imagen sin color propio (era el "recuadro" en varias tarjetas).
                 if (p.BackColor != Color.Transparent && Distancia(p.BackColor, tarjeta.FillColor) > 0)
                     p.BackColor = Color.Transparent;
